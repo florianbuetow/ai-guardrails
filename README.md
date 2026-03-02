@@ -1,4 +1,4 @@
-# AI Guardrails
+# AI Guardrails: Project Templates with Automatic Checks for Guiding Autonomous Coding Agents
 
 ![Made with AI](https://img.shields.io/badge/Made%20with-AI-333333?labelColor=f00) ![Verified by Humans](https://img.shields.io/badge/Verified%20by-Humans-333333?labelColor=brightgreen)
 
