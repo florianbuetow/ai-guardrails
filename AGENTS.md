@@ -21,6 +21,16 @@ This repository contains Copier templates for Python, Java, Go, Elixir, C++, and
 
 - `project-setup/setup-project-python.md` - A comprehensive guide for bootstrapping Python projects using AI agents
 
+### Violation Tests (`violations/`)
+
+- `violations/<language>/<rule-name>/...` contains file overlays that intentionally introduce one forbidden pattern.
+- Each violation case must map to an existing guardrail rule (Semgrep or Credo) and use valid, compilable code.
+- The test runner first checks a clean generated project (`just ci` must pass), then overlays violation files and expects `just ci` to fail.
+- To add a new violation test:
+  1. Create a new subdirectory under the target language (for example `violations/python/no-default-values/`).
+  2. Add only the files that must be overlaid onto the generated project.
+  3. Ensure the injected code triggers the intended rule without relying on placeholder/broken syntax.
+
 ### The Python CLI Template (`blueprints/python-cli-base`)
 
 - Python 3.12+ with uv package management

@@ -43,13 +43,13 @@ help:
 	@echo "  just init                              - Install templates and set up aliases"
 	@echo "  just update                            - Update templates to latest version"
 	@echo "  just create <template> <target-dir>    - Create new project from template"
-	@echo "  just test                              - Test Python CLI template generation"
-	@echo "  just test-java                         - Test Java CLI template generation"
-	@echo "  just test-elixir                       - Test Elixir OTP template generation"
-	@echo "  just test-go                           - Test Go CLI template generation"
-	@echo "  just test-cpp                          - Test C++ CLI template generation"
-	@echo "  just test-rust                         - Test Rust CLI template generation"
-	@echo "  just test-all                          - Test all templates"
+	@echo "  just test                              - Run Python baseline + violation tests"
+	@echo "  just test-java                         - Run Java baseline + violation tests"
+	@echo "  just test-go                           - Run Go baseline + violation tests"
+	@echo "  just test-elixir                       - Run Elixir baseline + violation tests"
+	@echo "  just test-cpp                          - Run C++ baseline + violation tests"
+	@echo "  just test-rust                         - Run Rust baseline + violation tests"
+	@echo "  just test-all                          - Run all baseline + violation tests"
 	@echo ""
 	@echo "Available templates:"
 	@echo "  python-cli-base                        - Python CLI application"
@@ -142,35 +142,30 @@ update:
 create template-name target-dir=".":
 	@./project-setup/setup-project.sh --template {{template-name}} --target {{target-dir}}
 
-# Test the Python CLI template by generating a project in a temp folder
+# Test the Python template (baseline + violations)
 test:
-	@./tests/test-template.sh
+	@./tests/run-tests.sh python
 
-# Test the Java CLI template by generating a project in a temp folder
+# Test the Java template (baseline + violations)
 test-java:
-	@./tests/test-java-template.sh
+	@./tests/run-tests.sh java
 
-# Test the Elixir OTP template by generating a project in a temp folder
-test-elixir:
-	@./tests/test-elixir-template.sh
-
-# Test the Go CLI template by generating a project in a temp folder
+# Test the Go template (baseline + violations)
 test-go:
-	@./tests/test-go-template.sh
+	@./tests/run-tests.sh go
 
-# Test the C++ CLI template by generating a project in a temp folder
+# Test the Elixir template (baseline + violations)
+test-elixir:
+	@./tests/run-tests.sh elixir
+
+# Test the C++ template (baseline + violations)
 test-cpp:
-	@./tests/test-cpp-template.sh
+	@./tests/run-tests.sh cpp
 
-# Test the Rust CLI template by generating a project in a temp folder
+# Test the Rust template (baseline + violations)
 test-rust:
-	@./tests/test-rust-template.sh
+	@./tests/run-tests.sh rust
 
-# Test all templates
+# Test all templates (baseline + violations)
 test-all:
-	@./tests/test-template.sh
-	@./tests/test-java-template.sh
-	@./tests/test-elixir-template.sh
-	@./tests/test-go-template.sh
-	@./tests/test-cpp-template.sh
-	@./tests/test-rust-template.sh
+	@./tests/run-tests.sh all

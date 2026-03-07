@@ -172,21 +172,20 @@ just run
 
 ```bash
 cd ai-guardrails
-just test          # Test Python template
-just test-java     # Test Java template
-just test-go       # Test Go template
-just test-elixir   # Test Elixir template
-just test-cpp      # Test C++ template
-just test-rust     # Test Rust template
-just test-all      # Test all templates
+just test          # Python baseline + violation tests
+just test-java     # Java baseline + violation tests
+just test-go       # Go baseline + violation tests
+just test-elixir   # Elixir baseline + violation tests
+just test-cpp      # C++ baseline + violation tests
+just test-rust     # Rust baseline + violation tests
+just test-all      # Run all language suites
 ```
 
-Each test will:
-1. Generate a test project from the template in a temp directory
-2. Verify all files are created correctly
-3. Run `just init`, `just run`, `just ci`, `just ci-quiet`, and `just destroy`
-4. Assert each step completes successfully
-5. Clean up the test project
+Each language suite now runs two phases:
+1. Baseline test: generate a clean project and verify `just ci` succeeds.
+2. Violation tests: for every folder under `violations/<language>/`, generate a fresh project, confirm baseline `just ci` passes, overlay the violation files, then assert `just ci` fails.
+
+This verifies both directions of the guardrails: valid generated projects pass, and known-bad patterns are rejected.
 
 ### Updating the Template Repository
 
@@ -210,7 +209,25 @@ ai-guardrails/
 │   ├── elixir-otp-base/                       # Elixir OTP template
 │   ├── cpp-cli-base/                          # C++ CLI template
 │   └── rust-cli-base/                         # Rust CLI template
-├── tests/                                      # Integration tests for each template
+├── tests/
+│   ├── run-tests.sh                           # Unified test entry point
+│   ├── lib/                                   # Shared test helpers and runner logic
+│   │   ├── helpers.sh
+│   │   └── runner.sh
+│   └── languages/                             # Per-language template config + prerequisites
+│       ├── python.sh
+│       ├── java.sh
+│       ├── go.sh
+│       ├── elixir.sh
+│       ├── cpp.sh
+│       └── rust.sh
+├── violations/                                 # Violation overlays used to force CI failures
+│   ├── python/
+│   ├── java/
+│   ├── go/
+│   ├── elixir/
+│   ├── cpp/
+│   └── rust/
 ├── config/                                     # Shared validation configs (semgrep, codespell)
 ├── docs/                                       # Documentation
 ├── justfile                                    # Quick setup commands
