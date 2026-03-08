@@ -150,8 +150,28 @@ code-typecheck:
 code-security:
     @echo ""
     @printf "\033[0;34m=== Running Security Checks ===\033[0m\n"
-    @cargo geiger 2>&1 || true
-    @printf "\033[0;32m> Security report generated\033[0m\n"
+    @set -e; \
+        crate_name="{{project_name}}"; \
+        if ! geiger_output="$$(cargo geiger 2>&1)"; then \
+            printf "%s\n" "$$geiger_output"; \
+            printf "\033[0;31mx Security check failed: cargo geiger execution failed\033[0m\n"; \
+            exit 1; \
+        fi; \
+        printf "%s\n" "$$geiger_output"; \
+        project_line="$$(printf "%s\n" "$$geiger_output" | grep -m 1 "$$crate_name" || true)"; \
+        if [ -z "$$project_line" ]; then \
+            printf "\033[0;31mx Security check failed: project crate '%s' not found in cargo geiger output\033[0m\n" "$$crate_name"; \
+            exit 1; \
+        fi; \
+        if printf "%s\n" "$$project_line" | grep -q "[☢?]"; then \
+            printf "\033[0;31mx Security check failed: unsafe code detected in project crate '%s'\033[0m\n" "$$crate_name"; \
+            exit 1; \
+        fi; \
+        if ! printf "%s\n" "$$project_line" | grep -q "🔒"; then \
+            printf "\033[0;31mx Security check failed: project crate '%s' is missing lock status\033[0m\n" "$$crate_name"; \
+            exit 1; \
+        fi
+    @printf "\033[0;32m> Security checks passed: project crate has no unsafe code\033[0m\n"
     @echo ""
 
 # Check dependency hygiene with cargo-machete

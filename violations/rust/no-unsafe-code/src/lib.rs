@@ -1,4 +1,4 @@
-//! {{project_description}}
+//! Test violation: unsafe code usage.
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
@@ -18,7 +18,8 @@ pub enum AppError {
 ///
 /// Returns an error if the application fails to execute.
 pub fn run() -> anyhow::Result<()> {
-    println!("Hello from {{project_name}}!");
+    let x: i32 = unsafe { std::mem::zeroed() };
+    println!("Hello with unsafe value: {x}!");
     Ok(())
 }
 

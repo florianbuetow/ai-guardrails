@@ -22,4 +22,4 @@ cargo = "warn"
 cargo_common_metadata = { level = "allow", priority = 1 }
 
 [lints.rust]
-unsafe_code = "deny"
+unsafe_code = "forbid"
