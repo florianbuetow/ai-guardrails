@@ -34,34 +34,33 @@
 
 # Default recipe: list all available recipes
 _default:
-    @just --list
+    @just help
 
 # Show help message
 help:
 	@clear
 	@echo ""
-	@echo "Available recipes:"
-	@echo "  just help                              - Show this help message"
-	@echo "  just init                              - Install templates and set up aliases"
+	@printf "  just help                              - Show this help message\n"
+	@printf "  just init                              - Install templates and set up aliases\n"
 	@echo ""
-	@echo "  just update                            - Update templates to latest version"
-	@echo "  just create <template> <target-dir>    - Create new project from template"
+	@printf "  just update                            - Update templates to latest version\n"
+	@printf "  just create <template> <target-dir>    - Create new project from template\n"
 	@echo ""
-	@echo "  just test                              - Run all baseline + violation tests"
-	@echo "  just test-python                       - Run Python baseline + violation tests"
-	@echo "  just test-java                         - Run Java baseline + violation tests"
-	@echo "  just test-go                           - Run Go baseline + violation tests"
-	@echo "  just test-elixir                       - Run Elixir baseline + violation tests"
-	@echo "  just test-cpp                          - Run C++ baseline + violation tests"
-	@echo "  just test-rust                         - Run Rust baseline + violation tests"
+	@printf "  For <template> choose one of:\n"
+	@printf "    python-cli-base                        - Python CLI application\n"
+	@printf "    java-cli-base                          - Java CLI application\n"
+	@printf "    elixir-otp-base                        - Elixir OTP application\n"
+	@printf "    go-cli-base                            - Go CLI application\n"
+	@printf "    cpp-cli-base                           - C++ CLI application\n"
+	@printf "    rust-cli-base                          - Rust CLI application\n"
 	@echo ""
-	@echo "Available templates:"
-	@echo "  python-cli-base                        - Python CLI application"
-	@echo "  java-cli-base                          - Java CLI application"
-	@echo "  elixir-otp-base                        - Elixir OTP application"
-	@echo "  go-cli-base                            - Go CLI application"
-	@echo "  cpp-cli-base                           - C++ CLI application"
-	@echo "  rust-cli-base                          - Rust CLI application"
+	@printf "  just test                              - Run all baseline + violation tests\n"
+	@printf "  just test-python                       - Run Python baseline + violation tests\n"
+	@printf "  just test-java                         - Run Java baseline + violation tests\n"
+	@printf "  just test-go                           - Run Go baseline + violation tests\n"
+	@printf "  just test-elixir                       - Run Elixir baseline + violation tests\n"
+	@printf "  just test-cpp                          - Run C++ baseline + violation tests\n"
+	@printf "  just test-rust                         - Run Rust baseline + violation tests\n"
 	@echo ""
 
 # Install templates and set up aliases
@@ -71,50 +70,50 @@ init:
 	@echo ""
 	@# Check for git
 	@if ! command -v git >/dev/null 2>&1; then \
-		echo "✗ Error: git is not installed"; \
+		printf "\033[31m✗ Error: git is not installed\033[0m\n"; \
 		echo "  Please install git first: https://git-scm.com/downloads"; \
 		echo ""; \
 		exit 1; \
 	fi
-	@echo "✓ git is installed"
+	@printf "\033[32m✓ git is installed\033[0m\n"
 	@# Check for python
 	@if ! command -v python3 >/dev/null 2>&1 && ! command -v python >/dev/null 2>&1; then \
-		echo "✗ Error: python is not installed"; \
+		printf "\033[31m✗ Error: python is not installed\033[0m\n"; \
 		echo "  Please install Python 3.12 or higher: https://www.python.org/downloads/"; \
 		echo ""; \
 		exit 1; \
 	fi
-	@echo "✓ python is installed"
+	@printf "\033[32m✓ python is installed\033[0m\n"
 	@# Check for uv
 	@if ! command -v uv >/dev/null 2>&1; then \
-		echo "✗ Error: uv is not installed"; \
+		printf "\033[31m✗ Error: uv is not installed\033[0m\n"; \
 		echo "  Please install uv: https://docs.astral.sh/uv/getting-started/installation/"; \
 		echo "  Quick install: curl -LsSf https://astral.sh/uv/install.sh | sh"; \
 		echo ""; \
 		exit 1; \
 	fi
-	@echo "✓ uv is installed"
+	@printf "\033[32m✓ uv is installed\033[0m\n"
 	@# Check for just
 	@if ! command -v just >/dev/null 2>&1; then \
-		echo "✗ Error: just is not installed"; \
+		printf "\033[31m✗ Error: just is not installed\033[0m\n"; \
 		echo "  Please install just: https://github.com/casey/just#installation"; \
 		echo ""; \
 		exit 1; \
 	fi
-	@echo "✓ just is installed"
+	@printf "\033[32m✓ just is installed\033[0m\n"
 	@# Check for claude CLI
 	@if ! command -v claude >/dev/null 2>&1; then \
-		echo "✗ Error: claude CLI is not installed"; \
+		printf "\033[31m✗ Error: claude CLI is not installed\033[0m\n"; \
 		echo "  Please install Claude Code: https://claude.com/claude-code"; \
 		echo ""; \
 		exit 1; \
 	fi
-	@echo "✓ claude CLI is installed"
+	@printf "\033[32m✓ claude CLI is installed\033[0m\n"
 	@# Check for elixir (optional, for Elixir templates)
 	@if command -v elixir >/dev/null 2>&1; then \
-		echo "✓ elixir is installed"; \
+		printf "\033[32m✓ elixir is installed\033[0m\n"; \
 	else \
-		echo "⚠ elixir is not installed (needed for Elixir templates)"; \
+		printf "\033[33m⚠ elixir is not installed (needed for Elixir templates)\033[0m\n"; \
 	fi
 	@echo ""
 	@echo "All prerequisites met! Installing AI Templates..."
@@ -128,20 +127,17 @@ update:
 	@echo "Updating AI Templates to latest version..."
 	@echo ""
 	@if ! command -v git >/dev/null 2>&1; then \
-		echo "✗ Error: git is not installed"; \
+		printf "\033[31m✗ Error: git is not installed\033[0m\n"; \
 		echo ""; \
 		exit 1; \
 	fi
 	@git pull && { \
-		echo ""; \
 		printf "\033[32m✓ Templates updated successfully!\033[0m\n"; \
-		echo ""; \
 	} || { \
-		echo ""; \
 		printf "\033[31m✗ Failed to update templates\033[0m\n"; \
-		echo ""; \
 		exit 1; \
 	}
+	@echo ""
 
 # Create new project from template
 create template-name target-dir=".":

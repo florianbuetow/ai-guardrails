@@ -172,13 +172,13 @@ just run
 
 ```bash
 cd ai-guardrails
-just test          # Python baseline + violation tests
-just test-java     # Java baseline + violation tests
-just test-go       # Go baseline + violation tests
-just test-elixir   # Elixir baseline + violation tests
-just test-cpp      # C++ baseline + violation tests
-just test-rust     # Rust baseline + violation tests
-just test-all      # Run all language suites
+just test          # Run all language suites (baseline + violation tests)
+just test-python   # Run Python baseline + violation tests
+just test-java     # Run Java baseline + violation tests
+just test-go       # Run Go baseline + violation tests
+just test-elixir   # Run Elixir baseline + violation tests
+just test-cpp      # Run C++ baseline + violation tests
+just test-rust     # Run Rust baseline + violation tests
 ```
 
 Each language suite now runs two phases:
