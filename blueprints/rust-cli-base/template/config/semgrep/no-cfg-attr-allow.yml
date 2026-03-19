@@ -1,0 +1,18 @@
+rules:
+  - id: rust.no-cfg-attr-allow
+    languages: [rust]
+    severity: ERROR
+    message: >
+      Conditional lint suppression via #[cfg_attr(..., allow(...))] is not allowed.
+      This is an indirect way to suppress warnings and is banned for the same reason
+      as #[allow(...)]. Fix the underlying issue instead:
+        - dead_code: remove the unused function or make it public if it is part of the API.
+        - unused_imports: remove the import.
+        - clippy lints: follow clippy's suggestion to fix the code.
+      If the lint only applies in certain build configurations, restructure the code so it
+      is valid in all configurations. If you cannot resolve the violation without suppression,
+      stop and ask the user. Present the lint name, the cfg condition, and 2-3 options.
+    pattern-regex: 'cfg_attr\(.*allow\('
+    paths:
+      include:
+        - src/

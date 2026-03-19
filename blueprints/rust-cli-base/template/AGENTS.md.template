@@ -21,6 +21,12 @@ This file provides guidance to AI agents and AI-assisted development tools when 
 - `just ci-quiet` -- Run CI silently (only show output on errors)
 - `just destroy` -- Remove build artifacts and reports
 
+## General Coding Principles
+
+- **Fail fast — never swallow errors.** Always propagate errors and exit with code 1 immediately. No silent fallbacks, no `.unwrap_or()`, no ignored Results.
+- **Never assume any default values anywhere.** Check for required values explicitly and fail if something is missing. Default values mask underlying issues and make them hard to debug.
+- **Never suppress checks with annotations.** Fix the underlying issue instead. No `#[allow(...)]` — use `#[expect(...)]` with a reason only when absolutely unavoidable. No other mechanism that silences a checker.
+
 ## Code Style & Conventions
 
 ### Rust Rules

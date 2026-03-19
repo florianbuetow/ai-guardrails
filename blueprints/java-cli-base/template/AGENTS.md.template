@@ -3,10 +3,11 @@
 This file provides guidance to AI agents and AI-assisted development tools when working with this project. This includes Claude Code, Cursor IDE, GitHub Copilot, Windsurf, and any other AI coding assistants.
 
 ## General Coding Principles
-- **Never assume any default values anywhere**
+- **Fail fast — never swallow errors.** Always propagate errors and exit with code 1 immediately. No silent fallbacks, no ignored exceptions.
+- **Never assume any default values anywhere.** Check for required values explicitly and fail if something is missing. Default values mask underlying issues and make them hard to debug.
+- **Never suppress checks with annotations.** Fix the underlying issue instead. No `@SuppressWarnings`, `//noinspection`, `NOSONAR`, or any other mechanism that silences a checker.
 - Always be explicit about values, paths, and configurations
-- If a value is not provided, handle it explicitly (throw an exception, return null, or prompt for input)
-- Never silently fall back to a default when data is missing
+- If a value is not provided, throw an exception — never silently fall back to a default
 
 ## Git Commit Guidelines
 
@@ -70,11 +71,11 @@ The following patterns are banned in production code (`src/main/`) and enforced 
   - Correct: `./src/main/java/{{package_path}}/Helper.java`
 
 ## Error Handling
+- Fail fast — stop immediately on the first error, never continue past failures
 - Use explicit exceptions with clear messages for missing or invalid data
 - Never catch and silently ignore exceptions
 - Prefer checked exceptions for recoverable errors, unchecked for programming errors
-- Scripts should track and report success/failure counts
-- Exit with code 1 if any items failed, 0 if all succeeded
+- Exit with code 1 if any operation fails, 0 if all succeeded
 
 ## Optimization
 - **Skip processing if output already exists** - Don't reprocess unnecessarily

@@ -1,0 +1,20 @@
+rules:
+  - id: elixir.no-credo-disable
+    languages: [generic]
+    severity: ERROR
+    message: >
+      Credo suppression comments are not allowed.
+      Do NOT add or keep: '# credo:disable-for-this-file', '# credo:disable-for-next-line',
+      or '# credo:disable-for-lines:N'. Fix the underlying Credo issue instead:
+        - Readability.MaxLineLength: break the line into smaller expressions or extract a variable.
+        - Readability.ModuleDoc: add a @moduledoc with a meaningful description.
+        - Design.TagTODO: resolve the TODO or file an issue and remove the comment.
+        - Refactor.CyclomaticComplexity: extract helper functions to reduce branching.
+      If you cannot resolve the Credo violation without suppression, stop and ask the user.
+      Present the Credo check name, the specific violation, and 2-3 refactoring options.
+    pattern-regex: '#\s*credo:\s*disable'
+    paths:
+      include:
+        - lib/
+      exclude:
+        - test/

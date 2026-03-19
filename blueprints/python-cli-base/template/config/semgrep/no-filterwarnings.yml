@@ -1,0 +1,24 @@
+rules:
+  - id: python.no-filterwarnings
+    languages: [python]
+    severity: ERROR
+    message: |
+      Warning suppression via @pytest.mark.filterwarnings is not allowed.
+      Do NOT add or keep: '@pytest.mark.filterwarnings("ignore::...")'.
+      Fix the underlying warning instead:
+        - DeprecationWarning: upgrade the dependency or migrate to the replacement API.
+        - ResourceWarning: ensure resources are properly closed (use context managers).
+        - UserWarning: fix the condition that triggers the warning.
+      If the warning comes from a third-party library you cannot change, stop and ask
+      the user which approach to take. Present the warning class, its source, and 2-3
+      options that avoid suppression (e.g. pin the library version, wrap the call,
+      or open an upstream issue).
+    pattern-either:
+      - pattern: |
+          @pytest.mark.filterwarnings(...)
+          def $FUNC(...):
+              ...
+      - pattern: |
+          @pytest.mark.filterwarnings(...)
+          async def $FUNC(...):
+              ...

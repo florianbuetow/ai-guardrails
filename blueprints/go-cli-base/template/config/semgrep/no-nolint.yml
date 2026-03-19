@@ -1,0 +1,21 @@
+rules:
+  - id: go.no-nolint
+    languages: [go]
+    severity: ERROR
+    message: >
+      Linter suppression via //nolint is not allowed (including //nolint:lintername).
+      Do NOT add or keep any //nolint directive. Fix the underlying lint issue instead:
+        - Unused variables/imports: remove them.
+        - Shadow declarations: rename the variable.
+        - Error not checked: handle the error with an if-err check.
+        - Cyclomatic complexity: extract sub-functions.
+        - Line length: restructure the expression.
+      If you cannot resolve the lint violation without suppression, stop and ask the user.
+      Present the linter name, the specific violation, and 2-3 refactoring options.
+    pattern-regex: '//\s*nolint'
+    paths:
+      include:
+        - cmd/
+        - internal/
+      exclude:
+        - "*_test.go"

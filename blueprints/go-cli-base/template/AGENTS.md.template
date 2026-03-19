@@ -3,9 +3,11 @@
 This file provides guidance to AI agents and AI-assisted development tools when working with this project. This includes Claude Code, Cursor IDE, GitHub Copilot, Windsurf, and any other AI coding assistants.
 
 ## General Coding Principles
-- **Never assume any default values anywhere**
+- **Fail fast — never swallow errors.** Always propagate errors and exit with code 1 immediately. No silent fallbacks, no ignored return codes.
+- **Never assume any default values anywhere.** Check for required values explicitly and fail if something is missing. Default values mask underlying issues and make them hard to debug.
+- **Never suppress checks with annotations.** Fix the underlying issue instead. No `//nolint`, `// #nosec`, or any other mechanism that silences a checker.
 - Always be explicit about values, paths, and configurations
-- If a value is not provided, handle it explicitly (return error, log, or prompt for input)
+- If a value is not provided, return an error — never silently fall back to a default
 - All errors must be checked and handled — never assign to blank identifier `_`
 
 ## Git Commit Guidelines
@@ -51,11 +53,12 @@ This file provides guidance to AI agents and AI-assisted development tools when 
   - Correct: `./cmd/main.go`, `./internal/app/app.go`
 
 ## Error Handling
+- Fail fast — stop immediately on the first error, never continue past failures
 - Every error must be checked — never use `_ = funcThatReturnsError()`
 - Wrap errors with context: `fmt.Errorf("doing X: %w", err)`
 - Return errors to callers; let main() decide how to handle fatal errors
 - Use `errors.Is()` and `errors.As()` for error inspection, not string matching
-- Exit with code 1 if any operation failed, 0 if all succeeded
+- Exit with code 1 if any operation fails, 0 if all succeeded
 
 ## Optimization
 - **Skip processing if output already exists** - Don't reprocess unnecessarily

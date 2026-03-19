@@ -1,0 +1,21 @@
+rules:
+  - id: go.no-nosec
+    languages: [go]
+    severity: ERROR
+    message: >
+      Security suppression via #nosec is not allowed (including #nosec G204, #nosec G304, etc.).
+      Do NOT add or keep any #nosec directive. Fix the underlying security issue instead:
+        - G204 (command injection): avoid exec.Command with user input; use a allowlist of commands.
+        - G304 (file path injection): validate and sanitize file paths; use filepath.Clean and restrict to a base directory.
+        - G301/G302 (file permissions): use restrictive permissions (0600 for files, 0700 for dirs).
+        - G401/G501 (weak crypto): use modern algorithms (SHA-256+, AES-GCM).
+        - G104 (unhandled error): check and propagate the error.
+      If none of these alternatives apply, stop and ask the user which approach to take.
+      Present the gosec rule ID, what it flags, and 2-3 options that avoid suppression.
+    pattern-regex: '#nosec'
+    paths:
+      include:
+        - cmd/
+        - internal/
+      exclude:
+        - "*_test.go"

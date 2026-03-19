@@ -3,9 +3,11 @@
 This file provides guidance to AI agents and AI-assisted development tools when working with this project. This includes Claude Code, Cursor IDE, GitHub Copilot, Windsurf, and any other AI coding assistants.
 
 ## General Coding Principles
-- **Never assume any default values anywhere**
+- **Fail fast — never swallow errors.** Always propagate errors and exit with code 1 immediately. No silent fallbacks, no ignored return codes.
+- **Never assume any default values anywhere.** Check for required values explicitly and fail if something is missing. Default values mask underlying issues and make them hard to debug.
+- **Never suppress checks with annotations.** Fix the underlying issue instead. No `NOLINT`, `NOLINTNEXTLINE`, `#pragma` warning suppression, or any other mechanism that silences a checker.
 - Always be explicit about values, paths, and configurations
-- If a value is not provided, handle it explicitly (raise error, use null, or prompt for input)
+- If a value is not provided, raise an error — never silently fall back to a default
 
 ## Git Commit Guidelines
 
@@ -66,10 +68,10 @@ This file provides guidance to AI agents and AI-assisted development tools when 
   - Correct: `./src/helper.cpp`, `./tests/helper_test.cpp`
 
 ## Error Handling
-- Scripts should continue processing other items even if one fails
-- Failed/invalid outputs should be handled gracefully
-- Scripts should track and report success/failure counts
-- Exit with code 1 if any items failed, 0 if all succeeded
+- Fail fast — stop immediately on the first error, never continue past failures
+- Use `std::expected` for recoverable errors, propagate immediately on failure
+- Never catch and silently ignore exceptions
+- Exit with code 1 if any operation fails, 0 if all succeeded
 
 ## Optimization
 - **Skip processing if output already exists** - Don't reprocess unnecessarily

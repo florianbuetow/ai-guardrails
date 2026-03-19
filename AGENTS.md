@@ -6,6 +6,14 @@ This file provides guidance to AI agents and AI-assisted development tools when 
 
 This repository contains Copier templates for Python, Java, Go, Elixir, C++, and Rust that enforce strict validation guardrails on AI-generated code — catching antipatterns, suppressing silent defaults, and providing immediate feedback so AI agents write better, more maintainable code from the start.
 
+## Core Coding Principles
+
+These rules apply everywhere — repo scripts, justfiles, test infrastructure, and all language templates:
+
+1. **Fail fast — never swallow errors.** Always propagate errors and exit with code 1 immediately. No silent fallbacks, no `|| true`, no ignored return codes. Use `set -e` or `&&` chaining in shell scripts.
+2. **No default values — never assume missing values.** Check for required values explicitly and exit 1 if something is missing. Default values mask underlying issues and make them hard to debug.
+3. **Never suppress checks with annotations.** Fix the underlying issue instead. No `@SuppressWarnings`, `# noqa`, `# type: ignore`, `#[allow(...)]`, `NOLINT`, `// noinspection`, `NOSONAR`, `@dialyzer`, `# shellcheck disable`, or any other mechanism that silences a checker.
+
 ## Git Commit Guidelines
 
 **IMPORTANT:** When creating git commits in this repository:
@@ -70,6 +78,14 @@ This repository contains Copier templates for Python, Java, Go, Elixir, C++, and
 - Conventions: Justfile workflow, CMakePresets.json, strict compiler warnings (-Wall -Wextra -Wpedantic -Werror)
 
 All templates emphasize creating immediately runnable projects with no placeholders, comprehensive CI pipelines, and AGENTS.md/CLAUDE.md files for AI agent guidance.
+
+## Repository Commands
+
+- `just ci` — Run all repo-level checks (codespell, semgrep, shellcheck) + all template tests
+- `just test` — Run baseline + violation tests for all 6 languages
+- `just test-<language>` — Run tests for one language (python, java, go, elixir, cpp, rust)
+- `just check` — Verify required tools are installed
+- `just create <template> <target-dir>` — Scaffold a new project from a blueprint
 
 ## Delegating to Sub-Agents
 

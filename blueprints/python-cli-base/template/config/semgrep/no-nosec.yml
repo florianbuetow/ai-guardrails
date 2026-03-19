@@ -1,0 +1,21 @@
+rules:
+  - id: python.no-nosec
+    languages: [python]
+    severity: ERROR
+    message: |
+      Bandit suppression is not allowed.
+      Do NOT add or keep: '# nosec' (including '# nosec B602', '# nosec B101', etc.).
+      Fix the underlying security issue instead:
+        - B602 (subprocess shell=True): pass a list of arguments instead of a shell string.
+        - B101 (assert): use explicit if/raise instead of assert in production code.
+        - B105/B106/B107 (hardcoded passwords): load secrets from environment variables or a vault.
+        - B301/B302 (pickle): use json or another safe serialization format.
+        - B608 (SQL injection): use parameterized queries.
+      If none of these alternatives apply, stop and ask the user which approach to take.
+      Present the bandit rule ID, what it flags, and 2-3 options that avoid suppression.
+    pattern-regex: '#\s*nosec'
+    paths:
+      include:
+        - src/
+      exclude:
+        - tests/

@@ -3,9 +3,11 @@
 This file provides guidance to AI agents and AI-assisted development tools when working with this project. This includes Claude Code, Cursor IDE, GitHub Copilot, Windsurf, and any other AI coding assistants.
 
 ## General Coding Principles
-- **Never assume any default values anywhere**
+- **Fail fast — never swallow errors.** Always propagate errors and exit with code 1 immediately. No silent fallbacks, no ignored error tuples.
+- **Never assume any default values anywhere.** Check for required values explicitly and fail if something is missing. Default values mask underlying issues and make them hard to debug.
+- **Never suppress checks with annotations.** Fix the underlying issue instead. No `@dialyzer` suppression attributes, no `# credo:disable-for-this-file`, or any other mechanism that silences a checker.
 - Always be explicit about values, paths, and configurations
-- If a value is not provided, handle it explicitly (raise error, return error tuple, or prompt for input)
+- If a value is not provided, raise an error — never silently fall back to a default
 
 ## Git Commit Guidelines
 
@@ -69,8 +71,8 @@ This file provides guidance to AI agents and AI-assisted development tools when 
 - See https://hexdocs.pm/ex_arch_unit/ for rule syntax reference
 
 ## Error Handling
+- Fail fast — stop immediately on the first error, never continue past failures
 - Use tagged tuples for error handling: `{:ok, result}` and `{:error, reason}`
 - Use `with` chains for multi-step operations that may fail
 - Always pattern match on error tuples, never ignore them
-- Scripts should track and report success/failure counts
-- Exit with non-zero status if any operations failed
+- Exit with code 1 if any operation fails, 0 if all succeeded
