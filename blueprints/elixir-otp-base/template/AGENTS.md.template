@@ -57,6 +57,17 @@ This file provides guidance to AI agents and AI-assisted development tools when 
 - These checks run as part of `just code-semgrep` and also during `just code-lint`
 - **Never** disable or bypass these checks — fix the underlying issue instead
 
+## Architecture Testing
+- Architecture rules are defined in `arch.exs` at the project root
+- Run `just code-architecture` to check architecture rules (runs `mix arch.check`)
+- Architecture tests also run as ExUnit tests in `test/architecture/`
+- **Never** delete or weaken architecture rules — fix violations in the code instead
+- When adding new modules or layers, add corresponding rules in `arch.exs`
+- Add ExUnit-based tests in `test/architecture/architecture_test.exs` for:
+  - Cycle detection across module groups
+  - Layer dependency constraints that need programmatic logic
+- See https://hexdocs.pm/ex_arch_unit/ for rule syntax reference
+
 ## Error Handling
 - Use tagged tuples for error handling: `{:ok, result}` and `{:error, reason}`
 - Use `with` chains for multi-step operations that may fail

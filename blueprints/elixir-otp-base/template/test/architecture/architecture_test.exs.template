@@ -1,0 +1,44 @@
+defmodule {{module_name}}.ArchitectureTest do
+  @moduledoc """
+  Architecture rule tests for {{project_name}}.
+
+  Each test enforces one invariant about the module dependency graph.
+  The `use ExArchUnit, config: "arch.exs"` line auto-enforces all
+  declarative rules from arch.exs during test setup.
+
+  See: https://hexdocs.pm/ex_arch_unit/ for the full API.
+
+  Example rules to add as your project develops layers:
+
+      test "domain must not depend on web layer" do
+        forbid "{{module_name}}.Domain.*", depends_on: "{{module_name}}Web.*"
+      end
+
+      test "web layer can only depend on domain" do
+        allow "{{module_name}}Web.*", depends_on: ["{{module_name}}.Domain.*"]
+      end
+  """
+
+  use ExUnit.Case, async: true
+  use ExArchUnit, config: "arch.exs"
+
+  # ---------------------------------------------------------------------------
+  # Layer boundary: app code must not depend on Credo check internals
+  # ---------------------------------------------------------------------------
+
+  test "app modules must not depend on custom Credo checks" do
+    forbid "{{module_name}}.*", depends_on: "Credo.Check.Custom.*"
+  end
+
+  # ---------------------------------------------------------------------------
+  # Cycle detection
+  # ---------------------------------------------------------------------------
+
+  test "no circular dependencies in project modules" do
+    assert_no_cycles prefix: "{{module_name}}.*"
+  end
+
+  # ---------------------------------------------------------------------------
+  # Add your architecture rules below
+  # ---------------------------------------------------------------------------
+end

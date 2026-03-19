@@ -1,0 +1,37 @@
+# Architecture rules for {{project_name}}.
+# ex_arch_unit validates module dependencies without modifying production code.
+#
+# Run: mix arch.check
+# Docs: https://hexdocs.pm/ex_arch_unit/
+#
+# Active rules enforce real boundaries in this project. Commented examples
+# show additional rule types to add as the project develops more layers.
+
+layers do
+  # -------------------------------------------------------------------
+  # Active layers — these are enforced now
+  # -------------------------------------------------------------------
+  layer :app, "{{module_name}}.*"
+  layer :tooling, "Credo.Check.Custom.*"
+
+  # App code must never depend on internal Credo check modules
+  forbid :app, depends_on: [:tooling]
+
+  # -------------------------------------------------------------------
+  # Example layers — uncomment and adapt as the project grows
+  # -------------------------------------------------------------------
+  # layer :web, "{{module_name}}Web.*"
+  # layer :domain, "{{module_name}}.Domain.*"
+  # layer :infra, "{{module_name}}.Infra.*"
+  #
+  # allow :web, depends_on: [:domain]
+  # forbid :domain, depends_on: [:web, :infra]
+
+  # -------------------------------------------------------------------
+  # Module filtering — narrow the analysis scope
+  # -------------------------------------------------------------------
+  include "{{module_name}}.*"
+  include "Credo.Check.Custom.*"
+
+  # exclude "{{module_name}}.Legacy.*"
+end

@@ -24,6 +24,7 @@ Production-ready Copier template for Elixir OTP applications with full validatio
 | **Custom Credo checks** | Custom rules | Bans default parameters, fallback operators, Map.get defaults, and Dialyzer suppression |
 | **mix_audit** | Vulnerability scanning | Scans Hex dependencies for known security vulnerabilities |
 | **ExUnit** | Testing framework | Built-in testing with coverage support and async test execution |
+| **ex_arch_unit** | Architecture testing | Enforces module dependency boundaries and detects circular dependencies |
 
 ## Template Structure
 
@@ -36,6 +37,7 @@ blueprints/elixir-otp-base/
     ├── .formatter.exs
     ├── .gitignore.template
     ├── AGENTS.md.template
+    ├── arch.exs.template
     ├── CLAUDE.md -> AGENTS.md         # Symlink (created via _tasks)
     ├── README.md.template
     ├── justfile.template
@@ -53,6 +55,8 @@ blueprints/elixir-otp-base/
     │           ├── no_fallback_operator.ex
     │           └── no_map_get_default.ex
     └── test/
+        ├── architecture/
+        │   └── architecture_test.exs.template
         ├── test_helper.exs
         └── {{app_name}}_test.exs.template
 ```
@@ -98,6 +102,7 @@ Projects created from this template include:
 - **Git hooks**: Runs `just ci-quiet` on commit via git_hooks
 - **AI agent rules**: AGENTS.md with strict development guidelines
 - **Git commit rules**: No AI attribution, explicit file staging
+- **Architecture testing**: ex_arch_unit layer boundary enforcement and cycle detection
 - **Directory structure**: lib/, test/, config/
 
 ## Custom Credo Checks

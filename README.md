@@ -97,7 +97,7 @@ Every template runs the same CI check categories via `just ci`. The table below 
 | Vulnerability scan | pip-audit | Gradle Versions Plugin | govulncheck | mix deps.audit + hex.audit | — | cargo-deny |
 | Testing | pytest | JUnit 5 | go test | ExUnit | GoogleTest | cargo-nextest |
 | Meta-linter | — | — | golangci-lint | Credo | — | — |
-| Architecture | pytestarch | ArchUnit | arch-go | — | — | — |
+| Architecture | pytestarch | ArchUnit | arch-go | ex_arch_unit | — | — |
 
 See each template's README for tool details and configuration, or [code-validation-blueprint-guide.md](docs/code-validation-blueprint-guide.md) for semgrep rules.
 
