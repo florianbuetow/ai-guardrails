@@ -92,14 +92,14 @@ init: check
     @mkdir -p reports/coverage
     @echo "Installing Rust toolchain components..."
     @if command -v rustup >/dev/null 2>&1; then \
-        rustup component add rustfmt clippy llvm-tools-preview 2>/dev/null || true; \
+        rustup component add rustfmt clippy llvm-tools-preview; \
     fi
     @echo "Installing development tools..."
-    @cargo install cargo-nextest --locked 2>/dev/null || true
-    @cargo install cargo-deny --locked 2>/dev/null || true
-    @cargo install cargo-geiger --locked 2>/dev/null || true
-    @cargo install cargo-machete --locked 2>/dev/null || true
-    @cargo install grcov --locked 2>/dev/null || true
+    @cargo install cargo-nextest --locked
+    @cargo install cargo-deny --locked
+    @cargo install cargo-geiger --locked
+    @cargo install cargo-machete --locked
+    @cargo install grcov --locked
     @echo "Building project..."
     @cargo build
     @printf "\033[0;32m> Development environment ready\033[0m\n"

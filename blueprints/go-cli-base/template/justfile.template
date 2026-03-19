@@ -185,7 +185,7 @@ code-deptry:
 code-spell:
     @echo ""
     @printf "\033[0;34m=== Checking Spelling ===\033[0m\n"
-    @codespell cmd internal scripts *.md 2>/dev/null || codespell cmd internal scripts
+    @codespell cmd internal scripts $(find . -maxdepth 1 -name '*.md' 2>/dev/null)
     @printf "\033[0;32m✓ Spelling checks passed\033[0m\n"
     @echo ""
 

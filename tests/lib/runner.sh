@@ -131,12 +131,14 @@ run_language_tests() {
         (cd "$project_dir" && git add -A)
 
         # Run the targeted check — it must fail
-        if (cd "$project_dir" && just "$check_recipe" >/dev/null 2>&1); then
+        local check_output
+        check_output="$(cd "$project_dir" && just "$check_recipe" 2>&1)" && {
             log_fail "Violation '$violation_name' was NOT detected by 'just $check_recipe'"
+            printf "%s\n" "$check_output"
             restore_violation "$violation_dir" "$project_dir" "$backup_dir"
             cleanup_dir "$temp_dir"
             return 1
-        fi
+        }
 
         log_pass "Violation '$violation_name' correctly detected"
         passed_tests=$((passed_tests + 1))

@@ -196,19 +196,29 @@ code-security:
 # Check include hygiene with IWYU
 code-deptry:
     #!/usr/bin/env bash
+    set -e
     echo ""
     printf "\033[0;34m=== Checking Include Hygiene (IWYU) ===\033[0m\n"
+    IWYU_OUTPUT=""
     if command -v iwyu_tool >/dev/null 2>&1; then
-        iwyu_tool -p build/debug -- -Xiwyu --no_fwd_decls 2>&1
+        IWYU_OUTPUT="$(iwyu_tool -p build/debug -- -Xiwyu --no_fwd_decls 2>&1)"
     elif command -v include-what-you-use >/dev/null 2>&1; then
         FILES=$(find src/ -type f -name "*.cpp" 2>/dev/null)
         if [ -n "$FILES" ]; then
             for f in $FILES; do
-                include-what-you-use -std=c++{{cpp_standard}} -I include/ "$f" 2>&1
+                IWYU_OUTPUT+="$(include-what-you-use -std=c++{{cpp_standard}} -I include/ "$f" 2>&1)"
+                IWYU_OUTPUT+=$'\n'
             done
         fi
     else
-        printf "  IWYU not installed — skipping (install with: brew install include-what-you-use)\n"
+        printf "\033[0;31m✗ IWYU is not installed\033[0m\n"
+        printf "  Install with: brew install include-what-you-use\n"
+        exit 1
+    fi
+    printf "%s\n" "$IWYU_OUTPUT"
+    if printf "%s\n" "$IWYU_OUTPUT" | grep -q '^- #include'; then
+        printf "\033[0;31m✗ Unnecessary includes found (see IWYU output above)\033[0m\n"
+        exit 1
     fi
     printf "\033[0;32m✓ Include hygiene check completed\033[0m\n"
     echo ""
