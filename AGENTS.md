@@ -13,6 +13,7 @@ These rules apply everywhere — repo scripts, justfiles, test infrastructure, a
 1. **Fail fast — never swallow errors.** Always propagate errors and exit with code 1 immediately. No silent fallbacks, no `|| true`, no ignored return codes. Use `set -e` or `&&` chaining in shell scripts.
 2. **No default values — never assume missing values.** Check for required values explicitly and exit 1 if something is missing. Default values mask underlying issues and make them hard to debug.
 3. **Never suppress checks with annotations.** Fix the underlying issue instead. No `@SuppressWarnings`, `# noqa`, `# type: ignore`, `#[allow(...)]`, `NOLINT`, `// noinspection`, `NOSONAR`, `@dialyzer`, `# shellcheck disable`, or any other mechanism that silences a checker.
+4. **Use `printf` for color output — never `echo`.** Some terminals won't render ANSI escape sequences with `echo`. In shell scripts and justfiles, always use `printf` for colored or formatted text output. Plain `echo ""` is acceptable only for blank-line spacing.
 
 ## Git Commit Guidelines
 
@@ -32,12 +33,29 @@ These rules apply everywhere — repo scripts, justfiles, test infrastructure, a
 ### Violation Tests (`violations/`)
 
 - `violations/<language>/<rule-name>/...` contains file overlays that intentionally introduce one forbidden pattern.
-- Each violation case must map to an existing guardrail rule (Semgrep or Credo) and use valid, compilable code.
-- The test runner first checks a clean generated project (`just ci` must pass), then overlays violation files and expects `just ci` to fail.
-- To add a new violation test:
-  1. Create a new subdirectory under the target language (for example `violations/python/no-default-values/`).
-  2. Add only the files that must be overlaid onto the generated project.
-  3. Ensure the injected code triggers the intended rule without relying on placeholder/broken syntax.
+- Each violation case must map to an existing guardrail rule (Semgrep, Credo, or other checker) and use valid, compilable code.
+
+**How violation testing works:**
+
+The key principle is that we test the generated project's own CI justfile targets — the same `just code-semgrep`, `just code-security`, etc. that developers run. We're verifying that the project's built-in guardrails catch forbidden patterns, not running checks some other way.
+
+1. **Generate** a fresh project from the template into a temp directory.
+2. **Baseline** — run the project's full CI (`just ci`) on the clean project. It must pass. This confirms the template itself is valid.
+3. **For each violation:**
+   a. **Inject** — copy the violation's overlay files into the generated project (originals are backed up).
+   b. **Stage** — `git add -A` so tools like semgrep see the new/changed files.
+   c. **Run the project's targeted justfile recipe** — e.g. `just code-security`, `just code-semgrep`. The recipe name is read from a `check` file in the violation directory; if absent, defaults to `code-semgrep`.
+   d. **Expect failure** — the justfile target **must exit non-zero**. If it passes, the project's guardrail failed to catch the violation and the test fails.
+   e. **Restore** — put original files back and reset git state for the next test.
+
+This is an inverted test pattern: a passing test means the project's own CI caught the bad code.
+
+**To add a new violation test:**
+
+1. Create a new subdirectory under the target language (for example `violations/python/no-default-values/`).
+2. Add only the files that must be overlaid onto the generated project.
+3. Optionally add a `check` file containing the justfile recipe name to run (one line, e.g. `code-security`). If omitted, `code-semgrep` is used.
+4. Ensure the injected code triggers the intended rule without relying on placeholder/broken syntax.
 
 ### The Python CLI Template (`blueprints/python-cli-base`)
 

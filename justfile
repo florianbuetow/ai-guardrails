@@ -92,12 +92,12 @@ check:
 # Install templates and set up aliases
 init:
 	@echo ""
-	@echo "Checking prerequisites..."
+	@printf "Checking prerequisites...\n"
 	@echo ""
 	@# Check for git
 	@if ! command -v git >/dev/null 2>&1; then \
 		printf "\033[31m✗ Error: git is not installed\033[0m\n"; \
-		echo "  Please install git first: https://git-scm.com/downloads"; \
+		printf "  Please install git first: https://git-scm.com/downloads\n"; \
 		echo ""; \
 		exit 1; \
 	fi
@@ -105,7 +105,7 @@ init:
 	@# Check for python
 	@if ! command -v python3 >/dev/null 2>&1 && ! command -v python >/dev/null 2>&1; then \
 		printf "\033[31m✗ Error: python is not installed\033[0m\n"; \
-		echo "  Please install Python 3.12 or higher: https://www.python.org/downloads/"; \
+		printf "  Please install Python 3.12 or higher: https://www.python.org/downloads/\n"; \
 		echo ""; \
 		exit 1; \
 	fi
@@ -113,8 +113,8 @@ init:
 	@# Check for uv
 	@if ! command -v uv >/dev/null 2>&1; then \
 		printf "\033[31m✗ Error: uv is not installed\033[0m\n"; \
-		echo "  Please install uv: https://docs.astral.sh/uv/getting-started/installation/"; \
-		echo "  Quick install: curl -LsSf https://astral.sh/uv/install.sh | sh"; \
+		printf "  Please install uv: https://docs.astral.sh/uv/getting-started/installation/\n"; \
+		printf "  Quick install: curl -LsSf https://astral.sh/uv/install.sh | sh\n"; \
 		echo ""; \
 		exit 1; \
 	fi
@@ -122,7 +122,7 @@ init:
 	@# Check for just
 	@if ! command -v just >/dev/null 2>&1; then \
 		printf "\033[31m✗ Error: just is not installed\033[0m\n"; \
-		echo "  Please install just: https://github.com/casey/just#installation"; \
+		printf "  Please install just: https://github.com/casey/just#installation\n"; \
 		echo ""; \
 		exit 1; \
 	fi
@@ -130,7 +130,7 @@ init:
 	@# Check for claude CLI
 	@if ! command -v claude >/dev/null 2>&1; then \
 		printf "\033[31m✗ Error: claude CLI is not installed\033[0m\n"; \
-		echo "  Please install Claude Code: https://claude.com/claude-code"; \
+		printf "  Please install Claude Code: https://claude.com/claude-code\n"; \
 		echo ""; \
 		exit 1; \
 	fi
@@ -142,7 +142,7 @@ init:
 		printf "\033[33m⚠ elixir is not installed (needed for Elixir templates)\033[0m\n"; \
 	fi
 	@echo ""
-	@echo "All prerequisites met! Installing AI Templates..."
+	@printf "All prerequisites met! Installing AI Templates...\n"
 	@echo ""
 	@./project-setup/setup_aliases.sh && printf "\033[32m✓ init completed successfully\033[0m\n" || { printf "\033[31m✗ init failed\033[0m\n"; exit 1; }
 	@echo ""
@@ -150,7 +150,7 @@ init:
 # Update templates to latest version
 update:
 	@echo ""
-	@echo "Updating AI Templates to latest version..."
+	@printf "Updating AI Templates to latest version...\n"
 	@echo ""
 	@if ! command -v git >/dev/null 2>&1; then \
 		printf "\033[31m✗ Error: git is not installed\033[0m\n"; \
