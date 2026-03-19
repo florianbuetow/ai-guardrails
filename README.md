@@ -73,12 +73,12 @@ just run
 
 | Template | Language | Description |
 |----------|----------|-------------|
-| [**python-cli-base**](blueprints/python-cli-base/) | Python 3.12+ | CLI apps with uv, ruff, mypy, pyright, bandit, semgrep, pytest |
-| [**java-cli-base**](blueprints/java-cli-base/) | Java 21+ | CLI apps with Gradle, Spotless, Checkstyle, Error Prone, SpotBugs, JUnit 5 |
-| [**go-cli-base**](blueprints/go-cli-base/) | Go 1.23+ | CLI apps with golangci-lint, go vet, staticcheck, gosec, govulncheck |
-| [**elixir-otp-base**](blueprints/elixir-otp-base/) | Elixir 1.17+ | OTP apps with Credo, Dialyxir, Sobelow, mix_audit, ExUnit |
-| [**cpp-cli-base**](blueprints/cpp-cli-base/) | C++23 | CLI apps with CMake, clang-format, clang-tidy, cppcheck, flawfinder, GoogleTest |
-| [**rust-cli-base**](blueprints/rust-cli-base/) | Rust 2024 | CLI apps with clippy, cargo-geiger, cargo-machete, cargo-deny, cargo-nextest, grcov |
+| [**python-cli-base**](blueprints/python-cli-base/) | Python 3.12+ | CLI apps with [uv](https://github.com/astral-sh/uv), [ruff](https://github.com/astral-sh/ruff), [mypy](https://mypy-lang.org/), [pyright](https://github.com/microsoft/pyright), [bandit](https://github.com/PyCQA/bandit), [semgrep](https://github.com/semgrep/semgrep), [pytest](https://pytest.org/) |
+| [**java-cli-base**](blueprints/java-cli-base/) | Java 21+ | CLI apps with [Gradle](https://gradle.org/), [Spotless](https://github.com/diffplug/spotless), [Checkstyle](https://github.com/checkstyle/checkstyle), [Error Prone](https://github.com/google/error-prone), [SpotBugs](https://github.com/spotbugs/spotbugs), [JUnit 5](https://junit.org/) |
+| [**go-cli-base**](blueprints/go-cli-base/) | Go 1.23+ | CLI apps with [golangci-lint](https://golangci-lint.run/), go vet, [staticcheck](https://staticcheck.dev/), [gosec](https://github.com/securego/gosec), [govulncheck](https://golang.org/x/vuln/cmd/govulncheck) |
+| [**elixir-otp-base**](blueprints/elixir-otp-base/) | Elixir 1.17+ | OTP apps with [Credo](https://github.com/rrrene/credo), [Dialyxir](https://github.com/jeremyjh/dialyxir), [Sobelow](https://github.com/nccgroup/sobelow), [mix_audit](https://github.com/mirego/mix_audit), ExUnit |
+| [**cpp-cli-base**](blueprints/cpp-cli-base/) | C++23 | CLI apps with [CMake](https://cmake.org/), [clang-format](https://clang.llvm.org/docs/ClangFormat.html), [clang-tidy](https://clang.llvm.org/extra/clang-tidy/), [cppcheck](https://github.com/danmar/cppcheck), [flawfinder](https://github.com/david-a-wheeler/flawfinder), [GoogleTest](https://github.com/google/googletest) |
+| [**rust-cli-base**](blueprints/rust-cli-base/) | Rust 2024 | CLI apps with [clippy](https://github.com/rust-lang/rust-clippy), [cargo-geiger](https://github.com/geiger-rs/cargo-geiger), [cargo-machete](https://github.com/bnjbvr/cargo-machete), [cargo-deny](https://github.com/EmbarkStudios/cargo-deny), [cargo-nextest](https://github.com/nextest-rs/nextest), [grcov](https://github.com/mozilla/grcov) |
 
 ## Validation Tools by Language
 
@@ -86,18 +86,18 @@ Every template runs the same CI check categories via `just ci`. The table below 
 
 | Check | Python | Java | Go | Elixir | C++ | Rust |
 |-------|--------|------|----|--------|-----|------|
-| Formatting | ruff | Spotless | gofumpt | mix format | clang-format | rustfmt |
-| Style | ruff | Checkstyle | gofumpt | mix format | clang-tidy | rustfmt |
-| Type checking | mypy | Error Prone | go vet | Dialyzer | cppcheck | cargo check + clippy |
-| LSP analysis | pyright | javac -Xlint:all -Werror | staticcheck | mix compile --warnings-as-errors | — | — |
-| Security | bandit | SpotBugs | gosec | Sobelow | flawfinder | cargo-geiger |
-| Dependency hygiene | deptry | Gradle buildHealth | go mod tidy | mix deps.unlock --check-unused | IWYU | cargo-machete |
-| Spell checking | codespell | codespell | codespell | codespell | codespell | codespell |
-| Custom rules | semgrep | semgrep | semgrep | Custom Credo checks | semgrep | semgrep |
-| Vulnerability scan | pip-audit | Gradle Versions Plugin | govulncheck | mix deps.audit + hex.audit | — | cargo-deny |
-| Testing | pytest | JUnit 5 | go test | ExUnit | GoogleTest | cargo-nextest |
-| Meta-linter | — | — | golangci-lint | Credo | — | — |
-| Architecture | pytestarch | ArchUnit | arch-go | ex_arch_unit | — | — |
+| Formatting | [ruff](https://github.com/astral-sh/ruff) | [Spotless](https://github.com/diffplug/spotless) | [gofumpt](https://github.com/mvdan/gofumpt) | mix format | [clang-format](https://clang.llvm.org/docs/ClangFormat.html) | [rustfmt](https://github.com/rust-lang/rustfmt) |
+| Style | [ruff](https://github.com/astral-sh/ruff) | [Checkstyle](https://github.com/checkstyle/checkstyle) | [gofumpt](https://github.com/mvdan/gofumpt) | mix format | [clang-tidy](https://clang.llvm.org/extra/clang-tidy/) | [rustfmt](https://github.com/rust-lang/rustfmt) |
+| Type checking | [mypy](https://mypy-lang.org/) | [Error Prone](https://github.com/google/error-prone) | go vet | Dialyzer | [cppcheck](https://github.com/danmar/cppcheck) | cargo check + [clippy](https://github.com/rust-lang/rust-clippy) |
+| LSP analysis | [pyright](https://github.com/microsoft/pyright) | javac -Xlint:all -Werror | [staticcheck](https://staticcheck.dev/) | mix compile --warnings-as-errors | — | — |
+| Security | [bandit](https://github.com/PyCQA/bandit) | [SpotBugs](https://github.com/spotbugs/spotbugs) | [gosec](https://github.com/securego/gosec) | [Sobelow](https://github.com/nccgroup/sobelow) | [flawfinder](https://github.com/david-a-wheeler/flawfinder) | [cargo-geiger](https://github.com/geiger-rs/cargo-geiger) |
+| Dependency hygiene | [deptry](https://deptry.com/) | [Gradle](https://gradle.org/) buildHealth | go mod tidy | mix deps.unlock --check-unused | [IWYU](https://github.com/include-what-you-use/include-what-you-use) | [cargo-machete](https://github.com/bnjbvr/cargo-machete) |
+| Spell checking | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) |
+| Custom rules | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) | Custom [Credo](https://github.com/rrrene/credo) checks | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) |
+| Vulnerability scan | [pip-audit](https://github.com/pypa/pip-audit) | [Gradle Versions Plugin](https://github.com/ben-manes/gradle-versions-plugin) | [govulncheck](https://golang.org/x/vuln/cmd/govulncheck) | mix deps.audit + hex.audit | — | [cargo-deny](https://github.com/EmbarkStudios/cargo-deny) |
+| Testing | [pytest](https://pytest.org/) | [JUnit 5](https://junit.org/) | go test | ExUnit | [GoogleTest](https://github.com/google/googletest) | [cargo-nextest](https://github.com/nextest-rs/nextest) |
+| Meta-linter | — | — | [golangci-lint](https://golangci-lint.run/) | [Credo](https://github.com/rrrene/credo) | — | — |
+| Architecture | [pytestarch](https://github.com/zyskarch/pytestarch) | [ArchUnit](https://www.archunit.org/) | [arch-go](https://github.com/arch-go/arch-go) | [ex_arch_unit](https://hex.pm/packages/ex_arch_unit) | — | — |
 
 See each template's README for tool details and configuration.
 
