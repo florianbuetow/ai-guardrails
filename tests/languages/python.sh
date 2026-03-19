@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034 # Variables consumed by runner.sh which sources this file
 
 set -euo pipefail
 

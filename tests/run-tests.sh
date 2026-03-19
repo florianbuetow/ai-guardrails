@@ -33,7 +33,6 @@ esac
 
 requested_count=${#languages[@]}
 passed_languages=0
-failed_languages=0
 
 for lang in "${languages[@]}"; do
     lang_config="$SCRIPT_DIR/languages/$lang.sh"
