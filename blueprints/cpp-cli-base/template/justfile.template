@@ -193,27 +193,24 @@ code-security:
     @printf "\033[0;32m✓ Security checks passed\033[0m\n"
     @echo ""
 
-# Check include hygiene with IWYU (advisory — does not fail CI)
+# Check include hygiene with IWYU
 code-deptry:
     #!/usr/bin/env bash
     echo ""
-    printf "\033[0;34m=== Checking Include Hygiene (IWYU — advisory) ===\033[0m\n"
-    # IWYU (Include What You Use) is advisory only: its suggestions are
-    # informational and do not cause CI to fail. Review its output manually
-    # and apply fixes where appropriate.
+    printf "\033[0;34m=== Checking Include Hygiene (IWYU) ===\033[0m\n"
     if command -v iwyu_tool >/dev/null 2>&1; then
-        iwyu_tool -p build/debug -- -Xiwyu --no_fwd_decls 2>&1 || true
+        iwyu_tool -p build/debug -- -Xiwyu --no_fwd_decls 2>&1
     elif command -v include-what-you-use >/dev/null 2>&1; then
         FILES=$(find src/ -type f -name "*.cpp" 2>/dev/null)
         if [ -n "$FILES" ]; then
             for f in $FILES; do
-                include-what-you-use -std=c++{{cpp_standard}} -I include/ "$f" 2>&1 || true
+                include-what-you-use -std=c++{{cpp_standard}} -I include/ "$f" 2>&1
             done
         fi
     else
         printf "  IWYU not installed — skipping (install with: brew install include-what-you-use)\n"
     fi
-    printf "\033[0;32m✓ Include hygiene check completed (advisory)\033[0m\n"
+    printf "\033[0;32m✓ Include hygiene check completed\033[0m\n"
     echo ""
 
 # Check spelling in code and documentation
