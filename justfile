@@ -41,6 +41,7 @@ help:
 	@clear
 	@echo ""
 	@printf "  just help                              - Show this help message\n"
+	@printf "  just check                             - Check if all required tools are installed\n"
 	@printf "  just init                              - Install templates and set up aliases\n"
 	@echo ""
 	@printf "  just update                            - Update templates to latest version\n"
@@ -56,6 +57,7 @@ help:
 	@echo ""
 	@printf "  just code-spell                        - Check spelling across the repository\n"
 	@printf "  just code-semgrep                      - Run semgrep rules against repo scripts\n"
+	@printf "  just code-shellcheck                   - Lint shell scripts with ShellCheck\n"
 	@echo ""
 	@printf "  just ci                                - Run all checks + all template tests\n"
 	@printf "  just test                              - Run all baseline + violation tests\n"
@@ -65,6 +67,26 @@ help:
 	@printf "  just test-elixir                       - Run Elixir baseline + violation tests\n"
 	@printf "  just test-cpp                          - Run C++ baseline + violation tests\n"
 	@printf "  just test-rust                         - Run Rust baseline + violation tests\n"
+	@echo ""
+
+# Check if all required tools are installed
+check:
+	@echo ""
+	@missing=0; \
+	for tool in git just copier codespell semgrep shellcheck; do \
+		if command -v "$tool" >/dev/null 2>&1; then \
+			printf "\033[32m  ✓ %s\033[0m\n" "$tool"; \
+		else \
+			printf "\033[31m  ✗ %s not found\033[0m\n" "$tool"; \
+			missing=$((missing + 1)); \
+		fi; \
+	done; \
+	echo ""; \
+	if [ "$missing" -gt 0 ]; then \
+		printf "\033[31m✗ %d required tool(s) missing\033[0m\n" "$missing"; \
+		exit 1; \
+	fi; \
+	printf "\033[32m✓ all required tools are installed\033[0m\n"
 	@echo ""
 
 # Install templates and set up aliases
@@ -170,8 +192,18 @@ code-semgrep:
 		|| { printf "\033[31m✗ semgrep found violations\033[0m\n"; exit 1; }
 	@echo ""
 
+# Lint shell scripts with ShellCheck
+code-shellcheck:
+	@echo ""
+	@printf "\033[0;34m=== Running ShellCheck ===\033[0m\n"
+	@find tests/ project-setup/ -name '*.sh' -print0 \
+		| xargs -0 shellcheck \
+		&& printf "\033[32m✓ shellcheck passed\033[0m\n" \
+		|| { printf "\033[31m✗ shellcheck found issues\033[0m\n"; exit 1; }
+	@echo ""
+
 # Run all checks and all template tests
-ci: code-spell code-semgrep test
+ci: check code-spell code-semgrep code-shellcheck test
 	@echo ""
 	@printf "\033[32m✓ ci passed\033[0m\n"
 	@echo ""

@@ -255,6 +255,7 @@ ci:
     echo ""
     printf "\033[0;34m=== Running CI Checks ===\033[0m\n"
     echo ""
+    just check
     just init
     just code-format
     just code-style
@@ -279,6 +280,9 @@ ci-quiet:
     printf "\033[0;34m=== Running CI Checks (Quiet Mode) ===\033[0m\n"
     TMPFILE=$(mktemp)
     trap "rm -f $TMPFILE" EXIT
+
+    just check > $TMPFILE 2>&1 || { printf "\033[0;31m✗ Check failed\033[0m\n"; cat $TMPFILE; exit 1; }
+    printf "\033[0;32m✓ Check passed\033[0m\n"
 
     just init > $TMPFILE 2>&1 || { printf "\033[0;31m✗ Init failed\033[0m\n"; cat $TMPFILE; exit 1; }
     printf "\033[0;32m✓ Init passed\033[0m\n"
