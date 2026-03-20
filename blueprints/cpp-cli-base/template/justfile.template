@@ -366,6 +366,7 @@ ci:
     just code-style
     just code-typecheck
     just code-security
+    just code-infer
     just code-deptry
     just code-spell
     just code-semgrep
@@ -400,6 +401,9 @@ ci-quiet:
 
     just code-security > $TMPFILE 2>&1 || { printf "\033[0;31m✗ Code-security failed\033[0m\n"; cat $TMPFILE; exit 1; }
     printf "\033[0;32m✓ Code-security passed\033[0m\n"
+
+    just code-infer > $TMPFILE 2>&1 || { printf "\033[0;31m✗ Code-infer failed\033[0m\n"; cat $TMPFILE; exit 1; }
+    printf "\033[0;32m✓ Code-infer passed\033[0m\n"
 
     just code-deptry > $TMPFILE 2>&1 || { printf "\033[0;31m✗ Code-deptry failed\033[0m\n"; cat $TMPFILE; exit 1; }
     printf "\033[0;32m✓ Code-deptry passed\033[0m\n"
