@@ -77,6 +77,13 @@ check:
         exit 1; \
     fi
     @printf "\033[32m✓ infer is installed\033[0m\n"
+    @if ! command -v trivy >/dev/null 2>&1; then \
+        printf "\033[31m✗ Error: trivy is not installed\033[0m\n"; \
+        printf "  Install with: brew install trivy\n"; \
+        echo ""; \
+        exit 1; \
+    fi
+    @printf "\033[32m✓ trivy is installed\033[0m\n"
     @echo ""
 
 # Show help information
@@ -103,7 +110,7 @@ help:
     @printf "  %-40s %s\n" "code-deptry" "Check dependency hygiene"
     @printf "  %-40s %s\n" "code-spell" "Check spelling (codespell)"
     @printf "  %-40s %s\n" "code-semgrep" "Run custom static analysis (Semgrep)"
-    @printf "  %-40s %s\n" "code-audit" "Check for outdated dependencies"
+    @printf "  %-40s %s\n" "code-audit" "Scan dependencies for vulnerabilities and outdated versions"
     @printf "  %-40s %s\n" "code-architecture" "Run ArchUnit architecture tests"
     @printf "  %-40s %s\n" "code-lspchecks" "Run strict compiler checks (javac -Xlint:all -Werror)"
     @echo ""
@@ -204,10 +211,12 @@ code-semgrep:
     @printf "\033[32m✓ code-semgrep completed successfully\033[0m\n"
     @echo ""
 
-# Check for outdated dependencies
+# Scan dependencies for vulnerabilities and outdated versions
 code-audit:
     @echo ""
-    @printf "\033[34m=== Checking for Outdated Dependencies ===\033[0m\n"
+    @printf "\033[34m=== Scanning Dependencies for Vulnerabilities ===\033[0m\n"
+    @./gradlew dependencies --write-locks --quiet
+    @trivy fs --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --quiet .
     @./gradlew dependencyUpdates --quiet
     @printf "\033[32m✓ code-audit completed successfully\033[0m\n"
     @echo ""

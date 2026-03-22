@@ -105,6 +105,14 @@ tasks.jacocoTestCoverageVerification {
     }
 }
 
+// --- Dependency Locking (for vulnerability scanning) ---
+configurations {
+    compileClasspath { resolutionStrategy.activateDependencyLocking() }
+    runtimeClasspath { resolutionStrategy.activateDependencyLocking() }
+    testCompileClasspath { resolutionStrategy.activateDependencyLocking() }
+    testRuntimeClasspath { resolutionStrategy.activateDependencyLocking() }
+}
+
 // --- Dependency Analysis ---
 dependencyAnalysis {
     issues {

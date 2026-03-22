@@ -37,8 +37,11 @@ dependencies {
     // Find Security Bugs plugin for SpotBugs
     spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.13.0")
 
-    // Testing — intentionally outdated JUnit to trigger code-audit failure
-    testImplementation(platform("org.junit:junit-bom:5.9.0"))
+    // Intentionally vulnerable dependency (CVE-2021-44228 Log4Shell)
+    implementation("org.apache.logging.log4j:log4j-core:2.14.1")
+
+    // Testing
+    testImplementation(platform("org.junit:junit-bom:5.11.4"))
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -105,6 +108,14 @@ tasks.jacocoTestCoverageVerification {
     }
 }
 
+// --- Dependency Locking (for vulnerability scanning) ---
+configurations {
+    compileClasspath { resolutionStrategy.activateDependencyLocking() }
+    runtimeClasspath { resolutionStrategy.activateDependencyLocking() }
+    testCompileClasspath { resolutionStrategy.activateDependencyLocking() }
+    testRuntimeClasspath { resolutionStrategy.activateDependencyLocking() }
+}
+
 // --- Dependency Analysis ---
 dependencyAnalysis {
     issues {
@@ -112,29 +123,6 @@ dependencyAnalysis {
             onAny {
                 severity("fail")
             }
-        }
-    }
-}
-
-// --- Dependency Audit ---
-tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask>().configureEach {
-    outputFormatter = "json"
-    doLast {
-        val reportFile = file("build/dependencyUpdates/report.json")
-        if (!reportFile.exists()) {
-            return@doLast
-        }
-
-        val report = groovy.json.JsonSlurper().parse(reportFile) as? Map<*, *> ?: return@doLast
-        val outdated = report["outdated"] as? Map<*, *> ?: return@doLast
-        val outdatedCount = when (val count = outdated["count"]) {
-            is Number -> count.toInt()
-            is String -> count.toIntOrNull() ?: 0
-            else -> 0
-        }
-
-        if (outdatedCount > 0) {
-            throw GradleException("Outdated dependencies found. Run './gradlew dependencyUpdates' to see details.")
         }
     }
 }

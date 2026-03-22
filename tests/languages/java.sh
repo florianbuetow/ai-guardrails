@@ -38,4 +38,5 @@ check_prerequisites() {
     require_command codespell "Install with: brew install codespell"
     require_command semgrep "Install with: brew install semgrep"
     require_command infer "Install from: https://github.com/facebook/infer/releases"
+    require_command trivy "Install with: brew install trivy"
 }
