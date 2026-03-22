@@ -182,8 +182,7 @@ code-security:
     @echo ""
     @printf "\033[0;34m=== Running Security Checks ===\033[0m\n"
     @mkdir -p reports/security
-    @gosec -fmt text -out reports/security/gosec.txt ./... || true
-    @gosec ./...
+    @gosec -fmt text -out reports/security/gosec.txt ./...
     @printf "\033[0;32m✓ Security checks passed\033[0m\n"
     @echo ""
 
@@ -194,16 +193,16 @@ code-deptry:
     echo ""
     printf "\033[0;34m=== Checking Dependencies ===\033[0m\n"
     cp go.mod go.mod.bak
-    cp go.sum go.sum.bak 2>/dev/null || true
+    [ -f go.sum ] && cp go.sum go.sum.bak
     go mod tidy
     if ! diff -q go.mod go.mod.bak > /dev/null 2>&1; then
         mv go.mod.bak go.mod
-        mv go.sum.bak go.sum 2>/dev/null || true
+        [ -f go.sum.bak ] && mv go.sum.bak go.sum
         printf "\033[0;31m✗ go.mod is not tidy. Run 'go mod tidy'\033[0m\n"
         exit 1
     fi
     rm go.mod.bak
-    rm go.sum.bak 2>/dev/null || true
+    [ -f go.sum.bak ] && rm go.sum.bak
     printf "\033[0;32m✓ Dependency checks passed\033[0m\n"
     echo ""
 

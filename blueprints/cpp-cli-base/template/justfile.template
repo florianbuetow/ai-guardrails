@@ -194,10 +194,11 @@ code-style:
     printf "\033[0;34m=== Checking Code Style ===\033[0m\n"
     EXTRA_ARGS=""
     if [ "$(uname)" = "Darwin" ] && command -v xcrun >/dev/null 2>&1; then
-        SDKROOT=$(xcrun --show-sdk-path 2>/dev/null || true)
-        if [ -n "$SDKROOT" ]; then
-            EXTRA_ARGS="--extra-arg=--sysroot=$SDKROOT"
+        if ! SDKROOT=$(xcrun --show-sdk-path 2>/dev/null); then
+            printf "\033[0;31m✗ xcrun found but SDK path lookup failed. Install Xcode CLI tools or run 'xcode-select --install'\033[0m\n" >&2
+            exit 1
         fi
+        EXTRA_ARGS="--extra-arg=--sysroot=$SDKROOT"
     fi
     FILES=$(find src/ -type f -name "*.cpp" 2>/dev/null)
     if [ -n "$FILES" ]; then
@@ -219,7 +220,7 @@ code-security:
     @echo ""
     @printf "\033[0;34m=== Running Security Checks ===\033[0m\n"
     @mkdir -p reports/security
-    @flawfinder --minlevel=1 src/ include/ > reports/security/flawfinder.txt 2>&1 || true
+    @flawfinder --minlevel=1 src/ include/ > reports/security/flawfinder.txt 2>&1
     @flawfinder --minlevel=1 --error-level=1 src/ include/
     @printf "\033[0;32m✓ Security checks passed\033[0m\n"
     @echo ""

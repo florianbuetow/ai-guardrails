@@ -175,14 +175,16 @@ code-security:
     @printf "\033[0;34m=== Running Security Checks ===\033[0m\n"
     @set -e; \
         crate_name="{{project_name}}"; \
-        geiger_output="$(cargo geiger 2>/dev/null)" || true; \
+        if ! geiger_output="$(cargo geiger 2>/dev/null)"; then \
+            printf "\033[0;31mx Security check failed: cargo geiger failed\033[0m\n"; \
+            exit 1; \
+        fi; \
         if [ -z "$geiger_output" ]; then \
             printf "\033[0;31mx Security check failed: cargo geiger produced no output\033[0m\n"; \
             exit 1; \
         fi; \
         printf "%s\n" "$geiger_output"; \
-        project_line="$(printf "%s\n" "$geiger_output" | grep -m 1 "$crate_name" || true)"; \
-        if [ -z "$project_line" ]; then \
+        if ! project_line="$(printf "%s\n" "$geiger_output" | grep -m 1 "$crate_name")"; then \
             printf "\033[0;31mx Security check failed: project crate '%s' not found in cargo geiger output\033[0m\n" "$crate_name"; \
             exit 1; \
         fi; \

@@ -153,20 +153,15 @@ code-typecheck:
 code-lspchecks:
     @echo ""
     @printf "\033[0;34m=== Running Pyright Type Checks ===\033[0m\n"
-    @mkdir -p reports/pyright
-    @uv run pyright --project pyrightconfig.json > reports/pyright/pyright.txt 2>&1 || true
     @uv run pyright --project pyrightconfig.json
     @echo ""
     @printf "\033[0;32m✓ Pyright checks passed\033[0m\n"
-    @echo "  Report: reports/pyright/pyright.txt"
     @echo ""
 
 # Run security checks with bandit
 code-security:
     @echo ""
     @printf "\033[0;34m=== Running Security Checks ===\033[0m\n"
-    @mkdir -p reports/security
-    @uv run bandit -c pyproject.toml -r src -f txt -o reports/security/bandit.txt || true
     @uv run bandit -c pyproject.toml -r src
     @echo ""
     @printf "\033[0;32m✓ Security checks passed\033[0m\n"
