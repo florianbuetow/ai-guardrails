@@ -97,6 +97,17 @@ This is an inverted test pattern: a passing test means the project's own CI caug
 
 All templates emphasize creating immediately runnable projects with no placeholders, comprehensive CI pipelines, and AGENTS.md/CLAUDE.md files for AI agent guidance.
 
+## Justfile Conventions
+
+These rules apply to all justfiles — in this repository and in all generated templates:
+
+1. **Use `printf` for colored or formatted output** — never `echo` with ANSI escape sequences, as some terminals won't render colors with `echo`. Plain `echo ""` is acceptable only for blank-line spacing.
+2. **Add an empty `@echo ""` line before and after each target's command block** to visually separate output between targets.
+3. **The `help` target must be a dedicated recipe** with manually written `printf` lines that group related commands and order them by typical execution flow (setup → run → code quality → testing). Never use `just --list` for help output.
+4. **The default target (`_default`) must call `just help`.**
+5. **Every target must end with a clear status message**: green (`\033[32m`) on success, red (`\033[31m`) on failure with `exit 1`.
+6. **Composite targets (e.g. `ci`) must fail fast**: use `set -e` or `&&` chaining to ensure immediate abort on the first error.
+
 ## Repository Commands
 
 - `just ci` — Run all repo-level checks (codespell, semgrep, shellcheck) + all template tests

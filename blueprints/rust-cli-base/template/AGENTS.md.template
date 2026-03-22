@@ -21,6 +21,15 @@ This file provides guidance to AI agents and AI-assisted development tools when 
 - `just ci-quiet` -- Run CI silently (only show output on errors)
 - `just destroy` -- Remove build artifacts and reports
 
+## Justfile Conventions
+- **Use `printf` for colored or formatted output** — never `echo` with ANSI escape sequences, as some terminals won't render colors with `echo`. Plain `echo ""` is acceptable only for blank-line spacing.
+- **Add an empty `@echo ""` line before and after each target's command block** to visually separate output between targets.
+- **The `help` target must be a dedicated recipe** with manually written `printf` lines that group related commands and order them by typical execution flow (setup → run → code quality → testing). Never use `just --list`.
+- **The default target (`_default`) must call `just help`.**
+- **Every target must end with a clear status message**: green (`\033[32m`) on success, red (`\033[31m`) on failure with `exit 1`.
+- **Composite targets (e.g. `ci`) must fail fast**: use `set -e` or `&&` chaining.
+- Use `cargo` commands only — never invoke `rustc` directly
+
 ## General Coding Principles
 
 - **Fail fast — never swallow errors.** Always propagate errors and exit with code 1 immediately. No silent fallbacks, no `.unwrap_or()`, no ignored Results.
@@ -48,7 +57,6 @@ src/           -- Application source code
 tests/         -- Integration tests
 config/        -- Tool configuration (semgrep rules, codespell)
 scripts/       -- Utility scripts
-prompts/       -- AI prompt templates
 data/          -- Input/output data directories
 reports/       -- Generated reports (coverage, security)
 ```

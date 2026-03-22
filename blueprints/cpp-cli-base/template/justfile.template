@@ -28,6 +28,8 @@
 #      E.g. printf "\033[32m✓ init completed successfully\033[0m\n"
 #    - On failure: red (\033[31m) message indicating what failed, then exit 1.
 #      E.g. printf "\033[31m✗ ci failed: tests exited with errors\033[0m\n"
+# 7. Targets must be shown in groups separated by empty newlines in the help section.
+#    - init/destroy/clean/help on top, ci and other tests on the bottom, between other groups
 # =============================================================================
 
 # Default recipe: show available commands
@@ -226,7 +228,7 @@ code-security:
 code-infer:
     @echo ""
     @printf "\033[0;34m=== Running Infer Static Analysis ===\033[0m\n"
-    @infer run --compilation-database build/debug/compile_commands.json
+    @infer run --fail-on-issue --compilation-database build/debug/compile_commands.json
     @printf "\033[0;32m✓ Infer analysis passed\033[0m\n"
     @echo ""
 

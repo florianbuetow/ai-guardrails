@@ -31,7 +31,6 @@
 │   └── test/java/{{package_path}}/  # Test source code
 │       └── MainTest.java            # Unit tests
 ├── scripts/                   # Utility scripts
-├── prompts/                   # LLM prompt templates
 ├── data/                      # Data files
 │   ├── input/                 # Input data files
 │   └── output/                # Generated output files
@@ -53,6 +52,7 @@
 - **just** - Command runner ([installation guide](https://github.com/casey/just#installation))
 - **codespell** - Spell checker (`brew install codespell`)
 - **semgrep** - Static analysis (`brew install semgrep`)
+- **infer** - Static analysis for null safety, resource leaks ([releases](https://github.com/facebook/infer/releases))
 
 ## Setup
 

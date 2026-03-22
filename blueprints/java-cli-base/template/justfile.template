@@ -28,11 +28,13 @@
 #      E.g. printf "\033[32m✓ init completed successfully\033[0m\n"
 #    - On failure: red (\033[31m) message indicating what failed, then exit 1.
 #      E.g. printf "\033[31m✗ ci failed: tests exited with errors\033[0m\n"
+# 7. Targets must be shown in groups separated by empty newlines in the help section.
+#    - init/destroy/clean/help on top, ci and other tests on the bottom, between other groups
 # =============================================================================
 
 # Default recipe: show available commands
 _default:
-    @just --list
+    @just help
 
 # Check prerequisites
 check:
@@ -79,32 +81,37 @@ check:
 
 # Show help information
 help:
+    @clear
     @echo ""
-    @printf "\033[1m{{project_name}} - Available commands:\033[0m\n"
+    @printf "\033[0;34m=== {{project_name}} ===\033[0m\n"
     @echo ""
-    @printf "  \033[36mcheck\033[0m              Check prerequisites (java, gradlew, codespell, semgrep)\n"
-    @printf "  \033[36minit\033[0m               Initialize the development environment\n"
-    @printf "  \033[36mrun\033[0m                Run the main application\n"
-    @printf "  \033[36mdestroy\033[0m            Clean build artifacts\n"
-    @printf "  \033[36mhelp\033[0m               Show this help message\n"
+    @printf "\033[0;33mSetup & Lifecycle:\033[0m\n"
+    @printf "  %-40s %s\n" "init" "Initialize the development environment"
+    @printf "  %-40s %s\n" "destroy" "Clean build artifacts"
+    @printf "  %-40s %s\n" "check" "Check prerequisites"
+    @printf "  %-40s %s\n" "help" "Show this help message"
     @echo ""
-    @printf "  \033[36mcode-format\033[0m        Auto-format code (google-java-format via Spotless)\n"
-    @printf "  \033[36mcode-style\033[0m         Check code style (Checkstyle)\n"
-    @printf "  \033[36mcode-typecheck\033[0m     Compile with Error Prone checks\n"
-    @printf "  \033[36mcode-security\033[0m      Run security checks (SpotBugs + Find Security Bugs)\n"
-    @printf "  \033[36mcode-infer\033[0m         Run Infer static analysis (null safety, resource leaks)\n"
-    @printf "  \033[36mcode-deptry\033[0m        Check dependency hygiene\n"
-    @printf "  \033[36mcode-spell\033[0m         Check spelling (codespell)\n"
-    @printf "  \033[36mcode-semgrep\033[0m       Run custom static analysis (Semgrep)\n"
-    @printf "  \033[36mcode-audit\033[0m         Check for outdated dependencies\n"
-    @printf "  \033[36mcode-architecture\033[0m  Run ArchUnit architecture tests\n"
-    @printf "  \033[36mcode-lspchecks\033[0m     Run strict compiler checks (javac -Xlint:all -Werror)\n"
+    @printf "\033[0;33mRun:\033[0m\n"
+    @printf "  %-40s %s\n" "run" "Run the main application"
     @echo ""
-    @printf "  \033[36mtest\033[0m               Run unit tests\n"
-    @printf "  \033[36mtest-coverage\033[0m      Run tests with coverage ({{coverage_threshold}}%% threshold)\n"
+    @printf "\033[0;33mCode Quality:\033[0m\n"
+    @printf "  %-40s %s\n" "code-format" "Auto-format code (google-java-format via Spotless)"
+    @printf "  %-40s %s\n" "code-style" "Check code style (Checkstyle)"
+    @printf "  %-40s %s\n" "code-typecheck" "Compile with Error Prone checks"
+    @printf "  %-40s %s\n" "code-security" "Run security checks (SpotBugs + Find Security Bugs)"
+    @printf "  %-40s %s\n" "code-infer" "Run Infer static analysis (null safety, resource leaks)"
+    @printf "  %-40s %s\n" "code-deptry" "Check dependency hygiene"
+    @printf "  %-40s %s\n" "code-spell" "Check spelling (codespell)"
+    @printf "  %-40s %s\n" "code-semgrep" "Run custom static analysis (Semgrep)"
+    @printf "  %-40s %s\n" "code-audit" "Check for outdated dependencies"
+    @printf "  %-40s %s\n" "code-architecture" "Run ArchUnit architecture tests"
+    @printf "  %-40s %s\n" "code-lspchecks" "Run strict compiler checks (javac -Xlint:all -Werror)"
     @echo ""
-    @printf "  \033[36mci\033[0m                 Run ALL validation checks (verbose)\n"
-    @printf "  \033[36mci-quiet\033[0m           Run ALL validation checks (silent, fail-fast)\n"
+    @printf "\033[0;33mCI & Testing:\033[0m\n"
+    @printf "  %-40s %s\n" "test" "Run unit tests"
+    @printf "  %-40s %s\n" "test-coverage" "Run tests with coverage ({{coverage_threshold}}%% threshold)"
+    @printf "  %-40s %s\n" "ci" "Run ALL validation checks (verbose)"
+    @printf "  %-40s %s\n" "ci-quiet" "Run ALL validation checks (silent, fail-fast)"
     @echo ""
 
 # Initialize the development environment
@@ -169,7 +176,7 @@ code-infer:
     @echo ""
     @printf "\033[34m=== Running Infer Static Analysis ===\033[0m\n"
     @./gradlew clean --quiet
-    @infer run -- ./gradlew build --quiet
+    @infer run --fail-on-issue -- ./gradlew build --quiet
     @printf "\033[32m✓ code-infer completed successfully\033[0m\n"
     @echo ""
 

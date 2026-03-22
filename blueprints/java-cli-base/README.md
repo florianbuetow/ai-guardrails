@@ -61,7 +61,6 @@ blueprints/java-cli-base/
     │       └── architecture/
     │           └── ArchitectureTest.java.template
     ├── scripts/
-    ├── prompts/
     ├── data/
     │   ├── input/
     │   └── output/
@@ -112,13 +111,13 @@ The template will ask:
 Projects created from this template include:
 
 - **Strict Java execution**: Only via Gradle wrapper (`./gradlew`), never system Gradle
-- **Complete validation suite**: All tools configured in build.gradle.kts
+- **Complete validation suite**: All tools configured in build.gradle.kts, plus Infer static analysis (null safety, resource leaks)
 - **Just recipes**: init, run, destroy, code-*, test, ci, ci-quiet
 - **Pre-commit hooks**: Runs `just ci-quiet` on commit
 - **AI agent rules**: AGENTS.md with strict development guidelines
 - **Git commit rules**: No AI attribution, explicit file staging
 - **Semgrep rules**: Enforce explicit configuration, no defaults, no suppression
-- **Directory structure**: src/main/java/, src/test/java/, scripts/, prompts/, data/
+- **Directory structure**: src/main/java/, src/test/java/, scripts/, data/
 
 ## Semgrep Rules
 

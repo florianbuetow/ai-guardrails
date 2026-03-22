@@ -48,7 +48,6 @@ blueprints/rust-cli-base/
     ├── tests/
     │   └── integration_test.rs.template
     ├── scripts/
-    ├── prompts/
     ├── data/
     │   ├── input/
     │   └── output/
@@ -104,7 +103,7 @@ Projects created from this template include:
 - **AI agent rules**: AGENTS.md with strict development guidelines
 - **Git commit rules**: No AI attribution, explicit file staging
 - **Semgrep rules**: Enforce explicit error handling, ban unwrap/allow/silent discards
-- **Directory structure**: src/, tests/, scripts/, prompts/, data/
+- **Directory structure**: src/, tests/, scripts/, data/
 
 ## Semgrep Rules
 

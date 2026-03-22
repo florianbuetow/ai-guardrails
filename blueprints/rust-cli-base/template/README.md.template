@@ -21,7 +21,6 @@
 ├── tests/                  # Integration tests
 │   └── integration_test.rs # CLI integration tests
 ├── scripts/                # Utility scripts
-├── prompts/                # LLM prompt templates
 ├── data/                   # Data files
 │   ├── input/             # Input data files
 │   └── output/            # Generated output files

@@ -97,7 +97,7 @@ The template will ask:
 Projects created from this template include:
 
 - **CMake build system**: Modern CMake with presets (debug, release, coverage, sanitize)
-- **Complete validation suite**: clang-format, clang-tidy, cppcheck, flawfinder, IWYU, semgrep, codespell
+- **Complete validation suite**: clang-format, clang-tidy, cppcheck, flawfinder, IWYU, Infer, semgrep, codespell
 - **Runtime sanitizers**: AddressSanitizer and UndefinedBehaviorSanitizer
 - **Just recipes**: init, run, destroy, code-*, test, test-coverage, ci, ci-quiet
 - **Pre-commit hooks**: Runs `just ci-quiet` on commit

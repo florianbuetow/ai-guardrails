@@ -2,10 +2,6 @@
 
 set -euo pipefail
 
-# Default check recipe for violation tests. Override per-violation by placing
-# a file named "check" in the violation directory containing the recipe name.
-DEFAULT_CHECK_RECIPE="code-semgrep"
-
 # Back up original files before injecting a violation so we can restore them.
 inject_violation() {
     local violation_dir="$1"
@@ -103,24 +99,30 @@ run_language_tests() {
     total_tests=$((total_tests + 1))
     passed_tests=$((passed_tests + 1))
 
-    # --- Discover violation tests ---
+    # --- Discover violation tests (skip in baseline mode) ---
     violation_root="$REPO_ROOT/violations/$LANG_SLUG"
-    if [ -d "$violation_root" ]; then
+    if [ "${TEST_MODE:-all}" != "baseline" ] && [ -d "$violation_root" ]; then
         while IFS= read -r violation_dir; do
             violation_dirs+=("$violation_dir")
         done < <(find "$violation_root" -mindepth 1 -maxdepth 1 -type d | sort)
     fi
 
     # --- Run each violation test (fail fast) ---
-    for violation_dir in "${violation_dirs[@]}"; do
+    for violation_dir in ${violation_dirs[@]+"${violation_dirs[@]}"}; do
         violation_name="$(basename "$violation_dir")"
         total_tests=$((total_tests + 1))
 
-        # Determine which check recipe to run
-        if [ -f "$violation_dir/check" ]; then
-            check_recipe="$(cat "$violation_dir/check")"
-        else
-            check_recipe="$DEFAULT_CHECK_RECIPE"
+        # Determine which check recipe to run — every violation must declare one
+        if [ ! -f "$violation_dir/check" ]; then
+            log_fail "Violation '$violation_name' is missing its 'check' file (must contain the just recipe name)"
+            cleanup_dir "$temp_dir"
+            return 1
+        fi
+        check_recipe="$(cat "$violation_dir/check")"
+        if [ -z "$check_recipe" ]; then
+            log_fail "Violation '$violation_name' has an empty 'check' file"
+            cleanup_dir "$temp_dir"
+            return 1
         fi
 
         log_section "$LANG_NAME violation: $violation_name (just $check_recipe)"

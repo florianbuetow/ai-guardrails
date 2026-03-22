@@ -55,6 +55,7 @@ The following validation tools are also required:
 | [cppcheck](https://cppcheck.sourceforge.io/) | Static analysis | `brew install cppcheck` |
 | [flawfinder](https://dwheeler.com/flawfinder/) | Security scanning | `brew install flawfinder` |
 | [include-what-you-use](https://include-what-you-use.org/) | Include hygiene (advisory) | `brew install include-what-you-use` |
+| [infer](https://github.com/facebook/infer) | Static analysis (null deref, memory leaks) | [releases](https://github.com/facebook/infer/releases) |
 | [codespell](https://github.com/codespell-project/codespell) | Spell checking | `brew install codespell` |
 | [semgrep](https://semgrep.dev/) | Custom static analysis | `brew install semgrep` |
 | [lcov](https://github.com/linux-test-project/lcov) | Code coverage reporting | `brew install lcov` |

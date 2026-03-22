@@ -22,7 +22,6 @@ _skip_if_exists:
   - "data/input/"
   - "data/output/"
   - "scripts/"
-  - "prompts/"
 
 # Messages
 _message_before_copy: |

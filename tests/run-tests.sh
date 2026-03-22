@@ -10,10 +10,19 @@ source "$SCRIPT_DIR/lib/helpers.sh"
 source "$SCRIPT_DIR/lib/runner.sh"
 
 usage() {
-    printf "Usage: %s <python|java|go|elixir|cpp|rust|all>\n" "$0"
+    printf "Usage: %s <python|java|go|elixir|cpp|rust|all> [baseline]\n" "$0"
+    printf "  Add 'baseline' to run only project generation + just ci (skip violation tests)\n"
 }
 
-if [ "$#" -ne 1 ]; then
+if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
+    usage
+    exit 1
+fi
+
+# Second argument selects test mode: "all" (default) or "baseline"
+export TEST_MODE="${2:-all}"
+if [ "$TEST_MODE" != "all" ] && [ "$TEST_MODE" != "baseline" ]; then
+    printf "Unknown test mode: %s (expected 'all' or 'baseline')\n" "$TEST_MODE"
     usage
     exit 1
 fi

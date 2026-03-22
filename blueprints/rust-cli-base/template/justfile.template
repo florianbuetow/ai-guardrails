@@ -1,7 +1,7 @@
 # =============================================================================
 # Justfile Rules (follow these when editing justfile):
 #
-# 1. Use printf (not echo) to print colors -- some terminals won't render
+# 1. Use printf (not echo) to print colors — some terminals won't render
 #    colors with echo.
 #
 # 2. Always add an empty `@echo ""` line before and after each target's
@@ -25,14 +25,48 @@
 #
 # 6. Every target must end with a clear short status message:
 #    - On success: green (\033[32m) message confirming completion.
-#      E.g. printf "\033[32m> init completed successfully\033[0m\n"
+#      E.g. printf "\033[32m✓ init completed successfully\033[0m\n"
 #    - On failure: red (\033[31m) message indicating what failed, then exit 1.
-#      E.g. printf "\033[31mx ci failed: tests exited with errors\033[0m\n"
+#      E.g. printf "\033[31m✗ ci failed: tests exited with errors\033[0m\n"
+# 7. Targets must be shown in groups separated by empty newlines in the help section.
+#    - init/destroy/clean/help on top, ci and other tests on the bottom, between other groups
 # =============================================================================
 
 # Default recipe: show available commands
 _default:
-    @just --list
+    @just help
+
+# Show help information
+help:
+    @clear
+    @echo ""
+    @printf "\033[0;34m=== {{project_name}} ===\033[0m\n"
+    @echo ""
+    @printf "\033[0;33mSetup & Lifecycle:\033[0m\n"
+    @printf "  %-40s %s\n" "init" "Initialize the development environment"
+    @printf "  %-40s %s\n" "destroy" "Destroy build artifacts and reports"
+    @printf "  %-40s %s\n" "check" "Check prerequisites"
+    @printf "  %-40s %s\n" "help" "Show this help message"
+    @echo ""
+    @printf "\033[0;33mRun:\033[0m\n"
+    @printf "  %-40s %s\n" "run" "Run the main application"
+    @echo ""
+    @printf "\033[0;33mCode Quality:\033[0m\n"
+    @printf "  %-40s %s\n" "code-format" "Auto-fix code style and formatting"
+    @printf "  %-40s %s\n" "code-style" "Check code style and formatting (read-only)"
+    @printf "  %-40s %s\n" "code-typecheck" "Run type checking and clippy lints"
+    @printf "  %-40s %s\n" "code-security" "Run security checks with cargo-geiger"
+    @printf "  %-40s %s\n" "code-deptry" "Check dependency hygiene with cargo-machete"
+    @printf "  %-40s %s\n" "code-spell" "Check spelling in code and documentation"
+    @printf "  %-40s %s\n" "code-semgrep" "Run Semgrep static analysis"
+    @printf "  %-40s %s\n" "code-audit" "Scan dependencies for vulnerabilities and licenses"
+    @echo ""
+    @printf "\033[0;33mCI & Testing:\033[0m\n"
+    @printf "  %-40s %s\n" "test" "Run tests"
+    @printf "  %-40s %s\n" "test-coverage" "Run tests with coverage report"
+    @printf "  %-40s %s\n" "ci" "Run ALL validation checks (verbose)"
+    @printf "  %-40s %s\n" "ci-quiet" "Run ALL validation checks silently"
+    @echo ""
 
 # Check prerequisites
 check:
@@ -74,17 +108,6 @@ check:
     @printf "\033[0;32m> semgrep is installed\033[0m\n"
     @echo ""
 
-# Show help information
-help:
-    @echo ""
-    @clear
-    @echo ""
-    @printf "\033[0;34m=== {{project_name}} ===\033[0m\n"
-    @echo ""
-    @echo "Available commands:"
-    @just --list
-    @echo ""
-
 # Initialize the development environment
 init: check
     @echo ""
@@ -105,13 +128,6 @@ init: check
     @printf "\033[0;32m> Development environment ready\033[0m\n"
     @echo ""
 
-# Run the main application
-run:
-    @echo ""
-    @printf "\033[0;34m=== Running Application ===\033[0m\n"
-    @cargo run
-    @echo ""
-
 # Destroy build artifacts and reports
 destroy:
     @echo ""
@@ -121,12 +137,11 @@ destroy:
     @printf "\033[0;32m> Build artifacts removed\033[0m\n"
     @echo ""
 
-# Check code style and formatting (read-only)
-code-style:
+# Run the main application
+run:
     @echo ""
-    @printf "\033[0;34m=== Checking Code Style ===\033[0m\n"
-    @cargo fmt -- --check
-    @printf "\033[0;32m> Style checks passed\033[0m\n"
+    @printf "\033[0;34m=== Running Application ===\033[0m\n"
+    @cargo run
     @echo ""
 
 # Auto-fix code style and formatting
@@ -135,6 +150,14 @@ code-format:
     @printf "\033[0;34m=== Formatting Code ===\033[0m\n"
     @cargo fmt
     @printf "\033[0;32m> Code formatted\033[0m\n"
+    @echo ""
+
+# Check code style and formatting (read-only)
+code-style:
+    @echo ""
+    @printf "\033[0;34m=== Checking Code Style ===\033[0m\n"
+    @cargo fmt -- --check
+    @printf "\033[0;32m> Style checks passed\033[0m\n"
     @echo ""
 
 # Run type checking and clippy lints
@@ -182,16 +205,8 @@ code-deptry:
 code-spell:
     @echo ""
     @printf "\033[0;34m=== Checking Spelling ===\033[0m\n"
-    @codespell src tests scripts prompts *.md *.toml -I config/codespell/ignore.txt
+    @codespell src tests scripts *.md *.toml -I config/codespell/ignore.txt
     @printf "\033[0;32m> Spelling checks passed\033[0m\n"
-    @echo ""
-
-# Scan dependencies for known vulnerabilities and license issues
-code-audit:
-    @echo ""
-    @printf "\033[0;34m=== Scanning Dependencies ===\033[0m\n"
-    @cargo deny check
-    @printf "\033[0;32m> Dependency audit passed\033[0m\n"
     @echo ""
 
 # Run Semgrep static analysis
@@ -200,6 +215,14 @@ code-semgrep:
     @printf "\033[0;34m=== Running Semgrep Static Analysis ===\033[0m\n"
     @semgrep --config config/semgrep/ --error src scripts
     @printf "\033[0;32m> Semgrep checks passed\033[0m\n"
+    @echo ""
+
+# Scan dependencies for known vulnerabilities and license issues
+code-audit:
+    @echo ""
+    @printf "\033[0;34m=== Scanning Dependencies ===\033[0m\n"
+    @cargo deny check
+    @printf "\033[0;32m> Dependency audit passed\033[0m\n"
     @echo ""
 
 # Run tests

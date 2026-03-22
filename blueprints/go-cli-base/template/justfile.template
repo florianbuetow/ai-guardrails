@@ -28,11 +28,48 @@
 #      E.g. printf "\033[32m✓ init completed successfully\033[0m\n"
 #    - On failure: red (\033[31m) message indicating what failed, then exit 1.
 #      E.g. printf "\033[31m✗ ci failed: tests exited with errors\033[0m\n"
+# 7. Targets must be shown in groups separated by empty newlines in the help section.
+#    - init/destroy/clean/help on top, ci and other tests on the bottom, between other groups
 # =============================================================================
 
 # Default recipe: show available commands
 _default:
-    @just --list
+    @just help
+
+# Show help information
+help:
+    @clear
+    @echo ""
+    @printf "\033[0;34m=== {{project_name}} ===\033[0m\n"
+    @echo ""
+    @printf "\033[0;33mSetup & Lifecycle:\033[0m\n"
+    @printf "  %-40s %s\n" "init" "Initialize the development environment"
+    @printf "  %-40s %s\n" "destroy" "Remove build artifacts and caches"
+    @printf "  %-40s %s\n" "check" "Check prerequisites"
+    @printf "  %-40s %s\n" "help" "Show this help message"
+    @echo ""
+    @printf "\033[0;33mRun:\033[0m\n"
+    @printf "  %-40s %s\n" "run" "Run the main application"
+    @echo ""
+    @printf "\033[0;33mCode Quality:\033[0m\n"
+    @printf "  %-40s %s\n" "code-format" "Auto-fix code formatting"
+    @printf "  %-40s %s\n" "code-style" "Check code formatting (read-only)"
+    @printf "  %-40s %s\n" "code-typecheck" "Run static type checking with go vet"
+    @printf "  %-40s %s\n" "code-lspchecks" "Run strict static analysis with staticcheck"
+    @printf "  %-40s %s\n" "code-security" "Run security checks with gosec"
+    @printf "  %-40s %s\n" "code-deptry" "Check dependency hygiene with go mod tidy"
+    @printf "  %-40s %s\n" "code-spell" "Check spelling in code and documentation"
+    @printf "  %-40s %s\n" "code-semgrep" "Run Semgrep static analysis"
+    @printf "  %-40s %s\n" "code-audit" "Scan dependencies for known vulnerabilities"
+    @printf "  %-40s %s\n" "lint" "Run golangci-lint (meta-linter)"
+    @printf "  %-40s %s\n" "code-architecture" "Run architecture checks with arch-go"
+    @echo ""
+    @printf "\033[0;33mCI & Testing:\033[0m\n"
+    @printf "  %-40s %s\n" "test" "Run unit tests only (fast)"
+    @printf "  %-40s %s\n" "test-coverage" "Run unit tests with coverage report"
+    @printf "  %-40s %s\n" "ci" "Run ALL validation checks (verbose)"
+    @printf "  %-40s %s\n" "ci-quiet" "Run ALL validation checks silently"
+    @echo ""
 
 # Check prerequisites
 check:
@@ -60,17 +97,6 @@ check:
     @printf "\033[0;32m✓ semgrep is installed\033[0m\n"
     @echo ""
 
-# Show help information
-help:
-    @echo ""
-    @clear
-    @echo ""
-    @printf "\033[0;34m=== {{project_name}} ===\033[0m\n"
-    @echo ""
-    @echo "Available commands:"
-    @just --list
-    @echo ""
-
 # Initialize the development environment
 init: check
     @echo ""
@@ -96,13 +122,6 @@ init: check
     @printf "\033[0;32m✓ Development environment ready\033[0m\n"
     @echo ""
 
-# Run the main application
-run:
-    @echo ""
-    @printf "\033[0;34m=== Running Application ===\033[0m\n"
-    @go run ./cmd/...
-    @echo ""
-
 # Remove build artifacts and caches
 destroy:
     @echo ""
@@ -110,6 +129,21 @@ destroy:
     @rm -rf reports/ bin/ dist/
     @go clean -testcache
     @printf "\033[0;32m✓ Build artifacts removed\033[0m\n"
+    @echo ""
+
+# Run the main application
+run:
+    @echo ""
+    @printf "\033[0;34m=== Running Application ===\033[0m\n"
+    @go run ./cmd/...
+    @echo ""
+
+# Auto-fix code formatting
+code-format:
+    @echo ""
+    @printf "\033[0;34m=== Formatting Code ===\033[0m\n"
+    @gofumpt -w .
+    @printf "\033[0;32m✓ Code formatted\033[0m\n"
     @echo ""
 
 # Check code formatting (read-only)
@@ -126,14 +160,6 @@ code-style:
     fi
     printf "\033[0;32m✓ Style checks passed\033[0m\n"
     echo ""
-
-# Auto-fix code formatting
-code-format:
-    @echo ""
-    @printf "\033[0;34m=== Formatting Code ===\033[0m\n"
-    @gofumpt -w .
-    @printf "\033[0;32m✓ Code formatted\033[0m\n"
-    @echo ""
 
 # Run static type checking with go vet
 code-typecheck:
@@ -189,20 +215,20 @@ code-spell:
     @printf "\033[0;32m✓ Spelling checks passed\033[0m\n"
     @echo ""
 
-# Scan dependencies for known vulnerabilities
-code-audit:
-    @echo ""
-    @printf "\033[0;34m=== Scanning Dependencies for Vulnerabilities ===\033[0m\n"
-    @govulncheck ./...
-    @printf "\033[0;32m✓ No known vulnerabilities found\033[0m\n"
-    @echo ""
-
 # Run Semgrep static analysis
 code-semgrep:
     @echo ""
     @printf "\033[0;34m=== Running Semgrep Static Analysis ===\033[0m\n"
     @semgrep --config config/semgrep/ --error .
     @printf "\033[0;32m✓ Semgrep checks passed\033[0m\n"
+    @echo ""
+
+# Scan dependencies for known vulnerabilities
+code-audit:
+    @echo ""
+    @printf "\033[0;34m=== Scanning Dependencies for Vulnerabilities ===\033[0m\n"
+    @govulncheck ./...
+    @printf "\033[0;32m✓ No known vulnerabilities found\033[0m\n"
     @echo ""
 
 # Run golangci-lint (meta-linter)

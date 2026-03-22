@@ -51,7 +51,6 @@ blueprints/python-cli-base/
     ├── tests/
     │   └── __init__.py
     ├── scripts/
-    ├── prompts/
     ├── data/
     │   ├── input/
     │   └── output/
@@ -108,7 +107,7 @@ Projects created from this template include:
 - **AI agent rules**: AGENTS.md with strict development guidelines
 - **Git commit rules**: No AI attribution, explicit file staging
 - **Semgrep rules**: Enforce explicit configuration, no defaults, no type suppression
-- **Directory structure**: src/, tests/, scripts/, prompts/, data/
+- **Directory structure**: src/, tests/, scripts/, data/
 
 ## Semgrep Rules
 

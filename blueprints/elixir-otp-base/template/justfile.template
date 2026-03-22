@@ -28,21 +28,46 @@
 #      E.g. printf "\033[32m✓ init completed successfully\033[0m\n"
 #    - On failure: red (\033[31m) message indicating what failed, then exit 1.
 #      E.g. printf "\033[31m✗ ci failed: tests exited with errors\033[0m\n"
+# 7. Targets must be shown in groups separated by empty newlines in the help section.
+#    - init/destroy/clean/help on top, ci and other tests on the bottom, between other groups
 # =============================================================================
 
 # Default recipe: show available commands
 _default:
-    @just --list
+    @just help
 
 # Show help information
 help:
-    @echo ""
     @clear
     @echo ""
-    @echo "\033[0;34m=== {{project_name}} ===\033[0m"
+    @printf "\033[0;34m=== {{project_name}} ===\033[0m\n"
     @echo ""
-    @echo "Available commands:"
-    @just --list
+    @printf "\033[0;33mSetup & Lifecycle:\033[0m\n"
+    @printf "  %-40s %s\n" "init" "Initialize the development environment"
+    @printf "  %-40s %s\n" "destroy" "Destroy build artifacts and dependencies"
+    @printf "  %-40s %s\n" "check" "Check prerequisites"
+    @printf "  %-40s %s\n" "help" "Show this help message"
+    @echo ""
+    @printf "\033[0;33mRun:\033[0m\n"
+    @printf "  %-40s %s\n" "run" "Run the main application"
+    @echo ""
+    @printf "\033[0;33mCode Quality:\033[0m\n"
+    @printf "  %-40s %s\n" "code-format" "Auto-format code"
+    @printf "  %-40s %s\n" "code-style" "Check code formatting (read-only)"
+    @printf "  %-40s %s\n" "code-lint" "Run Credo static analysis"
+    @printf "  %-40s %s\n" "code-typecheck" "Run Dialyzer type checking"
+    @printf "  %-40s %s\n" "code-lspchecks" "Run strict compiler checks"
+    @printf "  %-40s %s\n" "code-security" "Run Sobelow security checks"
+    @printf "  %-40s %s\n" "code-deptry" "Check dependency hygiene"
+    @printf "  %-40s %s\n" "code-spell" "Check spelling in code and documentation"
+    @printf "  %-40s %s\n" "code-semgrep" "Run custom static analysis (Semgrep + Credo)"
+    @printf "  %-40s %s\n" "code-audit" "Scan dependencies for known vulnerabilities"
+    @printf "  %-40s %s\n" "code-architecture" "Run architecture boundary checks"
+    @echo ""
+    @printf "\033[0;33mCI & Testing:\033[0m\n"
+    @printf "  %-40s %s\n" "test" "Run unit tests with coverage"
+    @printf "  %-40s %s\n" "ci" "Run ALL validation checks (verbose)"
+    @printf "  %-40s %s\n" "ci-quiet" "Run ALL validation checks silently"
     @echo ""
 
 # Check prerequisites
@@ -81,135 +106,135 @@ check:
 # Initialize the development environment
 init: check
     @echo ""
-    @echo "\033[0;34m=== Initializing Development Environment ===\033[0m"
+    @printf "\033[0;34m=== Initializing Development Environment ===\033[0m\n"
     @if [ ! -d ".git" ]; then echo "Initializing git repository..." && git init -q; fi
     @echo "Fetching dependencies..."
     @mix deps.get
     @echo "Compiling project..."
     @mix compile
-    @echo "\033[0;32m✓ Development environment ready\033[0m"
-    @echo ""
-
-# Run the main application
-run:
-    @echo ""
-    @echo "\033[0;34m=== Running Application ===\033[0m"
-    @mix run -e "{{module_name}}.main()"
+    @printf "\033[0;32m✓ Development environment ready\033[0m\n"
     @echo ""
 
 # Destroy build artifacts and dependencies
 destroy:
     @echo ""
-    @echo "\033[0;34m=== Destroying Build Artifacts ===\033[0m"
+    @printf "\033[0;34m=== Destroying Build Artifacts ===\033[0m\n"
     @rm -rf _build deps
-    @echo "\033[0;32m✓ Build artifacts and dependencies removed\033[0m"
+    @printf "\033[0;32m✓ Build artifacts and dependencies removed\033[0m\n"
+    @echo ""
+
+# Run the main application
+run:
+    @echo ""
+    @printf "\033[0;34m=== Running Application ===\033[0m\n"
+    @mix run -e "{{module_name}}.main()"
     @echo ""
 
 # Auto-format code
 code-format:
     @echo ""
-    @echo "\033[0;34m=== Formatting Code ===\033[0m"
+    @printf "\033[0;34m=== Formatting Code ===\033[0m\n"
     @mix format
-    @echo "\033[0;32m✓ Code formatted\033[0m"
+    @printf "\033[0;32m✓ Code formatted\033[0m\n"
     @echo ""
 
 # Check code formatting (read-only)
 code-style:
     @echo ""
-    @echo "\033[0;34m=== Checking Code Style ===\033[0m"
+    @printf "\033[0;34m=== Checking Code Style ===\033[0m\n"
     @mix format --check-formatted
-    @echo "\033[0;32m✓ Style checks passed\033[0m"
+    @printf "\033[0;32m✓ Style checks passed\033[0m\n"
     @echo ""
 
 # Run Credo static analysis
 code-lint:
     @echo ""
-    @echo "\033[0;34m=== Running Credo Lint ===\033[0m"
+    @printf "\033[0;34m=== Running Credo Lint ===\033[0m\n"
     @mix credo --strict
     @echo ""
-    @echo "\033[0;32m✓ Credo checks passed\033[0m"
+    @printf "\033[0;32m✓ Credo checks passed\033[0m\n"
     @echo ""
 
 # Run Dialyzer type checking
 code-typecheck:
     @echo ""
-    @echo "\033[0;34m=== Running Dialyzer Type Checks ===\033[0m"
+    @printf "\033[0;34m=== Running Dialyzer Type Checks ===\033[0m\n"
     @mix dialyzer
     @echo ""
-    @echo "\033[0;32m✓ Dialyzer checks passed\033[0m"
-    @echo ""
-
-# Run Sobelow security checks
-code-security:
-    @echo ""
-    @echo "\033[0;34m=== Running Security Checks ===\033[0m"
-    @mix sobelow --exit
-    @echo ""
-    @echo "\033[0;32m✓ Security checks passed\033[0m"
-    @echo ""
-
-# Check dependency hygiene
-code-deptry:
-    @echo ""
-    @echo "\033[0;34m=== Checking Dependencies ===\033[0m"
-    @mix deps.unlock --check-unused
-    @mix deps.get --check-locked
-    @echo ""
-    @echo "\033[0;32m✓ Dependency checks passed\033[0m"
-    @echo ""
-
-# Check spelling in code and documentation
-code-spell:
-    @echo ""
-    @echo "\033[0;34m=== Checking Spelling ===\033[0m"
-    @codespell lib/ test/ config/ *.md *.exs --ignore-words=config/codespell/ignore.txt --skip="_build,deps,*.lock"
-    @echo ""
-    @echo "\033[0;32m✓ Spelling checks passed\033[0m"
-    @echo ""
-
-# Run custom Credo checks (equivalent to semgrep in other templates)
-code-semgrep:
-    @echo ""
-    @echo "\033[0;34m=== Running Custom Static Analysis ===\033[0m"
-    @mix credo --strict --checks Credo.Check.Custom.NoDefaultParameterValues,Credo.Check.Custom.NoFallbackOperator,Credo.Check.Custom.NoMapGetDefault,Credo.Check.Custom.NoDialyzerSuppress
-    @semgrep --config config/semgrep/ --error lib/ scripts/
-    @echo ""
-    @echo "\033[0;32m✓ Custom checks passed\033[0m"
-    @echo ""
-
-# Scan dependencies for known vulnerabilities
-code-audit:
-    @echo ""
-    @echo "\033[0;34m=== Scanning Dependencies for Vulnerabilities ===\033[0m"
-    @mix deps.audit
-    @mix hex.audit
-    @echo ""
-    @echo "\033[0;32m✓ No known vulnerabilities found\033[0m"
-    @echo ""
-
-# Run unit tests with coverage
-test:
-    @echo ""
-    @echo "\033[0;34m=== Running Tests ===\033[0m"
-    @mix test --cover --warnings-as-errors
-    @echo ""
-
-# Run architecture boundary checks
-code-architecture:
-    @echo ""
-    @echo "\033[0;34m=== Running Architecture Tests ===\033[0m"
-    @mix arch.check
-    @echo ""
-    @echo "\033[0;32m✓ Architecture checks passed\033[0m"
+    @printf "\033[0;32m✓ Dialyzer checks passed\033[0m\n"
     @echo ""
 
 # Run strict compiler checks (LSP-equivalent analysis)
 code-lspchecks:
     @echo ""
-    @echo "\033[0;34m=== Running Compiler Checks ===\033[0m"
+    @printf "\033[0;34m=== Running Compiler Checks ===\033[0m\n"
     @mix compile --force --warnings-as-errors --all-warnings
     @echo ""
-    @echo "\033[0;32m✓ Compiler checks passed\033[0m"
+    @printf "\033[0;32m✓ Compiler checks passed\033[0m\n"
+    @echo ""
+
+# Run Sobelow security checks
+code-security:
+    @echo ""
+    @printf "\033[0;34m=== Running Security Checks ===\033[0m\n"
+    @mix sobelow --exit
+    @echo ""
+    @printf "\033[0;32m✓ Security checks passed\033[0m\n"
+    @echo ""
+
+# Check dependency hygiene
+code-deptry:
+    @echo ""
+    @printf "\033[0;34m=== Checking Dependencies ===\033[0m\n"
+    @mix deps.unlock --check-unused
+    @mix deps.get --check-locked
+    @echo ""
+    @printf "\033[0;32m✓ Dependency checks passed\033[0m\n"
+    @echo ""
+
+# Check spelling in code and documentation
+code-spell:
+    @echo ""
+    @printf "\033[0;34m=== Checking Spelling ===\033[0m\n"
+    @codespell lib/ test/ config/ *.md *.exs --ignore-words=config/codespell/ignore.txt --skip="_build,deps,*.lock"
+    @echo ""
+    @printf "\033[0;32m✓ Spelling checks passed\033[0m\n"
+    @echo ""
+
+# Run custom Credo checks (equivalent to semgrep in other templates)
+code-semgrep:
+    @echo ""
+    @printf "\033[0;34m=== Running Custom Static Analysis ===\033[0m\n"
+    @mix credo --strict --checks Credo.Check.Custom.NoDefaultParameterValues,Credo.Check.Custom.NoFallbackOperator,Credo.Check.Custom.NoMapGetDefault,Credo.Check.Custom.NoDialyzerSuppress
+    @semgrep --config config/semgrep/ --error lib/ scripts/
+    @echo ""
+    @printf "\033[0;32m✓ Custom checks passed\033[0m\n"
+    @echo ""
+
+# Scan dependencies for known vulnerabilities
+code-audit:
+    @echo ""
+    @printf "\033[0;34m=== Scanning Dependencies for Vulnerabilities ===\033[0m\n"
+    @mix deps.audit
+    @mix hex.audit
+    @echo ""
+    @printf "\033[0;32m✓ No known vulnerabilities found\033[0m\n"
+    @echo ""
+
+# Run architecture boundary checks
+code-architecture:
+    @echo ""
+    @printf "\033[0;34m=== Running Architecture Tests ===\033[0m\n"
+    @mix arch.check
+    @echo ""
+    @printf "\033[0;32m✓ Architecture checks passed\033[0m\n"
+    @echo ""
+
+# Run unit tests with coverage
+test:
+    @echo ""
+    @printf "\033[0;34m=== Running Tests ===\033[0m\n"
+    @mix test --cover --warnings-as-errors
     @echo ""
 
 # Run ALL validation checks (verbose)
@@ -217,7 +242,7 @@ ci:
     #!/usr/bin/env bash
     set -e
     echo ""
-    echo "\033[0;34m=== Running CI Checks ===\033[0m"
+    printf "\033[0;34m=== Running CI Checks ===\033[0m\n"
     echo ""
     just check
     just init
@@ -234,59 +259,59 @@ ci:
     just code-architecture
     just code-lspchecks
     echo ""
-    echo "\033[0;32m✓ All CI checks passed\033[0m"
+    printf "\033[0;32m✓ All CI checks passed\033[0m\n"
     echo ""
 
 # Run ALL validation checks silently (only show output on errors)
 ci-quiet:
     #!/usr/bin/env bash
     set -e
-    echo "\033[0;34m=== Running CI Checks (Quiet Mode) ===\033[0m"
+    printf "\033[0;34m=== Running CI Checks (Quiet Mode) ===\033[0m\n"
     TMPFILE=$(mktemp)
     trap "rm -f $TMPFILE" EXIT
 
-    just check > $TMPFILE 2>&1 || { echo "\033[0;31m✗ Check failed\033[0m"; cat $TMPFILE; exit 1; }
-    echo "\033[0;32m✓ Check passed\033[0m"
+    just check > $TMPFILE 2>&1 || { printf "\033[0;31m✗ Check failed\033[0m\n"; cat $TMPFILE; exit 1; }
+    printf "\033[0;32m✓ Check passed\033[0m\n"
 
-    just init > $TMPFILE 2>&1 || { echo "\033[0;31m✗ Init failed\033[0m"; cat $TMPFILE; exit 1; }
-    echo "\033[0;32m✓ Init passed\033[0m"
+    just init > $TMPFILE 2>&1 || { printf "\033[0;31m✗ Init failed\033[0m\n"; cat $TMPFILE; exit 1; }
+    printf "\033[0;32m✓ Init passed\033[0m\n"
 
-    just code-format > $TMPFILE 2>&1 || { echo "\033[0;31m✗ Code-format failed\033[0m"; cat $TMPFILE; exit 1; }
-    echo "\033[0;32m✓ Code-format passed\033[0m"
+    just code-format > $TMPFILE 2>&1 || { printf "\033[0;31m✗ Code-format failed\033[0m\n"; cat $TMPFILE; exit 1; }
+    printf "\033[0;32m✓ Code-format passed\033[0m\n"
 
-    just code-style > $TMPFILE 2>&1 || { echo "\033[0;31m✗ Code-style failed\033[0m"; cat $TMPFILE; exit 1; }
-    echo "\033[0;32m✓ Code-style passed\033[0m"
+    just code-style > $TMPFILE 2>&1 || { printf "\033[0;31m✗ Code-style failed\033[0m\n"; cat $TMPFILE; exit 1; }
+    printf "\033[0;32m✓ Code-style passed\033[0m\n"
 
-    just code-lint > $TMPFILE 2>&1 || { echo "\033[0;31m✗ Code-lint failed\033[0m"; cat $TMPFILE; exit 1; }
-    echo "\033[0;32m✓ Code-lint passed\033[0m"
+    just code-lint > $TMPFILE 2>&1 || { printf "\033[0;31m✗ Code-lint failed\033[0m\n"; cat $TMPFILE; exit 1; }
+    printf "\033[0;32m✓ Code-lint passed\033[0m\n"
 
-    just code-typecheck > $TMPFILE 2>&1 || { echo "\033[0;31m✗ Code-typecheck failed\033[0m"; cat $TMPFILE; exit 1; }
-    echo "\033[0;32m✓ Code-typecheck passed\033[0m"
+    just code-typecheck > $TMPFILE 2>&1 || { printf "\033[0;31m✗ Code-typecheck failed\033[0m\n"; cat $TMPFILE; exit 1; }
+    printf "\033[0;32m✓ Code-typecheck passed\033[0m\n"
 
-    just code-security > $TMPFILE 2>&1 || { echo "\033[0;31m✗ Code-security failed\033[0m"; cat $TMPFILE; exit 1; }
-    echo "\033[0;32m✓ Code-security passed\033[0m"
+    just code-security > $TMPFILE 2>&1 || { printf "\033[0;31m✗ Code-security failed\033[0m\n"; cat $TMPFILE; exit 1; }
+    printf "\033[0;32m✓ Code-security passed\033[0m\n"
 
-    just code-deptry > $TMPFILE 2>&1 || { echo "\033[0;31m✗ Code-deptry failed\033[0m"; cat $TMPFILE; exit 1; }
-    echo "\033[0;32m✓ Code-deptry passed\033[0m"
+    just code-deptry > $TMPFILE 2>&1 || { printf "\033[0;31m✗ Code-deptry failed\033[0m\n"; cat $TMPFILE; exit 1; }
+    printf "\033[0;32m✓ Code-deptry passed\033[0m\n"
 
-    just code-spell > $TMPFILE 2>&1 || { echo "\033[0;31m✗ Code-spell failed\033[0m"; cat $TMPFILE; exit 1; }
-    echo "\033[0;32m✓ Code-spell passed\033[0m"
+    just code-spell > $TMPFILE 2>&1 || { printf "\033[0;31m✗ Code-spell failed\033[0m\n"; cat $TMPFILE; exit 1; }
+    printf "\033[0;32m✓ Code-spell passed\033[0m\n"
 
-    just code-semgrep > $TMPFILE 2>&1 || { echo "\033[0;31m✗ Code-semgrep failed\033[0m"; cat $TMPFILE; exit 1; }
-    echo "\033[0;32m✓ Code-semgrep passed\033[0m"
+    just code-semgrep > $TMPFILE 2>&1 || { printf "\033[0;31m✗ Code-semgrep failed\033[0m\n"; cat $TMPFILE; exit 1; }
+    printf "\033[0;32m✓ Code-semgrep passed\033[0m\n"
 
-    just code-audit > $TMPFILE 2>&1 || { echo "\033[0;31m✗ Code-audit failed\033[0m"; cat $TMPFILE; exit 1; }
-    echo "\033[0;32m✓ Code-audit passed\033[0m"
+    just code-audit > $TMPFILE 2>&1 || { printf "\033[0;31m✗ Code-audit failed\033[0m\n"; cat $TMPFILE; exit 1; }
+    printf "\033[0;32m✓ Code-audit passed\033[0m\n"
 
-    just test > $TMPFILE 2>&1 || { echo "\033[0;31m✗ Test failed\033[0m"; cat $TMPFILE; exit 1; }
-    echo "\033[0;32m✓ Test passed\033[0m"
+    just test > $TMPFILE 2>&1 || { printf "\033[0;31m✗ Test failed\033[0m\n"; cat $TMPFILE; exit 1; }
+    printf "\033[0;32m✓ Test passed\033[0m\n"
 
-    just code-architecture > $TMPFILE 2>&1 || { echo "\033[0;31m✗ Code-architecture failed\033[0m"; cat $TMPFILE; exit 1; }
-    echo "\033[0;32m✓ Code-architecture passed\033[0m"
+    just code-architecture > $TMPFILE 2>&1 || { printf "\033[0;31m✗ Code-architecture failed\033[0m\n"; cat $TMPFILE; exit 1; }
+    printf "\033[0;32m✓ Code-architecture passed\033[0m\n"
 
-    just code-lspchecks > $TMPFILE 2>&1 || { echo "\033[0;31m✗ Code-lspchecks failed\033[0m"; cat $TMPFILE; exit 1; }
-    echo "\033[0;32m✓ Code-lspchecks passed\033[0m"
+    just code-lspchecks > $TMPFILE 2>&1 || { printf "\033[0;31m✗ Code-lspchecks failed\033[0m\n"; cat $TMPFILE; exit 1; }
+    printf "\033[0;32m✓ Code-lspchecks passed\033[0m\n"
 
     echo ""
-    echo "\033[0;32m✓ All CI checks passed\033[0m"
+    printf "\033[0;32m✓ All CI checks passed\033[0m\n"
     echo ""

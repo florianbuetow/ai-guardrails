@@ -32,13 +32,17 @@ This file provides guidance to AI agents and AI-assisted development tools when 
   - **Never** manually download or copy dependency code
 - All dependencies must be declared in `mix.exs`
 
-## Justfile Rules
+## Justfile Conventions
+- **Use `printf` for colored or formatted output** — never `echo` with ANSI escape sequences, as some terminals won't render colors with `echo`. Plain `echo ""` is acceptable only for blank-line spacing.
+- **Add an empty `@echo ""` line before and after each target's command block** to visually separate output between targets.
+- **The `help` target must be a dedicated recipe** with manually written `printf` lines that group related commands and order them by typical execution flow (setup → run → code quality → testing). Never use `just --list`.
+- **The default target (`_default`) must call `just help`.**
+- **Every target must end with a clear status message**: green (`\033[32m`) on success, red (`\033[31m`) on failure with `exit 1`.
+- **Composite targets (e.g. `ci`) must fail fast**: use `set -e` or `&&` chaining.
 - All Elixir execution in the justfile uses `mix`, never `elixir` directly
 - Use `just init` to set up the project
 - Use `just run` to execute the main program
 - Use `just destroy` to remove build artifacts and dependencies
-- Use `just help` to see all available recipes with descriptions
-- Use `just` (with no arguments) to see a list of all recipes
 - Use `just ci` to run all validation checks (verbose)
 - Use `just ci-quiet` to run all validation checks (silent, fail-fast)
 

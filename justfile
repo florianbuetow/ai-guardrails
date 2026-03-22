@@ -40,53 +40,48 @@ _default:
 help:
 	@clear
 	@echo ""
-	@printf "  just help                              - Show this help message\n"
-	@printf "  just check                             - Check if all required tools are installed\n"
-	@printf "  just init                              - Install templates and set up aliases\n"
+	@printf "\033[0;34m=== ai-guardrails ===\033[0m\n"
 	@echo ""
-	@printf "  just update                            - Update templates to latest version\n"
-	@printf "  just create <template> <target-dir>    - Create new project from template\n"
+	@printf "\033[0;33mSetup & Lifecycle:\033[0m\n"
+	@printf "  %-40s %s\n" "init" "Install templates and set up aliases"
+	@printf "  %-40s %s\n" "check" "Check if all required tools are installed"
+	@printf "  %-40s %s\n" "help" "Show this help message"
 	@echo ""
-	@printf "  For <template> choose one of:\n"
-	@printf "    python-cli-base                        - Python CLI application\n"
-	@printf "    java-cli-base                          - Java CLI application\n"
-	@printf "    elixir-otp-base                        - Elixir OTP application\n"
-	@printf "    go-cli-base                            - Go CLI application\n"
-	@printf "    cpp-cli-base                           - C++ CLI application\n"
-	@printf "    rust-cli-base                          - Rust CLI application\n"
+	@printf "\033[0;33mProject Scaffolding:\033[0m\n"
+	@printf "  %-40s %s\n" "create <template> <target-dir>" "Create new project from template"
+	@printf "  %-40s %s\n" "update" "Update templates to latest version"
 	@echo ""
-	@printf "  just code-spell                        - Check spelling across the repository\n"
-	@printf "  just code-semgrep                      - Run semgrep rules against repo scripts\n"
-	@printf "  just code-shellcheck                   - Lint shell scripts with ShellCheck\n"
+	@printf "  Available templates:\n"
+	@printf "    %-36s %s\n" "python-cli-base" "Python CLI application"
+	@printf "    %-36s %s\n" "java-cli-base" "Java CLI application"
+	@printf "    %-36s %s\n" "go-cli-base" "Go CLI application"
+	@printf "    %-36s %s\n" "elixir-otp-base" "Elixir OTP application"
+	@printf "    %-36s %s\n" "cpp-cli-base" "C++ CLI application"
+	@printf "    %-36s %s\n" "rust-cli-base" "Rust CLI application"
 	@echo ""
-	@printf "  just ci                                - Run all checks + all template tests\n"
-	@printf "  just test                              - Run all baseline + violation tests\n"
-	@printf "  just test-python                       - Run Python baseline + violation tests\n"
-	@printf "  just test-java                         - Run Java baseline + violation tests\n"
-	@printf "  just test-go                           - Run Go baseline + violation tests\n"
-	@printf "  just test-elixir                       - Run Elixir baseline + violation tests\n"
-	@printf "  just test-cpp                          - Run C++ baseline + violation tests\n"
-	@printf "  just test-rust                         - Run Rust baseline + violation tests\n"
+	@printf "\033[0;33mCode Quality:\033[0m\n"
+	@printf "  %-40s %s\n" "code-spell" "Check spelling across the repository"
+	@printf "  %-40s %s\n" "code-semgrep" "Run semgrep rules against repo scripts"
+	@printf "  %-40s %s\n" "code-shellcheck" "Lint shell scripts with ShellCheck"
 	@echo ""
-
-# Check if all required tools are installed
-check:
+	@printf "\033[0;33mBaseline Tests:\033[0m\n"
+	@printf "  %-40s %s\n" "baseline" "Generate all templates and run just ci"
+	@printf "  %-40s %s\n" "baseline-python" "Generate Python template and run just ci"
+	@printf "  %-40s %s\n" "baseline-java" "Generate Java template and run just ci"
+	@printf "  %-40s %s\n" "baseline-go" "Generate Go template and run just ci"
+	@printf "  %-40s %s\n" "baseline-elixir" "Generate Elixir template and run just ci"
+	@printf "  %-40s %s\n" "baseline-cpp" "Generate C++ template and run just ci"
+	@printf "  %-40s %s\n" "baseline-rust" "Generate Rust template and run just ci"
 	@echo ""
-	@missing=0; \
-	for tool in git just copier codespell semgrep shellcheck; do \
-		if command -v "$tool" >/dev/null 2>&1; then \
-			printf "\033[32m  ✓ %s\033[0m\n" "$tool"; \
-		else \
-			printf "\033[31m  ✗ %s not found\033[0m\n" "$tool"; \
-			missing=$((missing + 1)); \
-		fi; \
-	done; \
-	echo ""; \
-	if [ "$missing" -gt 0 ]; then \
-		printf "\033[31m✗ %d required tool(s) missing\033[0m\n" "$missing"; \
-		exit 1; \
-	fi; \
-	printf "\033[32m✓ all required tools are installed\033[0m\n"
+	@printf "\033[0;33mCI & Testing:\033[0m\n"
+	@printf "  %-40s %s\n" "test" "Run all baseline + violation tests"
+	@printf "  %-40s %s\n" "test-python" "Run Python baseline + violation tests"
+	@printf "  %-40s %s\n" "test-java" "Run Java baseline + violation tests"
+	@printf "  %-40s %s\n" "test-go" "Run Go baseline + violation tests"
+	@printf "  %-40s %s\n" "test-elixir" "Run Elixir baseline + violation tests"
+	@printf "  %-40s %s\n" "test-cpp" "Run C++ baseline + violation tests"
+	@printf "  %-40s %s\n" "test-rust" "Run Rust baseline + violation tests"
+	@printf "  %-40s %s\n" "ci" "Run all checks + all template tests"
 	@echo ""
 
 # Install templates and set up aliases
@@ -147,6 +142,32 @@ init:
 	@./project-setup/setup_aliases.sh && printf "\033[32m✓ init completed successfully\033[0m\n" || { printf "\033[31m✗ init failed\033[0m\n"; exit 1; }
 	@echo ""
 
+# Check if all required tools are installed
+check:
+	@echo ""
+	@missing=0; \
+	for tool in git just copier codespell semgrep shellcheck; do \
+		if command -v "$tool" >/dev/null 2>&1; then \
+			printf "\033[32m  ✓ %s\033[0m\n" "$tool"; \
+		else \
+			printf "\033[31m  ✗ %s not found\033[0m\n" "$tool"; \
+			missing=$((missing + 1)); \
+		fi; \
+	done; \
+	echo ""; \
+	if [ "$missing" -gt 0 ]; then \
+		printf "\033[31m✗ %d required tool(s) missing\033[0m\n" "$missing"; \
+		exit 1; \
+	fi; \
+	printf "\033[32m✓ all required tools are installed\033[0m\n"
+	@echo ""
+
+# Create new project from template
+create template-name target-dir=".":
+	@echo ""
+	@./project-setup/setup-project.sh --template {{template-name}} --target {{target-dir}} && printf "\033[32m✓ project created successfully\033[0m\n" || { printf "\033[31m✗ project creation failed\033[0m\n"; exit 1; }
+	@echo ""
+
 # Update templates to latest version
 update:
 	@echo ""
@@ -163,12 +184,6 @@ update:
 		printf "\033[31m✗ Failed to update templates\033[0m\n"; \
 		exit 1; \
 	}
-	@echo ""
-
-# Create new project from template
-create template-name target-dir=".":
-	@echo ""
-	@./project-setup/setup-project.sh --template {{template-name}} --target {{target-dir}} && printf "\033[32m✓ project created successfully\033[0m\n" || { printf "\033[31m✗ project creation failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Check spelling across the repository
@@ -202,10 +217,46 @@ code-shellcheck:
 		|| { printf "\033[31m✗ shellcheck found issues\033[0m\n"; exit 1; }
 	@echo ""
 
-# Run all checks and all template tests
-ci: check code-spell code-semgrep code-shellcheck test
+# Generate all templates and run just ci (no violation tests)
+baseline:
 	@echo ""
-	@printf "\033[32m✓ ci passed\033[0m\n"
+	@./tests/run-tests.sh all baseline && printf "\033[32m✓ all baselines passed\033[0m\n" || { printf "\033[31m✗ baseline tests failed\033[0m\n"; exit 1; }
+	@echo ""
+
+# Generate Python template and run just ci
+baseline-python:
+	@echo ""
+	@./tests/run-tests.sh python baseline && printf "\033[32m✓ python baseline passed\033[0m\n" || { printf "\033[31m✗ python baseline failed\033[0m\n"; exit 1; }
+	@echo ""
+
+# Generate Java template and run just ci
+baseline-java:
+	@echo ""
+	@./tests/run-tests.sh java baseline && printf "\033[32m✓ java baseline passed\033[0m\n" || { printf "\033[31m✗ java baseline failed\033[0m\n"; exit 1; }
+	@echo ""
+
+# Generate Go template and run just ci
+baseline-go:
+	@echo ""
+	@./tests/run-tests.sh go baseline && printf "\033[32m✓ go baseline passed\033[0m\n" || { printf "\033[31m✗ go baseline failed\033[0m\n"; exit 1; }
+	@echo ""
+
+# Generate Elixir template and run just ci
+baseline-elixir:
+	@echo ""
+	@./tests/run-tests.sh elixir baseline && printf "\033[32m✓ elixir baseline passed\033[0m\n" || { printf "\033[31m✗ elixir baseline failed\033[0m\n"; exit 1; }
+	@echo ""
+
+# Generate C++ template and run just ci
+baseline-cpp:
+	@echo ""
+	@./tests/run-tests.sh cpp baseline && printf "\033[32m✓ cpp baseline passed\033[0m\n" || { printf "\033[31m✗ cpp baseline failed\033[0m\n"; exit 1; }
+	@echo ""
+
+# Generate Rust template and run just ci
+baseline-rust:
+	@echo ""
+	@./tests/run-tests.sh rust baseline && printf "\033[32m✓ rust baseline passed\033[0m\n" || { printf "\033[31m✗ rust baseline failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Test all templates (baseline + violations)
@@ -248,4 +299,10 @@ test-cpp:
 test-rust:
 	@echo ""
 	@./tests/run-tests.sh rust && printf "\033[32m✓ rust tests passed\033[0m\n" || { printf "\033[31m✗ rust tests failed\033[0m\n"; exit 1; }
+	@echo ""
+
+# Run all checks and all template tests
+ci: check code-spell code-semgrep code-shellcheck test
+	@echo ""
+	@printf "\033[32m✓ ci passed\033[0m\n"
 	@echo ""

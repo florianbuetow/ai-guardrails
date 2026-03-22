@@ -25,7 +25,6 @@
 ├── tests/                  # Test files
 │   └── __init__.py         # Test package marker
 ├── scripts/                # Utility scripts
-├── prompts/                # LLM prompt templates
 ├── data/                   # Data files
 │   ├── input/             # Input data files
 │   └── output/            # Generated output files
