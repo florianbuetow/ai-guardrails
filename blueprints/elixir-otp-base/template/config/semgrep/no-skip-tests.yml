@@ -1,0 +1,13 @@
+rules:
+  - id: elixir.no-skip-tests
+    languages: [generic]
+    severity: ERROR
+    message: >
+      Do not skip tests with @tag :skip or @moduletag :skip. Tests must either
+      pass or fail. Fix the underlying issue instead of skipping the test.
+      If a test requires external infrastructure, use ExUnit tags and filter
+      at collection time with --exclude.
+    pattern-regex: '@(tag|moduletag)\s+:skip'
+    paths:
+      include:
+        - test/

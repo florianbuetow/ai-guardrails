@@ -206,7 +206,7 @@ code-semgrep:
     @echo ""
     @printf "\033[0;34m=== Running Custom Static Analysis ===\033[0m\n"
     @mix credo --strict --checks Credo.Check.Custom.NoDefaultParameterValues,Credo.Check.Custom.NoFallbackOperator,Credo.Check.Custom.NoMapGetDefault,Credo.Check.Custom.NoDialyzerSuppress
-    @semgrep --config config/semgrep/ --error lib/ scripts/
+    @semgrep --config config/semgrep/ --error lib/ test/ scripts/
     @echo ""
     @printf "\033[0;32m✓ Custom checks passed\033[0m\n"
     @echo ""
