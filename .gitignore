@@ -213,6 +213,9 @@ __marimo__/
 .claude/settings.json
 .claude/settings.local.json
 
+# Beads issue tracker
+.beads/
+
 # Design/plan documents
 docs/plans/
 docs/superpowers/
