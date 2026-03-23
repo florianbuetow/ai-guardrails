@@ -202,7 +202,9 @@ code-semgrep:
 	@echo ""
 	@printf "\033[0;34m=== Running Semgrep Static Analysis ===\033[0m\n"
 	@semgrep --config config/semgrep/ --error \
-		tests/ project-setup/ justfile \
+		--exclude='tests' \
+		--exclude='violations' \
+		. \
 		&& printf "\033[32m✓ semgrep passed\033[0m\n" \
 		|| { printf "\033[31m✗ semgrep found violations\033[0m\n"; exit 1; }
 	@echo ""

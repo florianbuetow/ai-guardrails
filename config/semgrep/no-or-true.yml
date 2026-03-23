@@ -29,10 +29,12 @@ rules:
         - "*.bash"
         - justfile
         - Justfile
+        - "*.template"
         - scripts/
         - src/
       exclude:
         - tests/
+        - "*.md.template"
         - "*.py"
         - "*.go"
         - "*.java"
