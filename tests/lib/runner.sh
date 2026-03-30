@@ -90,7 +90,10 @@ run_language_tests() {
     # --- Baseline: full CI must pass ---
     log_section "$LANG_NAME baseline"
 
-    if ! (cd "$project_dir" && just ci); then
+    # Disable uv exclude-newer during testing — the supply-chain protection
+    # intentionally pins older packages, which can cause pip-audit to flag
+    # vulnerabilities whose fixes are too recent to install.
+    if ! (cd "$project_dir" && UV_EXCLUDE_NEWER="2099-01-01" just ci); then
         log_fail "Baseline CI failed"
         cleanup_dir "$temp_dir"
         return 1

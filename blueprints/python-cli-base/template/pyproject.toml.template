@@ -220,3 +220,8 @@ skip = ".git,.venv,venv,build,dist,reports,*.lock,uv.lock"
 
 # Use external ignore file for maintainability
 ignore-words = "config/codespell/ignore.txt"
+
+[tool.uv]
+# Supply-chain protection: ignore packages published in the last 30 days,
+# giving the community time to detect and yank malicious releases.
+exclude-newer = "30 days"
