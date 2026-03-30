@@ -238,3 +238,7 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# Dolt database files (added by bd init)
+.dolt/
+*.db

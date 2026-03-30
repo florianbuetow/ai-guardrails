@@ -1,6 +1,7 @@
 {
   "database": "dolt",
-  "jsonl_export": "issues.jsonl",
   "backend": "dolt",
-  "dolt_database": "beads_ai-guardrails"
+  "dolt_mode": "server",
+  "dolt_database": "beads_ai-guardrails",
+  "project_id": "07624128-4d1d-46d3-a57d-c2f6bf3b34bc"
 }
