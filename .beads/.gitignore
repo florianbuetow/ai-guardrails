@@ -1,3 +1,6 @@
+# Credentials (never commit)
+.beads-credential-key
+
 # Dolt database (managed by Dolt, not git)
 dolt/
 dolt-access.lock
