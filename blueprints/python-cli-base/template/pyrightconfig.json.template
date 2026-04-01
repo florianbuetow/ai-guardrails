@@ -16,6 +16,12 @@
   ],
   "typeCheckingMode": "strict",
   "useLibraryCodeForTypes": true,
-  "reportMissingImports": true,
-  "reportMissingTypeStubs": true
+  "reportMissingImports": "error",
+  "reportMissingTypeStubs": "error",
+  "reportUnknownVariableType": "error",
+  "reportUnknownMemberType": "error",
+  "reportUnknownParameterType": "error",
+  "reportUnknownArgumentType": "error",
+  "reportMissingParameterType": "error",
+  "reportOptionalCall": "error"
 }
