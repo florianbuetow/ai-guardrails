@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Isolated per-rule violation tests for six Pyright strict-mode rules (missing-parameter-type, unknown-parameter-type, unknown-variable-type, unknown-member-type, unknown-argument-type, optional-call).
+- IWYU prerequisite check in C++ template `check` recipe.
+
+### Fixed
+
+- Fixed C++ `code-deptry` recipe to use `iwyu_tool.py` with compilation database instead of broken direct `include-what-you-use` invocation that failed to resolve system headers on macOS.
 
 ## 2026-03-30
 
@@ -177,4 +182,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial project setup with automated local templates and prerequisite checks.
 - Git workflow guidelines: explicit file staging, push requirement, no AI attribution in commits.
 
-[Unreleased]: https://github.com/florianbuetow/ai-guardrails/compare/4db8de9...HEAD
+[Unreleased]: https://github.com/florianbuetow/ai-guardrails/compare/38e431c...HEAD
