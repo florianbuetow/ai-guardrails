@@ -90,6 +90,7 @@ echo ""
 copier copy --trust --defaults \
   --data project_name="$PROJECT_NAME" \
   --data package_name="$PACKAGE_NAME" \
+  --data module_path="$PROJECT_NAME" \
   --data project_description="A Python CLI application" \
   --data python_version="3.12" \
   --data author_name="" \
