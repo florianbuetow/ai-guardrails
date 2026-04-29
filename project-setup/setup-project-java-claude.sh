@@ -1,0 +1,30 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+  echo "Error: Target directory parameter required"
+  echo "Usage: $0 <target-directory>"
+  exit 1
+fi
+
+TARGET_DIR="$1"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SETUP_SCRIPT="$SCRIPT_DIR/setup-project.sh"
+
+if [ ! -f "$SETUP_SCRIPT" ]; then
+  echo "✗ Error: setup-project.sh not found: $SETUP_SCRIPT"
+  exit 1
+fi
+
+"$SETUP_SCRIPT" --template java-cli-base --target "$TARGET_DIR"
+EXIT_CODE=$?
+
+if [ $EXIT_CODE -eq 0 ]; then
+  echo ""
+  echo "✓ Project setup complete!"
+  echo ""
+else
+  echo ""
+  echo "✗ Project setup failed"
+  echo ""
+  exit $EXIT_CODE
+fi
