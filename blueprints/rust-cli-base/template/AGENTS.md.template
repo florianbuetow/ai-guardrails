@@ -69,7 +69,7 @@ The CI pipeline runs checks in this order (fail-fast):
 3. `code-style` -- Check formatting
 4. `code-typecheck` -- cargo check + clippy
 5. `code-security` -- cargo-geiger unsafe code scan
-6. `code-deptry` -- cargo-machete unused dependency check
+6. `code-machete` -- cargo-machete unused dependency check
 7. `code-spell` -- codespell spelling check
 8. `code-semgrep` -- Semgrep custom rules
 9. `code-audit` -- cargo-deny advisory/license/ban check

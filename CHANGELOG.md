@@ -6,14 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
-
-- Promoted Pyright warning-level diagnostic rules to explicit `"error"` for deterministic CI failures.
-
 ### Added
 
 - Isolated per-rule violation tests for six Pyright strict-mode rules (missing-parameter-type, unknown-parameter-type, unknown-variable-type, unknown-member-type, unknown-argument-type, optional-call).
 - IWYU prerequisite check in C++ template `check` recipe.
+- Language-specific project setup scripts for all supported blueprints.
+
+### Changed
+
+- Promoted Pyright warning-level diagnostic rules to explicit `"error"` for deterministic CI failures.
+- Set `module_path` default to project name in Go template.
+- Renamed `code-deptry` recipe to `code-machete` in Rust template.
 
 ### Fixed
 
@@ -182,4 +185,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial project setup with automated local templates and prerequisite checks.
 - Git workflow guidelines: explicit file staging, push requirement, no AI attribution in commits.
 
-[Unreleased]: https://github.com/florianbuetow/ai-guardrails/compare/38e431c...HEAD
+[Unreleased]: https://github.com/florianbuetow/ai-guardrails/compare/fdbac81...HEAD

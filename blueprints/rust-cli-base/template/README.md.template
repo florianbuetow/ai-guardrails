@@ -92,7 +92,7 @@ just
 - `just code-format` - Auto-fix code formatting
 - `just code-typecheck` - Run cargo check + clippy
 - `just code-security` - Run unsafe code detection (cargo-geiger)
-- `just code-deptry` - Check dependency hygiene (cargo-machete)
+- `just code-machete` - Check dependency hygiene (cargo-machete)
 - `just code-spell` - Check spelling
 - `just code-audit` - Scan for vulnerabilities (cargo-deny)
 - `just code-semgrep` - Run custom static analysis
@@ -113,7 +113,7 @@ The CI pipeline runs the following steps in order:
 3. `code-style` - Verify formatting
 4. `code-typecheck` - Type checking (cargo check + clippy)
 5. `code-security` - Unsafe code scan (cargo-geiger)
-6. `code-deptry` - Unused dependency check (cargo-machete)
+6. `code-machete` - Unused dependency check (cargo-machete)
 7. `code-spell` - Spell checking (codespell)
 8. `code-semgrep` - Custom static analysis (semgrep)
 9. `code-audit` - Advisory/license/ban check (cargo-deny)

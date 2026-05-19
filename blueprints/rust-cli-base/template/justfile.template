@@ -56,7 +56,7 @@ help:
     @printf "  %-40s %s\n" "code-style" "Check code style and formatting (read-only)"
     @printf "  %-40s %s\n" "code-typecheck" "Run type checking and clippy lints"
     @printf "  %-40s %s\n" "code-security" "Run security checks with cargo-geiger"
-    @printf "  %-40s %s\n" "code-deptry" "Check dependency hygiene with cargo-machete"
+    @printf "  %-40s %s\n" "code-machete" "Check dependency hygiene with cargo-machete"
     @printf "  %-40s %s\n" "code-spell" "Check spelling in code and documentation"
     @printf "  %-40s %s\n" "code-semgrep" "Run Semgrep static analysis"
     @printf "  %-40s %s\n" "code-audit" "Scan dependencies for vulnerabilities and licenses"
@@ -196,7 +196,7 @@ code-security:
     @echo ""
 
 # Check dependency hygiene with cargo-machete
-code-deptry:
+code-machete:
     @echo ""
     @printf "\033[0;34m=== Checking Dependencies ===\033[0m\n"
     @cargo machete
@@ -275,7 +275,7 @@ ci:
     just code-style
     just code-typecheck
     just code-security
-    just code-deptry
+    just code-machete
     just code-spell
     just code-semgrep
     just code-audit
@@ -310,8 +310,8 @@ ci-quiet:
     just code-security > $TMPFILE 2>&1 || { printf "\033[0;31mx Code-security failed\033[0m\n"; cat $TMPFILE; exit 1; }
     printf "\033[0;32m> Code-security passed\033[0m\n"
 
-    just code-deptry > $TMPFILE 2>&1 || { printf "\033[0;31mx Code-deptry failed\033[0m\n"; cat $TMPFILE; exit 1; }
-    printf "\033[0;32m> Code-deptry passed\033[0m\n"
+    just code-machete > $TMPFILE 2>&1 || { printf "\033[0;31mx Code-machete failed\033[0m\n"; cat $TMPFILE; exit 1; }
+    printf "\033[0;32m> Code-machete passed\033[0m\n"
 
     just code-spell > $TMPFILE 2>&1 || { printf "\033[0;31mx Code-spell failed\033[0m\n"; cat $TMPFILE; exit 1; }
     printf "\033[0;32m> Code-spell passed\033[0m\n"
