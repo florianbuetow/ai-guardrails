@@ -10,7 +10,7 @@ source "$SCRIPT_DIR/lib/helpers.sh"
 source "$SCRIPT_DIR/lib/runner.sh"
 
 usage() {
-    printf "Usage: %s <python|java|go|elixir|cpp|rust|all> [baseline]\n" "$0"
+    printf "Usage: %s <python|java|go|elixir|cpp|rust|kotlin|all> [baseline]\n" "$0"
     printf "  Add 'baseline' to run only project generation + just ci (skip violation tests)\n"
 }
 
@@ -28,11 +28,11 @@ if [ "$TEST_MODE" != "all" ] && [ "$TEST_MODE" != "baseline" ]; then
 fi
 
 case "$1" in
-    python|java|go|elixir|cpp|rust)
+    python|java|go|elixir|cpp|rust|kotlin)
         languages=("$1")
         ;;
     all)
-        languages=(python java go elixir cpp rust)
+        languages=(python java go elixir cpp rust kotlin)
         ;;
     *)
         usage

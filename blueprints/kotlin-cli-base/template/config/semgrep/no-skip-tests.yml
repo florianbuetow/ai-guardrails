@@ -1,0 +1,36 @@
+rules:
+  - id: kotlin.no-disabled-tests
+    languages: [kotlin]
+    message: >
+      Do not use @Disabled to skip tests. Tests must either pass or fail.
+      Fix the underlying issue instead of disabling the test.
+    severity: ERROR
+    pattern-regex: '@Disabled\b'
+
+  - id: kotlin.no-ignore-tests
+    languages: [kotlin]
+    message: >
+      Do not use @Ignore to skip tests. Tests must either pass or fail.
+      Fix the underlying issue instead of ignoring the test.
+    severity: ERROR
+    pattern-regex: '@Ignore\b'
+
+  - id: kotlin.no-conditional-disabled-tests
+    languages: [kotlin]
+    message: >
+      Do not conditionally disable tests. Tests must either pass or fail.
+      Use test fixtures or separate suites instead of conditional disabling.
+    severity: ERROR
+    pattern-regex: '@Disabled(On|If)[A-Za-z]*\b'
+
+  - id: kotlin.no-assume-skip-tests
+    languages: [kotlin]
+    message: >
+      Do not use Assumptions to skip tests at runtime. Tests must either pass or fail.
+      Use test fixtures or separate test suites instead.
+    severity: ERROR
+    pattern-either:
+      - pattern: Assumptions.assumeTrue(...)
+      - pattern: Assumptions.assumeFalse(...)
+      - pattern: assumeTrue(...)
+      - pattern: assumeFalse(...)

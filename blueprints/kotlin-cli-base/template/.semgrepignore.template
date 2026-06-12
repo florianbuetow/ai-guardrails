@@ -1,0 +1,8 @@
+:include .gitignore
+
+# Gradle build directory
+build/
+.gradle/
+
+# Reports
+reports/

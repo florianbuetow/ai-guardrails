@@ -1,0 +1,28 @@
+rules:
+  - id: kotlin.no-get-or-default
+    languages: [kotlin]
+    message: >
+      Map.getOrDefault() hides missing configuration values.
+      Access the key directly and handle the missing case explicitly,
+      or use getValue() / require() with a clear error message.
+    severity: ERROR
+    pattern-regex: '\.getOrDefault\s*\('
+    paths:
+      include:
+        - /src/main/
+      exclude:
+        - /src/test/
+
+  - id: kotlin.no-env-elvis-default
+    languages: [kotlin]
+    message: >
+      Falling back to a literal default when an environment variable is absent
+      hides missing configuration. Read the value and fail explicitly when it is
+      missing (e.g. with requireNotNull or error()).
+    severity: ERROR
+    pattern-regex: 'System\.getenv\([^)]*\)\s*\?:'
+    paths:
+      include:
+        - /src/main/
+      exclude:
+        - /src/test/

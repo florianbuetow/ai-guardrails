@@ -1,0 +1,24 @@
+package {{package_name}}.architecture
+
+import com.lemonappdev.konsist.api.Konsist
+import com.lemonappdev.konsist.api.verify.assertFalse
+import org.junit.jupiter.api.Test
+
+/**
+ * Architecture constraints enforced with Konsist.
+ *
+ * Production code must rely on the Kotlin standard library rather than legacy
+ * `java.util` collection and utility types. Introducing a `java.util.*` import
+ * in production code makes this test fail.
+ */
+class ArchitectureTest {
+    @Test
+    fun productionCodeDoesNotDependOnJavaUtil() {
+        Konsist
+            .scopeFromProduction()
+            .files
+            .assertFalse { file ->
+                file.imports.any { import -> import.name.startsWith("java.util") }
+            }
+    }
+}

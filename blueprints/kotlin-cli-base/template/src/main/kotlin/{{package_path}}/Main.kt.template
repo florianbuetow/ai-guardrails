@@ -1,0 +1,6 @@
+package {{package_name}}
+
+/** Entry point for {{project_name}}. */
+fun main() {
+    println("Hello from {{project_name}}!")
+}

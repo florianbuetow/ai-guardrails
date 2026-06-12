@@ -1,0 +1,14 @@
+rules:
+  - id: kotlin.insecure-predictable-random
+    languages: [kotlin]
+    message: >
+      java.util.Random is a predictable pseudo-random generator and must not be
+      used for security-sensitive values (tokens, passwords, nonces, IDs).
+      Use java.security.SecureRandom instead.
+    severity: ERROR
+    pattern-regex: '\bjava\.util\.Random\b'
+    paths:
+      include:
+        - /src/main/
+      exclude:
+        - /src/test/

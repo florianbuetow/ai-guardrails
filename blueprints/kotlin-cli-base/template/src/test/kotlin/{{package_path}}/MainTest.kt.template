@@ -1,0 +1,12 @@
+package {{package_name}}
+
+import org.assertj.core.api.Assertions.assertThatCode
+import org.junit.jupiter.api.Test
+
+/** Tests for [main]. */
+class MainTest {
+    @Test
+    fun mainRunsWithoutError() {
+        assertThatCode { main() }.doesNotThrowAnyException()
+    }
+}

@@ -1,0 +1,144 @@
+# {{project_name}}
+
+{{project_description}}
+
+## Repository Structure
+
+```
+{{project_name}}/
+├── build.gradle.kts           # Gradle build configuration with all plugins
+├── settings.gradle.kts        # Gradle settings (project name)
+├── gradle.properties          # Gradle and project properties
+├── gradlew                    # Gradle wrapper (Unix)
+├── gradlew.bat                # Gradle wrapper (Windows)
+├── gradle/                    # Gradle wrapper JAR and properties
+│   └── wrapper/
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── .pre-commit-config.yaml    # Pre-commit hooks configuration
+├── .semgrepignore             # Semgrep ignore patterns
+├── .gitignore                 # Git ignore patterns
+├── justfile                   # Task runner with build/test/validation commands
+├── AGENTS.md                  # AI agent development rules
+├── CLAUDE.md                  # Claude Code compatibility (symlink to AGENTS.md)
+├── README.md                  # This file
+├── src/
+│   ├── main/kotlin/{{package_path}}/  # Main source code
+│   │   └── Main.kt                    # Application entry point
+│   └── test/kotlin/{{package_path}}/  # Test source code
+│       ├── MainTest.kt                # Unit tests
+│       └── architecture/
+│           └── ArchitectureTest.kt    # Konsist architecture tests
+├── scripts/                   # Utility scripts
+├── data/                      # Data files
+│   ├── input/                 # Input data files
+│   └── output/                # Generated output files
+├── config/                    # Configuration files
+│   ├── detekt/                # detekt static analysis configuration
+│   │   └── detekt.yml
+│   ├── semgrep/               # Semgrep static analysis rules
+│   │   ├── no-default-values.yml
+│   │   ├── no-sneaky-fallbacks.yml
+│   │   ├── no-skip-tests.yml
+│   │   ├── no-suppression.yml
+│   │   ├── no-shellcheck-disable.yml
+│   │   └── security-predictable-random.yml
+│   └── codespell/             # Spell-check configuration
+│       └── ignore.txt         # Spell-check ignore list
+└── reports/                   # Generated reports (not in git)
+```
+
+## Prerequisites
+
+- **JDK {{jvm_target}}+** ([Adoptium](https://adoptium.net/))
+- **just** - Command runner ([installation guide](https://github.com/casey/just#installation))
+- **codespell** - Spell checker (`brew install codespell`)
+- **semgrep** - Static analysis (`brew install semgrep`)
+- **trivy** - Dependency vulnerability scanner (`brew install trivy`)
+
+All Kotlin tooling (ktlint, detekt, Kover, Konsist) is provided by Gradle plugins — no separate installation required.
+
+## Setup
+
+Initialize the project environment:
+
+```bash
+just init
+```
+
+This will:
+- Verify prerequisites (java, gradlew, codespell, semgrep, trivy)
+- Download and cache all Gradle dependencies
+
+## Usage
+
+Run the main application:
+
+```bash
+just run
+```
+
+See all available commands:
+
+```bash
+just help
+```
+
+## Development
+
+### Available Commands
+
+- `just check` - Check prerequisites
+- `just init` - Initialize development environment
+- `just run` - Run the main application
+- `just destroy` - Clean build artifacts
+- `just help` - Show available commands
+
+### Code Quality
+
+- `just code-format` - Auto-format code (ktlint)
+- `just code-style` - Check code style (ktlint)
+- `just code-spell` - Check spelling (codespell)
+- `just code-semgrep` - Run custom static analysis (Semgrep)
+- `just code-lspchecks` - Run strict compiler checks (allWarningsAsErrors)
+- `just code-security` - Run detekt static analysis (bugs, exceptions, complexity)
+- `just code-deptry` - Check dependency hygiene (dependency-analysis)
+- `just code-architecture` - Run Konsist architecture tests
+- `just code-audit` - Scan dependencies for vulnerabilities and outdated versions
+
+### Testing
+
+- `just test` - Run unit tests
+- `just test-coverage` - Run tests with coverage ({{coverage_threshold}}% threshold)
+
+### CI
+
+- `just ci` - Run all validation checks (verbose)
+- `just ci-quiet` - Run all checks (silent, fail-fast)
+
+The CI pipeline runs the following steps in order:
+1. `init` - Initialize environment
+2. `code-format` - Auto-format code (ktlint)
+3. `code-style` - Check code style (ktlint)
+4. `code-spell` - Spell checking
+5. `code-semgrep` - Custom static analysis
+6. `code-lspchecks` - Strict compiler checks (allWarningsAsErrors)
+7. `code-security` - Static analysis (detekt)
+8. `code-deptry` - Dependency hygiene
+9. `test` - Unit tests
+10. `code-architecture` - Architecture tests (Konsist)
+11. `test-coverage` - Coverage verification (Kover)
+12. `code-audit` - Vulnerability + version scan (trivy + Gradle Versions Plugin)
+
+## Project Rules
+
+See [AGENTS.md](AGENTS.md) for detailed development guidelines including:
+- Kotlin execution rules (use `./gradlew` exclusively)
+- Git commit guidelines (no AI attribution)
+- Testing requirements
+- Forbidden patterns
+- Project structure conventions
+
+## License
+
+<!-- Add your license here -->

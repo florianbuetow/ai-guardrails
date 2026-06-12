@@ -58,6 +58,7 @@ help:
 	@printf "    %-36s %s\n" "elixir-otp-base" "Elixir OTP application"
 	@printf "    %-36s %s\n" "cpp-cli-base" "C++ CLI application"
 	@printf "    %-36s %s\n" "rust-cli-base" "Rust CLI application"
+	@printf "    %-36s %s\n" "kotlin-cli-base" "Kotlin CLI application"
 	@echo ""
 	@printf "\033[0;33mCode Quality:\033[0m\n"
 	@printf "  %-40s %s\n" "code-spell" "Check spelling across the repository"
@@ -72,6 +73,7 @@ help:
 	@printf "  %-40s %s\n" "baseline-elixir" "Generate Elixir template and run just ci"
 	@printf "  %-40s %s\n" "baseline-cpp" "Generate C++ template and run just ci"
 	@printf "  %-40s %s\n" "baseline-rust" "Generate Rust template and run just ci"
+	@printf "  %-40s %s\n" "baseline-kotlin" "Generate Kotlin template and run just ci"
 	@echo ""
 	@printf "\033[0;33mCI & Testing:\033[0m\n"
 	@printf "  %-40s %s\n" "test" "Run all baseline + violation tests"
@@ -81,6 +83,7 @@ help:
 	@printf "  %-40s %s\n" "test-elixir" "Run Elixir baseline + violation tests"
 	@printf "  %-40s %s\n" "test-cpp" "Run C++ baseline + violation tests"
 	@printf "  %-40s %s\n" "test-rust" "Run Rust baseline + violation tests"
+	@printf "  %-40s %s\n" "test-kotlin" "Run Kotlin baseline + violation tests"
 	@printf "  %-40s %s\n" "ci" "Run all checks + all template tests"
 	@echo ""
 
@@ -261,6 +264,12 @@ baseline-rust:
 	@./tests/run-tests.sh rust baseline && printf "\033[32m✓ rust baseline passed\033[0m\n" || { printf "\033[31m✗ rust baseline failed\033[0m\n"; exit 1; }
 	@echo ""
 
+# Generate Kotlin template and run just ci
+baseline-kotlin:
+	@echo ""
+	@./tests/run-tests.sh kotlin baseline && printf "\033[32m✓ kotlin baseline passed\033[0m\n" || { printf "\033[31m✗ kotlin baseline failed\033[0m\n"; exit 1; }
+	@echo ""
+
 # Test all templates (baseline + violations)
 test:
 	@echo ""
@@ -301,6 +310,12 @@ test-cpp:
 test-rust:
 	@echo ""
 	@./tests/run-tests.sh rust && printf "\033[32m✓ rust tests passed\033[0m\n" || { printf "\033[31m✗ rust tests failed\033[0m\n"; exit 1; }
+	@echo ""
+
+# Test the Kotlin template (baseline + violations)
+test-kotlin:
+	@echo ""
+	@./tests/run-tests.sh kotlin && printf "\033[32m✓ kotlin tests passed\033[0m\n" || { printf "\033[31m✗ kotlin tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Run all checks and all template tests

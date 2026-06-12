@@ -1,0 +1,104 @@
+# Kotlin CLI Base Template Configuration
+# Minimum Copier version required
+_min_copier_version: "9.0.0"
+
+# Template settings
+_subdirectory: template
+_templates_suffix: ".template"
+_answers_file: .copier-answers.yml
+
+# Exclude patterns (extend defaults)
+_exclude:
+  - ".gradle"
+  - "build"
+  - ".git"
+  - "CLAUDE.md"  # Exclude symlink, create it via task instead
+
+# Skip if exists (never overwrite these on update)
+_skip_if_exists:
+  - "src/"
+  - "data/input/"
+  - "data/output/"
+  - "scripts/"
+
+# Messages
+_message_before_copy: |
+  Creating Kotlin CLI project with full validation infrastructure.
+  This will set up a production-ready project following strict conventions.
+
+_message_after_copy: |
+  Project {{project_name}} created successfully!
+
+  Next steps:
+    cd {{project_name}}
+    ./gradlew build    # Build and test the project
+    ./gradlew run      # Run the application
+
+# Post-generation tasks
+_tasks:
+  - "ln -s AGENTS.md CLAUDE.md"
+
+# Questions
+project_name:
+  type: str
+  help: Project name (e.g., my-cli-tool)?
+  validator: >-
+    {% if not (project_name | regex_search('^[a-zA-Z0-9]([a-zA-Z0-9_.-]*[a-zA-Z0-9])?$')) %}
+    Invalid project name. Use letters, digits, -, _, . only.
+    {% endif %}
+
+group_id:
+  type: str
+  help: Maven/Gradle group ID (e.g., com.example)?
+  default: "com.example"
+  validator: >-
+    {% if not (group_id | regex_search('^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)*$')) %}
+    Invalid group ID. Must be a valid Kotlin package prefix (e.g., com.example).
+    {% endif %}
+
+package_name:
+  type: str
+  help: Kotlin package name (e.g., com.example.myapp)?
+  default: "{{group_id}}.{{project_name | replace('-', '_') | replace('.', '_')}}"
+  validator: >-
+    {% if not (package_name | regex_search('^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)*$')) %}
+    Invalid package name. Must be a valid Kotlin package name.
+    {% endif %}
+
+# Hidden variable: converts dots to slashes for directory structure
+package_path:
+  type: str
+  when: false
+  default: "{{package_name | replace('.', '/')}}"
+
+project_description:
+  type: str
+  help: Short description?
+  default: "A Kotlin CLI application"
+
+jvm_target:
+  type: str
+  help: JVM toolchain version?
+  default: "21"
+  choices:
+    - "21"
+    - "23"
+
+author_name:
+  type: str
+  help: Author name?
+  default: ""
+
+author_email:
+  type: str
+  help: Author email?
+  default: ""
+
+coverage_threshold:
+  type: int
+  help: Code coverage threshold (%)?
+  default: 80
+  validator: >-
+    {% if coverage_threshold < 0 or coverage_threshold > 100 %}
+    Must be 0-100
+    {% endif %}

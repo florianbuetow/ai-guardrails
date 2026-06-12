@@ -1,0 +1,18 @@
+# Domain-specific terms that codespell should ignore
+# One word per line, case-insensitive
+
+# Kotlin & JVM build tools
+gradle
+kotlin
+kotlinx
+jetbrains
+junit
+kover
+konsist
+detekt
+ktlint
+assertj
+gitlab
+arturbosch
+jlleitschuh
+lemonappdev

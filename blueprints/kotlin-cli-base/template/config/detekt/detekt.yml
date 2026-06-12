@@ -1,0 +1,51 @@
+# detekt configuration for strict static analysis.
+#
+# This config layers on top of detekt's bundled defaults
+# (buildUponDefaultConfig = true in build.gradle.kts). Any finding fails the
+# build — there is no suppression escape hatch by design.
+
+build:
+  maxIssues: 0
+  excludeCorrectable: false
+
+config:
+  validation: true
+  warningsAsErrors: true
+
+comments:
+  active: true
+
+complexity:
+  active: true
+
+exceptions:
+  active: true
+  TooGenericExceptionCaught:
+    active: true
+  TooGenericExceptionThrown:
+    active: true
+  SwallowedException:
+    active: true
+  ThrowingExceptionsWithoutMessageOrCause:
+    active: true
+
+potential-bugs:
+  active: true
+
+style:
+  active: true
+  MagicNumber:
+    active: true
+    ignoreNumbers: ['-1', '0', '1', '2']
+  MaxLineLength:
+    active: true
+    maxLineLength: 120
+  WildcardImport:
+    active: true
+  ForbiddenComment:
+    active: true
+    comments:
+      - reason: 'Forbidden TODO marker — resolve before committing.'
+        value: 'TODO:'
+      - reason: 'Forbidden FIXME marker — resolve before committing.'
+        value: 'FIXME:'

@@ -1,0 +1,49 @@
+rules:
+  - id: kotlin.no-suppress
+    languages: [kotlin]
+    message: >
+      @Suppress is not allowed. Fix the underlying issue instead of suppressing it.
+      If you believe suppression is required, explain why and propose a fix that avoids suppression.
+    severity: ERROR
+    pattern-regex: '@Suppress\s*\('
+    paths:
+      include:
+        - /src/main/
+      exclude:
+        - /src/test/
+
+  - id: kotlin.no-suppress-warnings
+    languages: [kotlin]
+    message: >
+      @SuppressWarnings is not allowed. Fix the underlying issue instead of suppressing it.
+    severity: ERROR
+    pattern-regex: '@SuppressWarnings\s*\('
+    paths:
+      include:
+        - /src/main/
+      exclude:
+        - /src/test/
+
+  - id: kotlin.no-noinspection-comment
+    languages: [kotlin]
+    message: >
+      //noinspection comments are not allowed. Fix the underlying issue instead of suppressing it.
+    severity: ERROR
+    pattern-regex: '//\s*noinspection\b'
+    paths:
+      include:
+        - /src/main/
+      exclude:
+        - /src/test/
+
+  - id: kotlin.no-nosonar-comment
+    languages: [kotlin]
+    message: >
+      NOSONAR comments are not allowed. Fix the underlying issue instead of suppressing it.
+    severity: ERROR
+    pattern-regex: 'NOSONAR'
+    paths:
+      include:
+        - /src/main/
+      exclude:
+        - /src/test/

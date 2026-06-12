@@ -4,7 +4,7 @@ This file provides guidance to AI agents and AI-assisted development tools when 
 
 ## Repository Overview
 
-This repository contains Copier templates for Python, Java, Go, Elixir, C++, and Rust that enforce strict validation guardrails on AI-generated code — catching antipatterns, suppressing silent defaults, and providing immediate feedback so AI agents write better, more maintainable code from the start.
+This repository contains Copier templates for Python, Java, Go, Elixir, C++, Rust, and Kotlin that enforce strict validation guardrails on AI-generated code — catching antipatterns, suppressing silent defaults, and providing immediate feedback so AI agents write better, more maintainable code from the start.
 
 ## Core Coding Principles
 
@@ -95,6 +95,13 @@ This is an inverted test pattern: a passing test means the project's own CI caug
 - Validation: clang-format, clang-tidy, cppcheck, flawfinder, IWYU, semgrep, codespell, GoogleTest, ASan/UBSan, lcov coverage
 - Conventions: Justfile workflow, CMakePresets.json, strict compiler warnings (-Wall -Wextra -Wpedantic -Werror)
 
+### The Kotlin CLI Template (`blueprints/kotlin-cli-base`)
+
+- Kotlin 2.1+ on the JVM (toolchain 21+) with Gradle Kotlin DSL
+- Project structure: src/main/kotlin/, src/test/kotlin/, scripts/, data/
+- Validation: ktlint, detekt, kotlinc allWarningsAsErrors, semgrep, codespell, dependency-analysis, trivy, Gradle Versions Plugin, Konsist, JUnit 5, Kover
+- Conventions: Justfile workflow, `./gradlew` exclusively, no `@Suppress`, no silent fallbacks, strict compiler warnings as errors
+
 All templates emphasize creating immediately runnable projects with no placeholders, comprehensive CI pipelines, and AGENTS.md/CLAUDE.md files for AI agent guidance.
 
 ## Justfile Conventions
@@ -111,8 +118,8 @@ These rules apply to all justfiles — in this repository and in all generated t
 ## Repository Commands
 
 - `just ci` — Run all repo-level checks (codespell, semgrep, shellcheck) + all template tests
-- `just test` — Run baseline + violation tests for all 6 languages
-- `just test-<language>` — Run tests for one language (python, java, go, elixir, cpp, rust)
+- `just test` — Run baseline + violation tests for all 7 languages
+- `just test-<language>` — Run tests for one language (python, java, go, elixir, cpp, rust, kotlin)
 - `just check` — Verify required tools are installed
 - `just create <template> <target-dir>` — Scaffold a new project from a blueprint
 
