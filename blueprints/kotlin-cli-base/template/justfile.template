@@ -77,6 +77,13 @@ check:
         exit 1; \
     fi
     @printf "\033[32m✓ trivy is installed\033[0m\n"
+    @if ! command -v timeout >/dev/null 2>&1; then \
+        printf "\033[31m✗ Error: timeout is not installed\033[0m\n"; \
+        printf "  Install with: brew install coreutils\n"; \
+        echo ""; \
+        exit 1; \
+    fi
+    @printf "\033[32m✓ timeout is installed\033[0m\n"
     @echo ""
 
 # Show help information
@@ -202,11 +209,15 @@ code-architecture:
     @echo ""
 
 # Scan dependencies for vulnerabilities and outdated versions
+# Note: trivy's vulnerability-DB download has no internal timeout and Go's
+# HTTP/2 client can stall mid-transfer on some networks (flow-control freeze
+# a few MiB in). GODEBUG forces HTTP/1.1; timeout -k turns any remaining
+# stall into a loud failure (trivy traps SIGTERM, so -k SIGKILL is required).
 code-audit:
     @echo ""
     @printf "\033[34m=== Scanning Dependencies for Vulnerabilities ===\033[0m\n"
     @./gradlew dependencies --write-locks --quiet
-    @trivy fs --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --quiet .
+    @GODEBUG=http2client=0 timeout -k 10 600 trivy fs --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --quiet .
     @./gradlew dependencyUpdates --quiet
     @printf "\033[32m✓ code-audit completed successfully\033[0m\n"
     @echo ""
