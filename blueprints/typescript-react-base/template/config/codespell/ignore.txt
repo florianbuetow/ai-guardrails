@@ -7,3 +7,7 @@ vitest
 tsx
 esbuild
 knip
+
+# Test-runner skip directives referenced by the no-skip-tests Semgrep rule
+# (codespell otherwise "corrects" xdescribe -> describe)
+xdescribe

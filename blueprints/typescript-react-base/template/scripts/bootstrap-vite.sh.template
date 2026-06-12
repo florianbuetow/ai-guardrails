@@ -44,6 +44,14 @@ rm -rf "$SCAFFOLD_DIR"
 npm pkg set name="{{project_name}}" description="{{project_description}}" \
     engines.node=">={{node_version}}"
 
+# Constrain eslint to the v9 line. The current Vite react-ts scaffold pins
+# eslint (and @eslint/js) to v10, but eslint-plugin-jsx-a11y — a required
+# accessibility guardrail — has no v10-compatible release (its peer range tops
+# out at eslint 9). All other plugins support both 9 and 10, so pinning eslint
+# to ^9 is the real compatibility ceiling, not a workaround. Drop this when
+# jsx-a11y ships eslint 10 support.
+npm pkg set devDependencies.eslint="^9" devDependencies.@eslint/js="^9"
+
 # Guardrail toolchain — deliberately unpinned (latest at apply time).
 npm install --save-dev \
     prettier \
