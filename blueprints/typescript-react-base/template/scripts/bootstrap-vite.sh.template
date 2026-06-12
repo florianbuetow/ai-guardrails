@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+# Runs as a Copier post-generation task with cwd = project root.
+# Phase 2 of generation: scaffold the current Vite react-ts app, merge it into
+# the project root (template-provisioned files always win), then install the
+# guardrail toolchain unpinned so every apply gets current versions.
+
+set -euo pipefail
+
+SCAFFOLD_DIR=".vite-scaffold"
+
+if [ -f "package.json" ]; then
+    printf "Error: package.json already exists — the Vite scaffold has already been applied.\n" >&2
+    printf "Re-running the bootstrap would overwrite project state. Aborting.\n" >&2
+    exit 1
+fi
+
+rm -rf "$SCAFFOLD_DIR"
+
+# Target dir is fresh, so create-vite runs fully non-interactively.
+npm create -y vite@latest "$SCAFFOLD_DIR" -- --template react-ts
+
+# Merge rule: copy a scaffold file only where no file already exists.
+# Template files (justfile, eslint.config.js, README.md, ...) always win.
+(cd "$SCAFFOLD_DIR" && find . -type f | sed 's|^\./||') | while IFS= read -r rel_path; do
+    if [ ! -f "$rel_path" ]; then
+        mkdir -p "$(dirname "$rel_path")"
+        cp "$SCAFFOLD_DIR/$rel_path" "$rel_path"
+    fi
+done
+
+rm -rf "$SCAFFOLD_DIR"
+
+# The scaffold named the package after the staging dir — set real metadata.
+npm pkg set name="{{project_name}}" description="{{project_description}}" \
+    engines.node=">={{node_version}}"
+
+# Guardrail toolchain — deliberately unpinned (latest at apply time).
+npm install --save-dev \
+    prettier \
+    eslint-config-prettier \
+    eslint-plugin-jsx-a11y \
+    eslint-plugin-security \
+    eslint-plugin-no-unsanitized \
+    vitest \
+    @vitest/coverage-v8 \
+    jsdom \
+    @testing-library/react \
+    @testing-library/jest-dom \
+    @testing-library/user-event \
+    @playwright/test \
+    @types/node \
+    dependency-cruiser \
+    knip
+
+printf "Vite scaffold merged and guardrail toolchain installed.\n"
