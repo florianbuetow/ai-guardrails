@@ -102,6 +102,14 @@ This is an inverted test pattern: a passing test means the project's own CI caug
 - Validation: ktlint, detekt, kotlinc allWarningsAsErrors, semgrep, codespell, dependency-analysis, trivy, Gradle Versions Plugin, Konsist, JUnit 5, Kover
 - Conventions: Justfile workflow, `./gradlew` exclusively, no `@Suppress`, no silent fallbacks, strict compiler warnings as errors
 
+### The TypeScript React Template (`blueprints/typescript-react-base`)
+
+- React + Vite + TypeScript, Node 22+/24+, npm-only tooling
+- Two-phase generation: Copier provisions guardrails, then a post-task runs `npm create vite` and merges the scaffold into the project root (nothing frozen — current scaffold and tool versions at every apply; network required)
+- Project structure: src/, e2e/, scripts/, data/, config/
+- Validation: prettier, eslint (typescript-eslint strict-type-checked, react-hooks, jsx-a11y), tsc, semgrep, codespell, eslint security pass (security + no-unsanitized), knip, dependency-cruiser, vitest + Testing Library, Playwright, npm audit
+- Conventions: Justfile workflow, npm/npx exclusively, no eslint-disable, no @ts-ignore, no skipped tests
+
 All templates emphasize creating immediately runnable projects with no placeholders, comprehensive CI pipelines, and AGENTS.md/CLAUDE.md files for AI agent guidance.
 
 ## Justfile Conventions
@@ -119,7 +127,7 @@ These rules apply to all justfiles — in this repository and in all generated t
 
 - `just ci` — Run all repo-level checks (codespell, semgrep, shellcheck) + all template tests
 - `just test` — Run baseline + violation tests for all 7 languages
-- `just test-<language>` — Run tests for one language (python, java, go, elixir, cpp, rust, kotlin)
+- `just test-<language>` — Run tests for one language (python, java, go, elixir, cpp, rust, kotlin, typescript)
 - `just check` — Verify required tools are installed
 - `just create <template> <target-dir>` — Scaffold a new project from a blueprint
 
