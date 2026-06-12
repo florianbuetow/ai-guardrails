@@ -183,7 +183,7 @@ code-lspchecks:
 code-security:
     @echo ""
     @printf "\033[34m=== Running Security Lint Pass ===\033[0m\n"
-    @npx eslint --no-config-lookup -c config/eslint/security.config.mjs 'src/**/*.{ts,tsx}' 'e2e/**/*.ts'
+    @npx eslint --no-config-lookup -c config/eslint/security.config.mjs --max-warnings 0 'src/**/*.{ts,tsx}' 'e2e/**/*.ts'
     @printf "\033[32m✓ code-security completed successfully\033[0m\n"
     @echo ""
 
