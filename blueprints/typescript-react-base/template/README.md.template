@@ -1,0 +1,58 @@
+# {{project_name}}
+
+{{project_description}}
+
+## Stack
+
+React + Vite + TypeScript, validated by the full ai-guardrails suite:
+prettier, ESLint (strict type-checked), tsc, semgrep, codespell, an ESLint
+security pass, knip, dependency-cruiser, Vitest (+{{coverage_threshold}}%
+coverage), Playwright, and npm audit.
+
+## Prerequisites
+
+- Node.js {{node_version}}+ and npm
+- [just](https://github.com/casey/just#installation)
+- codespell (`brew install codespell`)
+- semgrep (`brew install semgrep`)
+
+## Quickstart
+
+    just init     # install dependencies + Playwright browser
+    just run      # start the Vite dev server
+    just ci       # run every validation check
+
+## Commands
+
+Run `just` (or `just help`) for the full annotated list. The most important:
+
+| Command | Purpose |
+| --- | --- |
+| `just init` | Install dependencies and the Playwright Chromium browser |
+| `just run` | Start the Vite dev server |
+| `just build` | Type-check and build for production |
+| `just code-format` | Auto-format with prettier |
+| `just code-style` | prettier --check + eslint --max-warnings 0 |
+| `just code-semgrep` | Custom guardrail rules (no suppression, no silent defaults, …) |
+| `just code-lspchecks` | tsc over app, node, and e2e configs |
+| `just code-security` | ESLint security plugins pass |
+| `just code-deptry` | knip dependency hygiene |
+| `just code-architecture` | dependency-cruiser import rules |
+| `just code-audit` | npm audit + outdated report |
+| `just test` / `just test-coverage` | Vitest (with {{coverage_threshold}}% threshold) |
+| `just test-e2e` | Playwright against the built app |
+| `just ci` / `just ci-quiet` | Everything, fail-fast |
+
+## Project Layout
+
+    src/            application code + colocated *.test.tsx unit tests
+    e2e/            Playwright tests
+    scripts/        utility scripts
+    data/input/     input data
+    data/output/    output data
+    config/         semgrep, codespell, eslint-security configuration
+
+## Conventions
+
+See [AGENTS.md](AGENTS.md) — fail fast, no default values, no suppression
+annotations, npm-only tooling.

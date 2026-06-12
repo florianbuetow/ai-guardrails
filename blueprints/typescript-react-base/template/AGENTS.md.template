@@ -1,0 +1,86 @@
+# Development Rules for {{project_name}}
+
+This file provides guidance to AI agents and AI-assisted development tools when working with this project. This includes Claude Code, Cursor IDE, GitHub Copilot, Windsurf, and any other AI coding assistants.
+
+## General Coding Principles
+- **Fail fast — never swallow errors.** Always propagate errors and fail immediately. No silent fallbacks, no empty catch blocks.
+- **Never assume any default values anywhere.** Check for required values explicitly and throw if something is missing. Default values mask underlying issues and make them hard to debug.
+- **Never suppress checks with annotations.** Fix the underlying issue instead. No `eslint-disable`, `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, `prettier-ignore`, or any other mechanism that silences a checker.
+- Always be explicit about values, paths, and configurations
+- If a value is not provided, throw an error — never silently fall back to a default
+
+## Git Commit Guidelines
+
+**IMPORTANT:** When creating git commits in this repository:
+- **NEVER include AI attribution in commit messages**
+- **NEVER add "Generated with [AI tool name]" or similar phrases**
+- **NEVER add "Co-Authored-By: [AI name]" or similar attribution**
+- **NEVER run `git add -A` or `git add .` - always stage files explicitly**
+- Keep commit messages professional and focused on the changes made
+- Commit messages should describe what changed and why, without mentioning AI assistance
+- **ALWAYS run `git push` after creating a commit to push changes to the remote repository**
+
+## Testing
+- After **every change** to the code, the tests must be executed
+- Use **Vitest** with **Testing Library** for unit and component tests
+- Query the DOM the way users do (roles, labels, text) — avoid test IDs unless unavoidable
+- Use **Playwright** for end-to-end tests against the built app (`just test-e2e`)
+- Run `just test` for unit tests, `just test-coverage` for coverage verification
+
+## Node/npm Execution Rules
+- JavaScript tooling must be run **only** via `npm` and `npx`
+  - Example: `npm run dev`, `npm run build`, `npx vitest run`
+  - **Never** use `yarn`, `pnpm`, or `bun` — this project is npm-only
+- All dependencies must be managed through `package.json` via `npm install` /
+  `npm uninstall` — **never** edit `package-lock.json` by hand
+- The Vite scaffold files (`vite.config.ts`, `tsconfig.json`, `tsconfig.app.json`,
+  `tsconfig.node.json`, `index.html`) come from `npm create vite` — change them
+  only with a concrete reason, never to silence a checker
+
+## Justfile Conventions
+- **Use `printf` for colored or formatted output** — never `echo` with ANSI escape sequences. Plain `echo ""` is acceptable only for blank-line spacing.
+- **Add an empty `@echo ""` line before and after each target's command block.**
+- **The `help` target must be a dedicated recipe** with manually written `printf` lines. Never use `just --list`.
+- **The default target (`_default`) must call `just help`.**
+- **Every target must end with a clear status message**: green on success, red + `exit 1` on failure.
+- **Composite targets (e.g. `ci`) must fail fast**: use `set -e` or `&&` chaining.
+- Use `just init` to install dependencies, `just run` for the dev server,
+  `just build` for a production build, `just ci` for all validation checks
+
+## Forbidden Patterns
+The following patterns are banned and enforced by Semgrep (`just code-semgrep`):
+
+- **`eslint-disable`** — fix the lint finding instead of suppressing it
+- **`@ts-ignore` / `@ts-expect-error` / `@ts-nocheck`** — fix the type error
+- **`prettier-ignore`** — keep formatting consistent
+- **`istanbul/c8/v8 ignore`** — write a test instead of hiding the coverage gap
+- **`import.meta.env.X ?? default` / `process.env.X || default`** — read configuration and fail explicitly when it is absent
+- **Empty `catch {}` blocks** — handle the failure explicitly or let it propagate
+- **`.skip` / `.only` / `xit` / `xdescribe`** — tests must either pass or fail
+- **`Math.random()`** — use `crypto.getRandomValues()` for anything security-sensitive
+
+These tools enforce the rules:
+- **prettier** — formatting (`just code-format` / `just code-style`)
+- **ESLint** — typescript-eslint strict-type-checked, react-hooks, jsx-a11y (`just code-style`)
+- **tsc** — strict type checks across app, node, and e2e configs (`just code-lspchecks`)
+- **ESLint security pass** — eslint-plugin-security + no-unsanitized (`just code-security`)
+- **knip** — unused/unlisted dependencies, exports, files (`just code-deptry`)
+- **dependency-cruiser** — no cycles, no orphans, no src→test imports (`just code-architecture`)
+- **Vitest coverage** — {{coverage_threshold}}% threshold (`just test-coverage`)
+- **npm audit** — dependency vulnerability scanning (`just code-audit`)
+
+## Project Structure
+- Application code lives in `src/`
+- Unit/component tests live next to the code as `src/**/*.test.tsx`
+- End-to-end tests live in `e2e/`
+- Utility scripts go in `scripts/`
+- **Input data is organized**: `data/input/`
+- **Output data is organized**: `data/output/`
+- Configuration files go in `config/` (semgrep, codespell, eslint security pass)
+- **Never create source files in the project root directory**
+
+## Error Handling
+- Fail fast — stop immediately on the first error, never continue past failures
+- Throw explicit `Error`s with clear messages for missing or invalid data
+- Never catch and silently ignore errors
+- Exit with a non-zero status if any operation fails
