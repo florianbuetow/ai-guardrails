@@ -1,0 +1,24 @@
+rules:
+  - id: typescript.no-skipped-tests
+    languages: [generic]
+    message: >
+      Do not skip tests (.skip / xit / xdescribe / xtest). Tests must either
+      pass or fail. Fix the underlying issue instead of skipping the test.
+    severity: ERROR
+    pattern-regex: '\b(it|test|describe)\.skip\s*[\(.]|\b(xit|xdescribe|xtest)\s*\('
+    paths:
+      include:
+        - "*.ts"
+        - "*.tsx"
+
+  - id: typescript.no-only-tests
+    languages: [generic]
+    message: >
+      Do not use .only on tests. It silently shrinks the suite so CI passes
+      while most tests never run.
+    severity: ERROR
+    pattern-regex: '\b(it|test|describe)\.only\s*[\(.]'
+    paths:
+      include:
+        - "*.ts"
+        - "*.tsx"

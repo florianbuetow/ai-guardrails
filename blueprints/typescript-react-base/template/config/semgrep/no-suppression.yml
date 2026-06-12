@@ -1,0 +1,48 @@
+rules:
+  - id: typescript.no-eslint-disable
+    languages: [generic]
+    message: >
+      eslint-disable comments are not allowed. Fix the underlying issue instead
+      of suppressing it. If you believe suppression is required, explain why and
+      propose a fix that avoids suppression.
+    severity: ERROR
+    pattern-regex: 'eslint-disable'
+    paths:
+      include:
+        - "*.ts"
+        - "*.tsx"
+
+  - id: typescript.no-ts-suppression-comments
+    languages: [generic]
+    message: >
+      @ts-ignore, @ts-expect-error and @ts-nocheck are not allowed. Fix the
+      underlying type error instead of suppressing it.
+    severity: ERROR
+    pattern-regex: '@ts-(ignore|expect-error|nocheck)'
+    paths:
+      include:
+        - "*.ts"
+        - "*.tsx"
+
+  - id: typescript.no-prettier-ignore
+    languages: [generic]
+    message: >
+      prettier-ignore comments are not allowed. Keep formatting consistent.
+    severity: ERROR
+    pattern-regex: 'prettier-ignore'
+    paths:
+      include:
+        - "*.ts"
+        - "*.tsx"
+
+  - id: typescript.no-coverage-ignore
+    languages: [generic]
+    message: >
+      Coverage-ignore comments (istanbul/c8/v8 ignore) are not allowed.
+      Write a test instead of hiding the gap.
+    severity: ERROR
+    pattern-regex: '(istanbul|c8|v8) ignore'
+    paths:
+      include:
+        - "*.ts"
+        - "*.tsx"

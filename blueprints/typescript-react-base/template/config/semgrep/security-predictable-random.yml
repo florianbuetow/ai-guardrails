@@ -1,0 +1,16 @@
+rules:
+  - id: typescript.insecure-predictable-random
+    languages: [generic]
+    message: >
+      Math.random() is a predictable pseudo-random generator and must not be
+      used for security-sensitive values (tokens, passwords, nonces, IDs).
+      Use crypto.getRandomValues() or crypto.randomUUID() instead.
+    severity: ERROR
+    pattern-regex: 'Math\.random\s*\('
+    paths:
+      include:
+        - "*.ts"
+        - "*.tsx"
+      exclude:
+        - "*.test.ts"
+        - "*.test.tsx"

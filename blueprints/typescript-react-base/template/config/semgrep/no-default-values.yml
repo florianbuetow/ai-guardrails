@@ -1,0 +1,16 @@
+rules:
+  - id: typescript.no-env-fallback-default
+    languages: [generic]
+    message: >
+      Falling back to a default when an environment variable is absent hides
+      missing configuration. Read the value and fail explicitly when it is
+      missing (throw with a clear error message).
+    severity: ERROR
+    pattern-regex: '(import\.meta\.env|process\.env)\.[A-Za-z_][A-Za-z0-9_]*\s*(\?\?|\|\|)'
+    paths:
+      include:
+        - "*.ts"
+        - "*.tsx"
+      exclude:
+        - "*.test.ts"
+        - "*.test.tsx"

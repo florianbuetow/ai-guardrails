@@ -1,0 +1,15 @@
+rules:
+  - id: typescript.no-empty-catch
+    languages: [generic]
+    message: >
+      Empty catch blocks swallow errors silently. Handle the failure explicitly
+      or let it propagate.
+    severity: ERROR
+    pattern-regex: 'catch\s*(\([^)]*\))?\s*\{\s*\}'
+    paths:
+      include:
+        - "*.ts"
+        - "*.tsx"
+      exclude:
+        - "*.test.ts"
+        - "*.test.tsx"
