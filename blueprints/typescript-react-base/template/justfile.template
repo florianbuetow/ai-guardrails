@@ -205,8 +205,8 @@ code-architecture:
 
 # Scan dependencies for vulnerabilities and outdated versions
 # Note: npm outdated exits 1 whenever anything is outdated, which conflicts
-# with fail-fast (no `|| true` allowed). npm-check-updates without -u reports
-# the same information and exits 0, like Gradle's dependencyUpdates.
+# with fail-fast. npm-check-updates without -u reports the same information
+# and exits 0 cleanly, like Gradle's dependencyUpdates.
 code-audit:
     @echo ""
     @printf "\033[34m=== Scanning Dependencies for Vulnerabilities ===\033[0m\n"
