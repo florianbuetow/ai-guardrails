@@ -1,0 +1,10 @@
+{
+  "entry": [
+    "src/main.tsx",
+    "src/**/*.test.{ts,tsx}",
+    "e2e/**/*.spec.ts",
+    "config/eslint/security.config.mjs"
+  ],
+  "project": ["src/**/*.{ts,tsx}", "e2e/**/*.ts"],
+  "ignoreDependencies": ["dependency-cruiser"]
+}
