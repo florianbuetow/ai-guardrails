@@ -4,7 +4,7 @@ This file provides guidance to AI agents and AI-assisted development tools when 
 
 ## Repository Overview
 
-This repository contains Copier templates for Python, Java, Go, Elixir, C++, Rust, and Kotlin that enforce strict validation guardrails on AI-generated code — catching antipatterns, suppressing silent defaults, and providing immediate feedback so AI agents write better, more maintainable code from the start.
+This repository contains Copier templates for Python, Java, Go, Elixir, C++, Rust, Kotlin, and TypeScript (React) that enforce strict validation guardrails on AI-generated code — catching antipatterns, suppressing silent defaults, and providing immediate feedback so AI agents write better, more maintainable code from the start.
 
 ## Core Coding Principles
 
@@ -126,7 +126,7 @@ These rules apply to all justfiles — in this repository and in all generated t
 ## Repository Commands
 
 - `just ci` — Run all repo-level checks (codespell, semgrep, shellcheck) + all template tests
-- `just test` — Run baseline + violation tests for all 7 languages
+- `just test` — Run baseline + violation tests for all 8 languages
 - `just test-<language>` — Run tests for one language (python, java, go, elixir, cpp, rust, kotlin, typescript)
 - `just check` — Verify required tools are installed
 - `just create <template> <target-dir>` — Scaffold a new project from a blueprint
