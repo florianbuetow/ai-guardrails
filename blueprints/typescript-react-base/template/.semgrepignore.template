@@ -1,0 +1,6 @@
+:include .gitignore
+
+# Build and dependency directories
+node_modules/
+dist/
+coverage/

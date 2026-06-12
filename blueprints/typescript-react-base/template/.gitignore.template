@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Vite
+.vite/
+*.local
+
+# Test artifacts
+coverage/
+playwright-report/
+test-results/
+
+# Vite scaffold staging dir (removed by bootstrap, listed for safety)
+.vite-scaffold/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Logs
+npm-debug.log*
+
+# Copier answers file
+.copier-answers.yml

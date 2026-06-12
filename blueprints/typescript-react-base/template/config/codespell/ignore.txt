@@ -1,0 +1,9 @@
+# Domain-specific terms that codespell should ignore
+# One word per line, case-insensitive
+
+# JS/TS ecosystem tool and package names
+vite
+vitest
+tsx
+esbuild
+knip
