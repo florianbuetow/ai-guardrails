@@ -8,10 +8,19 @@
 set -euo pipefail
 
 SCAFFOLD_DIR=".vite-scaffold"
+SENTINEL=".bootstrap-complete"
+
+# The sentinel is written as the very last step. Its presence means the full
+# bootstrap (scaffold + toolchain install) succeeded — `copier update` re-runs
+# tasks, and this makes that a clean no-op instead of a failure.
+if [ -f "$SENTINEL" ]; then
+    printf "Vite scaffold already applied — nothing to do.\n"
+    exit 0
+fi
 
 if [ -f "package.json" ]; then
-    printf "Error: package.json already exists — the Vite scaffold has already been applied.\n" >&2
-    printf "Re-running the bootstrap would overwrite project state. Aborting.\n" >&2
+    printf "Error: package.json exists but %s is missing — a previous bootstrap\n" "$SENTINEL" >&2
+    printf "failed midway. Delete the generated directory and re-run copier copy.\n" >&2
     exit 1
 fi
 
@@ -52,5 +61,7 @@ npm install --save-dev \
     @types/node \
     dependency-cruiser \
     knip
+
+touch "$SENTINEL"
 
 printf "Vite scaffold merged and guardrail toolchain installed.\n"

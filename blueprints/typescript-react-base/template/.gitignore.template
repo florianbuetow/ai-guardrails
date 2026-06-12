@@ -8,13 +8,18 @@ dist/
 .vite/
 *.local
 
+# Env files
+.env
+
 # Test artifacts
 coverage/
 playwright-report/
 test-results/
+blob-report/
 
 # Vite scaffold staging dir (removed by bootstrap, listed for safety)
 .vite-scaffold/
+.bootstrap-complete
 
 # IDE
 .idea/

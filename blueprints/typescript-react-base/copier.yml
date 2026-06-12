@@ -36,8 +36,9 @@ _message_after_copy: |
     just run     # Start the Vite dev server
 
 # Post-generation tasks
+# ln -sf so `copier update` (which re-runs tasks) does not fail on the existing link
 _tasks:
-  - "ln -s AGENTS.md CLAUDE.md"
+  - "ln -sf AGENTS.md CLAUDE.md"
   - "bash scripts/bootstrap-vite.sh"
 
 # Questions
