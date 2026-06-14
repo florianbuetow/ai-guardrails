@@ -2,7 +2,7 @@
 
 ![Made with AI](https://img.shields.io/badge/Made%20with-AI-333333?labelColor=f00) ![Verified by Humans](https://img.shields.io/badge/Verified%20by-Humans-333333?labelColor=brightgreen)
 
-Copier templates for Python, Java, Go, Elixir, C++, and Rust that enforce strict validation guardrails on AI-generated code — catching antipatterns, suppressing silent defaults, and providing immediate feedback so AI agents write better, more maintainable code from the start.
+Copier templates for Python, Java, Go, Elixir, C++, Rust, Kotlin, and TypeScript/React that enforce strict validation guardrails on AI-generated code — catching antipatterns, suppressing silent defaults, and providing immediate feedback so AI agents write better, more maintainable code from the start.
 
 ## Quick Start
 
@@ -60,6 +60,24 @@ just init
 just run
 ```
 
+**Kotlin CLI:**
+
+```bash
+copier copy https://github.com/florianbuetow/ai-guardrails/blueprints/kotlin-cli-base my-kotlin-project
+cd my-kotlin-project
+just init
+just run
+```
+
+**TypeScript + React:**
+
+```bash
+copier copy https://github.com/florianbuetow/ai-guardrails/blueprints/react-vite-typescript-base my-react-project
+cd my-react-project
+just init
+just run
+```
+
 ## Features
 
 - **Multi-step CI pipelines** with fail-fast behavior across all templates
@@ -79,25 +97,27 @@ just run
 | [**elixir-otp-base**](blueprints/elixir-otp-base/) | Elixir 1.17+ | OTP apps with [Credo](https://github.com/rrrene/credo), [Dialyxir](https://github.com/jeremyjh/dialyxir), [Sobelow](https://github.com/nccgroup/sobelow), [mix_audit](https://github.com/mirego/mix_audit), [ExUnit](https://hexdocs.pm/ex_unit/) |
 | [**cpp-cli-base**](blueprints/cpp-cli-base/) | C++23 | CLI apps with [CMake](https://cmake.org/), [clang-format](https://clang.llvm.org/docs/ClangFormat.html), [clang-tidy](https://clang.llvm.org/extra/clang-tidy/), [cppcheck](https://github.com/danmar/cppcheck), [flawfinder](https://github.com/david-a-wheeler/flawfinder), [GoogleTest](https://github.com/google/googletest) |
 | [**rust-cli-base**](blueprints/rust-cli-base/) | Rust 2024 | CLI apps with [clippy](https://github.com/rust-lang/rust-clippy), [cargo-geiger](https://github.com/geiger-rs/cargo-geiger), [cargo-machete](https://github.com/bnjbvr/cargo-machete), [cargo-deny](https://github.com/EmbarkStudios/cargo-deny), [cargo-nextest](https://github.com/nextest-rs/nextest), [grcov](https://github.com/mozilla/grcov) |
+| [**kotlin-cli-base**](blueprints/kotlin-cli-base/) | Kotlin 2.1+ | CLI apps with [Gradle](https://gradle.org/), [ktlint](https://pinterest.github.io/ktlint/), [detekt](https://detekt.dev/), [Kover](https://github.com/Kotlin/kotlinx-kover), [Konsist](https://docs.konsist.lemonappdev.com/), [JUnit 5](https://junit.org/) |
+| [**react-vite-typescript-base**](blueprints/react-vite-typescript-base/) | TypeScript + React | Vite apps with [Prettier](https://prettier.io/), [ESLint](https://eslint.org/), [TypeScript](https://www.typescriptlang.org/), [knip](https://knip.dev/), [Vitest](https://vitest.dev/), [Playwright](https://playwright.dev/) |
 
 ## Validation Tools by Language
 
 Every template runs the same CI check categories via `just ci`. The table below shows which tool handles each check for each language.
 
-| Check | Python | Java | Go | Elixir | C++ | Rust |
-|-------|--------|------|----|--------|-----|------|
-| Formatting | [ruff](https://github.com/astral-sh/ruff) | [Spotless](https://github.com/diffplug/spotless) | [gofumpt](https://github.com/mvdan/gofumpt) | mix format | [clang-format](https://clang.llvm.org/docs/ClangFormat.html) | [rustfmt](https://github.com/rust-lang/rustfmt) |
-| Style | [ruff](https://github.com/astral-sh/ruff) | [Checkstyle](https://github.com/checkstyle/checkstyle) | [gofumpt](https://github.com/mvdan/gofumpt) | mix format | [clang-tidy](https://clang.llvm.org/extra/clang-tidy/) | [rustfmt](https://github.com/rust-lang/rustfmt) |
-| Type checking | [mypy](https://mypy-lang.org/) | [Error Prone](https://github.com/google/error-prone) | go vet | Dialyzer | [cppcheck](https://github.com/danmar/cppcheck) | cargo check + [clippy](https://github.com/rust-lang/rust-clippy) |
-| LSP analysis | [pyright](https://github.com/microsoft/pyright) | javac -Xlint:all -Werror | [staticcheck](https://staticcheck.dev/) | mix compile --warnings-as-errors | — | — |
-| Security | [bandit](https://github.com/PyCQA/bandit) | [SpotBugs](https://github.com/spotbugs/spotbugs) | [gosec](https://github.com/securego/gosec) | [Sobelow](https://github.com/nccgroup/sobelow) | [flawfinder](https://github.com/david-a-wheeler/flawfinder) | [cargo-geiger](https://github.com/geiger-rs/cargo-geiger) |
-| Dependency hygiene | [deptry](https://deptry.com/) | [Gradle](https://gradle.org/) buildHealth | go mod tidy | mix deps.unlock --check-unused | [IWYU](https://github.com/include-what-you-use/include-what-you-use) | [cargo-machete](https://github.com/bnjbvr/cargo-machete) |
-| Spell checking | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) |
-| Custom rules | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) | Custom [Credo](https://github.com/rrrene/credo) checks | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) |
-| Vulnerability scan | [pip-audit](https://github.com/pypa/pip-audit) | [Gradle Versions Plugin](https://github.com/ben-manes/gradle-versions-plugin) | [govulncheck](https://golang.org/x/vuln/cmd/govulncheck) | mix deps.audit + hex.audit | — | [cargo-deny](https://github.com/EmbarkStudios/cargo-deny) |
-| Testing | [pytest](https://pytest.org/) | [JUnit 5](https://junit.org/) | go test | [ExUnit](https://hexdocs.pm/ex_unit/) | [GoogleTest](https://github.com/google/googletest) | [cargo-nextest](https://github.com/nextest-rs/nextest) |
-| Meta-linter | — | — | [golangci-lint](https://golangci-lint.run/) | [Credo](https://github.com/rrrene/credo) | — | — |
-| Architecture | [pytestarch](https://github.com/zyskarch/pytestarch) | [ArchUnit](https://www.archunit.org/) | [arch-go](https://github.com/arch-go/arch-go) | [ex_arch_unit](https://hex.pm/packages/ex_arch_unit) | — | — |
+| Check | Python | Java | Go | Elixir | C++ | Rust | Kotlin | TypeScript/React |
+|-------|--------|------|----|--------|-----|------|--------|------------------|
+| Formatting | [ruff](https://github.com/astral-sh/ruff) | [Spotless](https://github.com/diffplug/spotless) | [gofumpt](https://github.com/mvdan/gofumpt) | mix format | [clang-format](https://clang.llvm.org/docs/ClangFormat.html) | [rustfmt](https://github.com/rust-lang/rustfmt) | [ktlint](https://pinterest.github.io/ktlint/) | [Prettier](https://prettier.io/) |
+| Style | [ruff](https://github.com/astral-sh/ruff) | [Checkstyle](https://github.com/checkstyle/checkstyle) | [gofumpt](https://github.com/mvdan/gofumpt) | mix format | [clang-tidy](https://clang.llvm.org/extra/clang-tidy/) | [rustfmt](https://github.com/rust-lang/rustfmt) | [ktlint](https://pinterest.github.io/ktlint/) | [Prettier](https://prettier.io/) |
+| Type checking | [mypy](https://mypy-lang.org/) | [Error Prone](https://github.com/google/error-prone) | go vet | Dialyzer | [cppcheck](https://github.com/danmar/cppcheck) | cargo check + [clippy](https://github.com/rust-lang/rust-clippy) | kotlinc | [tsc](https://www.typescriptlang.org/) |
+| LSP analysis | [pyright](https://github.com/microsoft/pyright) | javac -Xlint:all -Werror | [staticcheck](https://staticcheck.dev/) | mix compile --warnings-as-errors | — | — | kotlinc allWarningsAsErrors | tsc -b |
+| Security | [bandit](https://github.com/PyCQA/bandit) | [SpotBugs](https://github.com/spotbugs/spotbugs) | [gosec](https://github.com/securego/gosec) | [Sobelow](https://github.com/nccgroup/sobelow) | [flawfinder](https://github.com/david-a-wheeler/flawfinder) | [cargo-geiger](https://github.com/geiger-rs/cargo-geiger) | [detekt](https://detekt.dev/) | [ESLint](https://eslint.org/) (security config) |
+| Dependency hygiene | [deptry](https://deptry.com/) | [Gradle](https://gradle.org/) buildHealth | go mod tidy | mix deps.unlock --check-unused | [IWYU](https://github.com/include-what-you-use/include-what-you-use) | [cargo-machete](https://github.com/bnjbvr/cargo-machete) | [dependency-analysis](https://github.com/autonomousapps/dependency-analysis-gradle-plugin) | [knip](https://knip.dev/) |
+| Spell checking | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) |
+| Custom rules | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) | Custom [Credo](https://github.com/rrrene/credo) checks | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) |
+| Vulnerability scan | [pip-audit](https://github.com/pypa/pip-audit) | [Gradle Versions Plugin](https://github.com/ben-manes/gradle-versions-plugin) | [govulncheck](https://golang.org/x/vuln/cmd/govulncheck) | mix deps.audit + hex.audit | — | [cargo-deny](https://github.com/EmbarkStudios/cargo-deny) | [trivy](https://github.com/aquasecurity/trivy) | npm audit |
+| Testing | [pytest](https://pytest.org/) | [JUnit 5](https://junit.org/) | go test | [ExUnit](https://hexdocs.pm/ex_unit/) | [GoogleTest](https://github.com/google/googletest) | [cargo-nextest](https://github.com/nextest-rs/nextest) | [JUnit 5](https://junit.org/) + [Kover](https://github.com/Kotlin/kotlinx-kover) | [Vitest](https://vitest.dev/) + [Playwright](https://playwright.dev/) |
+| Meta-linter | — | — | [golangci-lint](https://golangci-lint.run/) | [Credo](https://github.com/rrrene/credo) | — | — | — | [ESLint](https://eslint.org/) |
+| Architecture | [pytestarch](https://github.com/zyskarch/pytestarch) | [ArchUnit](https://www.archunit.org/) | [arch-go](https://github.com/arch-go/arch-go) | [ex_arch_unit](https://hex.pm/packages/ex_arch_unit) | — | — | [Konsist](https://docs.konsist.lemonappdev.com/) | [dependency-cruiser](https://github.com/sverweij/dependency-cruiser) |
 
 See each template's README for tool details and configuration.
 
@@ -134,7 +154,7 @@ Use these plugins after scaffolding a project with AI Guardrails to maintain cod
 - **copier** - Template engine ([installation guide](https://copier.readthedocs.io/))
 
 Each template has its own language-specific prerequisites. See the template READMEs for details:
-[Python](blueprints/python-cli-base/) | [Java](blueprints/java-cli-base/) | [Go](blueprints/go-cli-base/) | [Elixir](blueprints/elixir-otp-base/) | [C++](blueprints/cpp-cli-base/) | [Rust](blueprints/rust-cli-base/)
+[Python](blueprints/python-cli-base/) | [Java](blueprints/java-cli-base/) | [Go](blueprints/go-cli-base/) | [Elixir](blueprints/elixir-otp-base/) | [C++](blueprints/cpp-cli-base/) | [Rust](blueprints/rust-cli-base/) | [Kotlin](blueprints/kotlin-cli-base/) | [TypeScript/React](blueprints/react-vite-typescript-base/)
 
 ## Installation
 
@@ -160,7 +180,7 @@ just run
 ```
 
 The `just create` command takes two arguments:
-1. Template name (e.g., `python-cli-base`, `java-cli-base`, `go-cli-base`, `elixir-otp-base`, `cpp-cli-base`, or `rust-cli-base`)
+1. Template name (e.g., `python-cli-base`, `java-cli-base`, `go-cli-base`, `elixir-otp-base`, `cpp-cli-base`, `rust-cli-base`, `kotlin-cli-base`, or `react-vite-typescript-base`)
 2. Target directory (absolute or relative path where the project will be created)
 
 **Method 2: Using Copier directly**
@@ -185,6 +205,8 @@ just test-go       # Run Go baseline + violation tests
 just test-elixir   # Run Elixir baseline + violation tests
 just test-cpp      # Run C++ baseline + violation tests
 just test-rust     # Run Rust baseline + violation tests
+just test-kotlin   # Run Kotlin baseline + violation tests
+just test-typescript  # Run TypeScript/React baseline + violation tests
 ```
 
 Each language suite now runs two phases:
@@ -214,7 +236,9 @@ ai-guardrails/
 │   ├── go-cli-base/                           # Go CLI template
 │   ├── elixir-otp-base/                       # Elixir OTP template
 │   ├── cpp-cli-base/                          # C++ CLI template
-│   └── rust-cli-base/                         # Rust CLI template
+│   ├── rust-cli-base/                         # Rust CLI template
+│   ├── kotlin-cli-base/                       # Kotlin CLI template
+│   └── react-vite-typescript-base/            # React + Vite + TypeScript template
 ├── tests/
 │   ├── run-tests.sh                           # Unified test entry point
 │   ├── lib/                                   # Shared test helpers and runner logic
@@ -226,14 +250,18 @@ ai-guardrails/
 │       ├── go.sh
 │       ├── elixir.sh
 │       ├── cpp.sh
-│       └── rust.sh
+│       ├── rust.sh
+│       ├── kotlin.sh
+│       └── typescript.sh
 ├── violations/                                 # Violation overlays used to force CI failures
 │   ├── python/
 │   ├── java/
 │   ├── go/
 │   ├── elixir/
 │   ├── cpp/
-│   └── rust/
+│   ├── rust/
+│   ├── kotlin/
+│   └── typescript/
 ├── config/                                     # Shared validation configs (semgrep, codespell)
 ├── docs/                                       # Documentation
 ├── justfile                                    # Quick setup commands
