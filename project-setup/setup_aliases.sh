@@ -20,6 +20,7 @@ ALIASES=(
   "newelixir:setup-project-elixir-claude.sh"
   "newrust:setup-project-rust-claude.sh"
   "newkotlin:setup-project-kotlin-claude.sh"
+  "newreact:setup-project-typescript-claude.sh"
 )
 UPDATE_ALIAS="alias update-templates='cd ~/scripts/ai-guardrails && git pull && cd - > /dev/null'"
 
@@ -150,6 +151,7 @@ echo "     newcpp my-project       # C++"
 echo "     newelixir my-project    # Elixir"
 echo "     newrust my-project      # Rust"
 echo "     newkotlin my-project    # Kotlin"
+echo "     newreact my-project     # TypeScript + React"
 echo ""
 echo "  3. Update templates to latest version:"
 echo "     update-templates"
