@@ -225,3 +225,9 @@ ignore-words = "config/codespell/ignore.txt"
 # Supply-chain protection: ignore packages published in the last 30 days,
 # giving the community time to detect and yank malicious releases.
 exclude-newer = "30 days"
+
+# Security floor: the latest semgrep transitively pins pyjwt to a vulnerable
+# 2.12.x via its [crypto] extra. Force the patched release so code-audit
+# (pip-audit) stays green; uv selects the newest semgrep compatible with this
+# floor and advances automatically once semgrep relaxes its pin upstream.
+constraint-dependencies = ["pyjwt>=2.13.0"]
