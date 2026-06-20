@@ -65,6 +65,7 @@ linters-settings:
     enable-all: true
 
   gofumpt:
+    module-path: "{{module_path}}"
     extra-rules: true
 
 issues:
