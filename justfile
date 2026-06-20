@@ -87,6 +87,7 @@ help:
 	@printf "  %-40s %s\n" "test-rust" "Run Rust baseline + violation tests"
 	@printf "  %-40s %s\n" "test-kotlin" "Run Kotlin baseline + violation tests"
 	@printf "  %-40s %s\n" "test-typescript" "Run TypeScript baseline + violation tests"
+	@printf "  %-40s %s\n" "test-create" "Run just create for all templates"
 	@printf "  %-40s %s\n" "ci" "Run all checks + all template tests"
 	@echo ""
 
@@ -332,6 +333,38 @@ test-typescript:
 	@echo ""
 	@./tests/run-tests.sh typescript && printf "\033[32m✓ typescript tests passed\033[0m\n" || { printf "\033[31m✗ typescript tests failed\033[0m\n"; exit 1; }
 	@echo ""
+
+# Test just create for all templates
+test-create:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo ""
+    tmp_dir="$(mktemp -d)"
+    trap 'rm -rf "$tmp_dir"' EXIT
+    for template_path in blueprints/*/; do
+        template="$(basename "$template_path")"
+        shortname="${template%-base}"
+        target_dir="$tmp_dir/$shortname"
+        printf "\033[0;34mTesting: just create %s\033[0m\n" "$template"
+        if ! just create "$template" "$target_dir"; then
+            printf "\033[31m✗ test-create failed for %s\033[0m\n" "$template"
+            exit 1
+        fi
+        printf "\033[0;34mRunning: just ci in %s\033[0m\n" "$shortname"
+        if ! (cd "$target_dir" && just ci); then
+            printf "\033[31m✗ test-create ci failed for %s\033[0m\n" "$template"
+            exit 1
+        fi
+        if [ -z "$target_dir" ] || [ "$target_dir" = "/" ]; then
+            printf "\033[31m✗ refusing to remove unsafe path: %s\033[0m\n" "$target_dir"
+            exit 1
+        fi
+        if [ -d "$target_dir" ]; then
+            rm -rf "$target_dir"
+        fi
+    done
+    printf "\033[32m✓ test-create passed for all templates\033[0m\n"
+    echo ""
 
 # Run all checks and all template tests
 ci: check code-spell code-semgrep code-shellcheck test
