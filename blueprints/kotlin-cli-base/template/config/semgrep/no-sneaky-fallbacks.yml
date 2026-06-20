@@ -12,11 +12,11 @@ rules:
       exclude:
         - /src/test/
 
-  - id: kotlin.no-runcatching-getordefault
+  - id: kotlin.no-result-get-or-null
     languages: [kotlin]
     message: >
-      Swallowing a failure with runCatching{...}.getOrDefault() hides errors.
-      Handle the failure explicitly or let it propagate.
+      Result.getOrNull() swallows the failure and returns null, hiding errors.
+      Handle the failure explicitly (onFailure, or getOrElse { error(...) }) or let it propagate.
     severity: ERROR
     pattern-regex: '\.getOrNull\s*\(\s*\)'
     paths:
