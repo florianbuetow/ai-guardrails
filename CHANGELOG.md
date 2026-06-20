@@ -14,17 +14,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Isolated per-rule violation tests for six Pyright strict-mode rules (missing-parameter-type, unknown-parameter-type, unknown-variable-type, unknown-member-type, unknown-argument-type, optional-call).
 - IWYU prerequisite check in C++ template `check` recipe.
 - Language-specific project setup scripts for all supported blueprints.
+- Added `test-create` target to smoke-test template creation across all blueprints.
 
 ### Changed
 
 - Promoted Pyright warning-level diagnostic rules to explicit `"error"` for deterministic CI failures.
 - Set `module_path` default to project name in Go template.
 - Renamed `code-deptry` recipe to `code-machete` in Rust template.
+- Renamed TypeScript/React template from `typescript-react-base` to `react-vite-typescript-base`.
+- Made Vite scaffold bootstrap non-interactive for automated template generation.
+- Kotlin code-security now runs type-resolved Detekt and emits Kover XML coverage reports.
 
 ### Fixed
 
 - Bounded trivy database download in Java and Kotlin code-audit to prevent CI hangs.
 - Fixed C++ `code-deptry` recipe to use `iwyu_tool.py` with compilation database instead of broken direct `include-what-you-use` invocation that failed to resolve system headers on macOS.
+- Fixed Kotlin template: corrected semgrep rule label, package name rendering, and test prerequisite timeout.
+- Fixed TypeScript template: code-security now fails on warnings; resolved generation smoke test issues.
+- Fixed Go test-coverage to propagate failed coverage parse errors via `pipefail`.
 
 ### Security
 
@@ -193,4 +200,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial project setup with automated local templates and prerequisite checks.
 - Git workflow guidelines: explicit file staging, push requirement, no AI attribution in commits.
 
-[Unreleased]: https://github.com/florianbuetow/ai-guardrails/compare/fdbac81...HEAD
+[Unreleased]: https://github.com/florianbuetow/ai-guardrails/compare/8643ef4...HEAD
