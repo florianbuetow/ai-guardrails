@@ -184,11 +184,11 @@ code-lspchecks:
     @printf "\033[32m✓ code-lspchecks completed successfully\033[0m\n"
     @echo ""
 
-# Run detekt static analysis (bug patterns, exception handling, complexity)
+# Run detekt static analysis with type resolution (bug patterns, exception handling, complexity)
 code-security:
     @echo ""
-    @printf "\033[34m=== Running Static Analysis (detekt) ===\033[0m\n"
-    @./gradlew detekt --quiet
+    @printf "\033[34m=== Running Static Analysis (detekt, type-resolved) ===\033[0m\n"
+    @./gradlew detektMain detektTest --quiet
     @printf "\033[32m✓ code-security completed successfully\033[0m\n"
     @echo ""
 
