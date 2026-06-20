@@ -55,6 +55,35 @@ restore_violation() {
     rm -rf "$backup_dir"
 }
 
+test_pre_commit_hook() {
+    local project_dir="$1"
+    local output
+
+    if [ ! -x "$project_dir/.git/hooks/pre-commit" ]; then
+        log_fail "Pre-commit hook is missing or not executable"
+        return 1
+    fi
+
+    output="$(cd "$project_dir" && UV_EXCLUDE_NEWER="2099-01-01" git commit --allow-empty -m "hook smoke" 2>&1)" || {
+        log_fail "Pre-commit hook smoke commit failed"
+        printf "%s\n" "$output"
+        return 1
+    }
+
+    if ! printf "%s\n" "$output" | grep -F "Running CI Checks (Quiet Mode)" >/dev/null; then
+        log_fail "Pre-commit hook did not run just ci-quiet"
+        printf "%s\n" "$output"
+        return 1
+    fi
+
+    if ! printf "%s\n" "$output" | grep -F "All CI checks passed" >/dev/null &&
+        ! printf "%s\n" "$output" | grep -F "ci-quiet completed successfully" >/dev/null; then
+        log_fail "Pre-commit hook did not complete the quiet CI checks"
+        printf "%s\n" "$output"
+        return 1
+    fi
+}
+
 run_language_tests() {
     local temp_dir
     local project_dir
@@ -100,6 +129,17 @@ run_language_tests() {
     fi
     log_pass "Baseline CI passed"
     total_tests=$((total_tests + 1))
+    passed_tests=$((passed_tests + 1))
+
+    # --- Hook smoke: a real commit must fire the generated pre-commit hook ---
+    log_section "$LANG_NAME pre-commit hook"
+
+    total_tests=$((total_tests + 1))
+    if ! test_pre_commit_hook "$project_dir"; then
+        cleanup_dir "$temp_dir"
+        return 1
+    fi
+    log_pass "Pre-commit hook fired and passed"
     passed_tests=$((passed_tests + 1))
 
     # --- Discover violation tests (skip in baseline mode) ---

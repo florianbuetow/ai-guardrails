@@ -176,12 +176,21 @@ check:
 init: check
     @echo ""
     @printf "\033[0;34m=== Initializing Development Environment ===\033[0m\n"
+    @if ! git rev-parse --git-dir >/dev/null 2>&1; then printf "Initializing git repository...\n" && git init -q; fi
     @mkdir -p reports/coverage
     @mkdir -p reports/security
     @echo "Configuring CMake debug preset..."
     @bin="$(just _llvm-bin)" && CC="$bin/clang" CXX="$bin/clang++" cmake --preset debug
     @echo "Building project..."
     @cmake --build --preset debug
+    @printf "Activating git hooks...\n"
+    @if [ ! -f ".git/hooks/pre-commit" ]; then \
+        printf "\033[0;31m✗ Error: .git/hooks/pre-commit is missing\033[0m\n"; \
+        printf "  Re-apply the template or restore the generated pre-commit hook.\n"; \
+        echo ""; \
+        exit 1; \
+    fi
+    @chmod +x .git/hooks/pre-commit
     @printf "\033[0;32m✓ Development environment ready\033[0m\n"
     @echo ""
 

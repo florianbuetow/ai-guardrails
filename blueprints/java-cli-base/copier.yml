@@ -37,6 +37,8 @@ _message_after_copy: |
 # Post-generation tasks
 _tasks:
   - "ln -s AGENTS.md CLAUDE.md"
+  - "git init -q"
+  - "mkdir -p .git/hooks && printf '%s\n' '#!/usr/bin/env sh' 'set -e' 'just ci-quiet' > .git/hooks/pre-commit"
 
 # Questions
 project_name:

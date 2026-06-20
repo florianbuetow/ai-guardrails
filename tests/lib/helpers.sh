@@ -57,8 +57,13 @@ generate_project() {
         "${copier_args[@]}" \
         "$template_path" "$target_dir"
 
-    # Semgrep only scans git-tracked files, so initialize a repo
-    (cd "$target_dir" && git init -q && git add -A && git commit -q -m "init")
+    # Semgrep only scans git-tracked files, so initialize a repo.
+    (cd "$target_dir" && \
+        git init -q && \
+        git config user.email template-tests@example.invalid && \
+        git config user.name "Template Tests" && \
+        git add -A && \
+        git -c advice.ignoredHook=false commit -q -m "init")
 }
 
 cleanup_dir() {
