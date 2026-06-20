@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""List dependency version specs declared by each template."""
+"""List direct library dependency specs declared by each template."""
 
 from __future__ import annotations
 
@@ -153,8 +153,6 @@ def python_dependency_group(section: str, key: str) -> str:
         return "Python project dependencies"
     if section == "project.optional-dependencies":
         return f"Python optional dependencies [{key}]"
-    if section == "build-system" and key == "requires":
-        return "Python build-system requirements"
     return ""
 
 
@@ -173,30 +171,10 @@ def parse_gradle_manifest(path: Path) -> list[Dependency]:
     dependencies: list[Dependency] = []
     in_dependencies = False
     dependency_depth = 0
-    block_stack: list[str] = []
 
     for line in path.read_text(encoding="utf-8").splitlines():
         stripped = line.strip()
         if not stripped or stripped.startswith("//"):
-            continue
-
-        plugin_match = re.search(r'id\("([^"]+)"\)\s+version\s+"([^"]+)"', stripped)
-        if plugin_match:
-            dependencies.append(Dependency("Gradle plugins", plugin_match.group(1), plugin_match.group(2), path.name))
-
-        kotlin_plugin_match = re.search(r'kotlin\("([^"]+)"\)\s+version\s+"([^"]+)"', stripped)
-        if kotlin_plugin_match:
-            dependencies.append(
-                Dependency("Gradle plugins", f'kotlin("{kotlin_plugin_match.group(1)}")', kotlin_plugin_match.group(2), path.name)
-            )
-
-        block_match = re.match(r"([A-Za-z][A-Za-z0-9_]*)\s*\{", stripped)
-        if block_match:
-            block_name = block_match.group(1)
-            block_stack.append(block_name)
-            if block_name == "dependencies":
-                in_dependencies = True
-                dependency_depth = 1
             continue
 
         if in_dependencies:
@@ -206,22 +184,23 @@ def parse_gradle_manifest(path: Path) -> list[Dependency]:
                 in_dependencies = False
             continue
 
-        if block_stack:
-            dependencies.extend(parse_gradle_tool_version(path, stripped, block_stack[-1]))
-
-        if stripped == "}" and block_stack:
-            block_stack.pop()
+        if re.match(r"dependencies\s*\{", stripped):
+            in_dependencies = True
+            dependency_depth = 1
 
     return dependencies
 
 
 def parse_gradle_dependency_line(path: Path, stripped: str) -> list[Dependency]:
-    dependency_match = re.match(r'([A-Za-z][A-Za-z0-9_]*)\((?:platform\()?\"([^\"]+)\"', stripped)
+    dependency_match = re.match(r'([A-Za-z][A-Za-z0-9_]*)\((platform\()?\"([^\"]+)\"', stripped)
     if not dependency_match:
         return []
 
     configuration = dependency_match.group(1)
-    coordinate = dependency_match.group(2)
+    if dependency_match.group(2):
+        return []
+
+    coordinate = dependency_match.group(3)
     name, spec = split_colon_coordinate(coordinate)
     return [Dependency(f"Gradle dependencies [{configuration}]", name, spec, path.name)]
 
@@ -231,16 +210,6 @@ def split_colon_coordinate(coordinate: str) -> tuple[str, str]:
     if len(parts) >= 3:
         return ":".join(parts[:-1]), parts[-1]
     return coordinate, MANAGED
-
-
-def parse_gradle_tool_version(path: Path, stripped: str, block_name: str) -> list[Dependency]:
-    if block_name not in {"checkstyle", "jacoco", "ktlint"}:
-        return []
-
-    tool_match = re.match(r'(toolVersion|version)\s*=\s*"([^"]+)"', stripped)
-    if not tool_match:
-        return []
-    return [Dependency("Gradle tool versions", f"{block_name}.{tool_match.group(1)}", tool_match.group(2), path.name)]
 
 
 def parse_go_manifest(path: Path) -> list[Dependency]:
@@ -361,11 +330,6 @@ def parse_npm_bootstrap(path: Path) -> list[Dependency]:
         stripped = line.strip()
         if not stripped or stripped.startswith("#"):
             continue
-
-        create_match = re.search(r"\bnpm\s+create\s+-y\s+([^\s]+)", stripped)
-        if create_match:
-            name, spec = split_npm_package(create_match.group(1))
-            dependencies.append(Dependency("npm scaffold packages", name, spec, path.name))
 
         for name, spec in re.findall(r"devDependencies\.([A-Za-z0-9_@./-]+)=\"([^\"]+)\"", stripped):
             dependencies.append(Dependency("npm pinned devDependencies", name, spec, path.name))

@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Verified generated hooks against real template commits in the lifecycle workflow.
+- Exposed template dependency pins from the lifecycle workflow.
 - Kotlin CLI template (kotlin-cli-base) with ktlint, detekt, Kover, Konsist, and violation tests.
 - TypeScript + React template (react-vite-typescript-base) with Vite, ESLint, Vitest, and Playwright.
 - Project-creation aliases for every language, including `newkotlin` and `newreact`.
@@ -18,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Scoped C++ compiler warning errors, style logs, and tests to owned code only.
+- Elixir template now owns its hook installation.
+- Aligned Go linter configuration with module paths.
 - Promoted Pyright warning-level diagnostic rules to explicit `"error"` for deterministic CI failures.
 - Set `module_path` default to project name in Go template.
 - Renamed `code-deptry` recipe to `code-machete` in Rust template.
@@ -200,4 +205,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial project setup with automated local templates and prerequisite checks.
 - Git workflow guidelines: explicit file staging, push requirement, no AI attribution in commits.
 
-[Unreleased]: https://github.com/florianbuetow/ai-guardrails/compare/8643ef4...HEAD
+[Unreleased]: https://github.com/florianbuetow/ai-guardrails/compare/b403d96...HEAD

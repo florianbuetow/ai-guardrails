@@ -45,7 +45,7 @@ help:
 	@printf "\033[0;33mSetup & Lifecycle:\033[0m\n"
 	@printf "  %-40s %s\n" "init" "Install templates and set up aliases"
 	@printf "  %-40s %s\n" "check" "Check if all required tools are installed"
-	@printf "  %-40s %s\n" "info" "List dependency versions declared by all templates"
+	@printf "  %-40s %s\n" "info" "List direct library dependencies declared by all templates"
 	@printf "  %-40s %s\n" "help" "Show this help message"
 	@echo ""
 	@printf "\033[0;33mProject Scaffolding:\033[0m\n"
@@ -89,6 +89,7 @@ help:
 	@printf "  %-40s %s\n" "test-kotlin" "Run Kotlin baseline + violation tests"
 	@printf "  %-40s %s\n" "test-typescript" "Run TypeScript baseline + violation tests"
 	@printf "  %-40s %s\n" "test-create" "Run just create for all templates"
+	@printf "  %-40s %s\n" "test-info" "Test direct dependency inventory output"
 	@printf "  %-40s %s\n" "ci" "Run all checks + all template tests"
 	@echo ""
 
@@ -170,10 +171,10 @@ check:
 	printf "\033[32m✓ all required tools are installed\033[0m\n"
 	@echo ""
 
-# List dependency versions declared by all templates
+# List direct library dependencies declared by all templates
 info:
 	@echo ""
-	@printf "\033[0;34m=== Template Dependency Info ===\033[0m\n"
+	@printf "\033[0;34m=== Template Direct Dependency Info ===\033[0m\n"
 	@echo ""
 	@if command -v python3 >/dev/null 2>&1; then \
 		python_cmd="python3"; \
@@ -386,8 +387,26 @@ test-create:
     printf "\033[32m✓ test-create passed for all templates\033[0m\n"
     echo ""
 
+# Test direct dependency inventory output
+test-info:
+	@echo ""
+	@printf "\033[0;34m=== Testing Template Dependency Info ===\033[0m\n"
+	@if command -v python3 >/dev/null 2>&1; then \
+		python_cmd="python3"; \
+	elif command -v python >/dev/null 2>&1; then \
+		python_cmd="python"; \
+	else \
+		printf "\033[31m✗ Error: python is not installed\033[0m\n"; \
+		echo ""; \
+		exit 1; \
+	fi; \
+	"$python_cmd" tests/test_template_info.py \
+		&& printf "\033[32m✓ template info tests passed\033[0m\n" \
+		|| { printf "\033[31m✗ template info tests failed\033[0m\n"; exit 1; }
+	@echo ""
+
 # Run all checks and all template tests
-ci: check code-spell code-semgrep code-shellcheck test test-create
+ci: check code-spell code-semgrep code-shellcheck test-info test test-create
 	@echo ""
 	@printf "\033[32m✓ ci passed\033[0m\n"
 	@echo ""
