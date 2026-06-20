@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.25)
 project({{project_name}} VERSION 0.1.0 LANGUAGES CXX)
 
+# Require LLVM/Clang; fail loudly rather than silently using AppleClang, GCC, or MSVC.
+if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    message(FATAL_ERROR
+        "Requires LLVM/Clang. Found '${CMAKE_CXX_COMPILER_ID}'. "
+        "Install LLVM and point CC/CXX at it (macOS: brew install llvm).")
+endif()
+
 # C++ standard
 set(CMAKE_CXX_STANDARD {{cpp_standard}})
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -9,17 +16,27 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Export compile_commands.json for clang-tidy, IWYU, etc.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Strict compiler warnings
-if(MSVC)
-    add_compile_options(/W4 /WX /permissive-)
-else()
-    add_compile_options(
-        -Wall -Wextra -Wpedantic -Werror
-        -Wconversion -Wsign-conversion -Wshadow
-        -Wnon-virtual-dtor -Wold-style-cast -Wcast-align
-        -Woverloaded-virtual -Wunused
-    )
-endif()
+# Strict compiler warnings for project-owned targets.
+option(PROJECT_WARNINGS_AS_ERRORS "Treat project warnings as errors" ON)
+
+function(enable_project_warnings target_name)
+    if(MSVC)
+        target_compile_options(${target_name} PRIVATE /W4 /permissive-)
+        if(PROJECT_WARNINGS_AS_ERRORS)
+            target_compile_options(${target_name} PRIVATE /WX)
+        endif()
+    else()
+        target_compile_options(${target_name} PRIVATE
+            -Wall -Wextra -Wpedantic
+            -Wconversion -Wsign-conversion -Wshadow
+            -Wnon-virtual-dtor -Wold-style-cast -Wcast-align
+            -Woverloaded-virtual -Wunused
+        )
+        if(PROJECT_WARNINGS_AS_ERRORS)
+            target_compile_options(${target_name} PRIVATE -Werror)
+        endif()
+    endif()
+endfunction()
 
 # Coverage flags (enabled via CMakePresets.json)
 option(ENABLE_COVERAGE "Enable code coverage instrumentation" OFF)
@@ -47,10 +64,12 @@ add_library(${PROJECT_NAME}_lib STATIC
 target_include_directories(${PROJECT_NAME}_lib PUBLIC
     ${CMAKE_SOURCE_DIR}/include
 )
+enable_project_warnings(${PROJECT_NAME}_lib)
 
 # Main executable
 add_executable(${PROJECT_NAME} src/main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_lib)
+enable_project_warnings(${PROJECT_NAME})
 
 # Testing
 option(BUILD_TESTING "Build tests" ON)
@@ -61,6 +80,7 @@ if(BUILD_TESTING)
         googletest
         GIT_REPOSITORY https://github.com/google/googletest.git
         GIT_TAG v1.15.2
+        SYSTEM
     )
     FetchContent_MakeAvailable(googletest)
 
@@ -71,6 +91,7 @@ if(BUILD_TESTING)
         ${PROJECT_NAME}_lib
         GTest::gtest_main
     )
+    enable_project_warnings(${PROJECT_NAME}_tests)
 
     include(GoogleTest)
     gtest_discover_tests(${PROJECT_NAME}_tests)

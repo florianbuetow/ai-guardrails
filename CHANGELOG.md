@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Kotlin CLI template (kotlin-cli-base) with ktlint, detekt, Kover, Konsist, and violation tests.
+- TypeScript + React template (react-vite-typescript-base) with Vite, ESLint, Vitest, and Playwright.
+- Project-creation aliases for every language, including `newkotlin` and `newreact`.
 - Isolated per-rule violation tests for six Pyright strict-mode rules (missing-parameter-type, unknown-parameter-type, unknown-variable-type, unknown-member-type, unknown-argument-type, optional-call).
 - IWYU prerequisite check in C++ template `check` recipe.
 - Language-specific project setup scripts for all supported blueprints.
@@ -20,7 +23,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Bounded trivy database download in Java and Kotlin code-audit to prevent CI hangs.
 - Fixed C++ `code-deptry` recipe to use `iwyu_tool.py` with compilation database instead of broken direct `include-what-you-use` invocation that failed to resolve system headers on macOS.
+
+### Security
+
+- Pinned pyjwt floor to 2.13.0 in Python template to satisfy pip-audit.
 
 ## 2026-03-30
 

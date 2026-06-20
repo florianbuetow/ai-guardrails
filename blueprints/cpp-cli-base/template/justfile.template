@@ -69,6 +69,32 @@ help:
     @printf "  %-40s %s\n" "ci-quiet" "Run ALL validation checks silently"
     @echo ""
 
+# Resolve the LLVM/Clang bin directory (rejects AppleClang); print it, or fail.
+[private]
+_llvm-bin:
+    #!/usr/bin/env bash
+    case "$(uname -s)" in
+        Darwin)
+            if command -v brew >/dev/null 2>&1; then
+                prefix="$(brew --prefix llvm 2>/dev/null)"
+                if [ -n "$prefix" ] && [ -x "$prefix/bin/clang++" ]; then
+                    printf '%s\n' "$prefix/bin"
+                    exit 0
+                fi
+            fi
+            printf "\033[0;31m✗ Error: LLVM/Clang not found. Install with: brew install llvm\033[0m\n" >&2
+            exit 1
+            ;;
+        *)
+            if command -v clang++ >/dev/null 2>&1; then
+                dirname "$(command -v clang++)"
+                exit 0
+            fi
+            printf "\033[0;31m✗ Error: LLVM/Clang (clang++) not found on PATH\033[0m\n" >&2
+            exit 1
+            ;;
+    esac
+
 # Check prerequisites
 check:
     @echo ""
@@ -79,13 +105,8 @@ check:
         exit 1; \
     fi
     @printf "\033[0;32m✓ cmake is installed\033[0m\n"
-    @if ! command -v c++ >/dev/null 2>&1 && ! command -v g++ >/dev/null 2>&1; then \
-        printf "\033[0;31m✗ Error: no C++ compiler found (c++ or g++)\033[0m\n"; \
-        printf "  Install Xcode Command Line Tools: xcode-select --install\n"; \
-        echo ""; \
-        exit 1; \
-    fi
-    @printf "\033[0;32m✓ C++ compiler is installed\033[0m\n"
+    @just _llvm-bin >/dev/null
+    @printf "\033[0;32m✓ LLVM/Clang is installed\033[0m\n"
     @if ! command -v clang-format >/dev/null 2>&1; then \
         printf "\033[0;31m✗ Error: clang-format is not installed\033[0m\n"; \
         printf "  Install with: brew install clang-format\n"; \
@@ -158,7 +179,7 @@ init: check
     @mkdir -p reports/coverage
     @mkdir -p reports/security
     @echo "Configuring CMake debug preset..."
-    @cmake --preset debug
+    @bin="$(just _llvm-bin)" && CC="$bin/clang" CXX="$bin/clang++" cmake --preset debug
     @echo "Building project..."
     @cmake --build --preset debug
     @printf "\033[0;32m✓ Development environment ready\033[0m\n"
@@ -296,7 +317,7 @@ code-semgrep:
 code-sanitize:
     @echo ""
     @printf "\033[0;34m=== Running Sanitizer Tests ===\033[0m\n"
-    @cmake --preset sanitize
+    @bin="$(just _llvm-bin)" && CC="$bin/clang" CXX="$bin/clang++" cmake --preset sanitize
     @cmake --build --preset sanitize
     @ctest --preset sanitize
     @printf "\033[0;32m✓ Sanitizer tests passed\033[0m\n"
@@ -320,7 +341,8 @@ test-coverage:
     mkdir -p reports/coverage
 
     # Configure and build with coverage preset
-    cmake --preset coverage
+    bin="$(just _llvm-bin)"
+    CC="$bin/clang" CXX="$bin/clang++" cmake --preset coverage
     cmake --build --preset coverage
 
     # Run tests

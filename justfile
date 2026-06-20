@@ -367,7 +367,7 @@ test-create:
     echo ""
 
 # Run all checks and all template tests
-ci: check code-spell code-semgrep code-shellcheck test
+ci: check code-spell code-semgrep code-shellcheck test test-create
 	@echo ""
 	@printf "\033[32m✓ ci passed\033[0m\n"
 	@echo ""
