@@ -3,7 +3,7 @@
 set -euo pipefail
 
 LANG_NAME="TypeScript"
-TEMPLATE_DIR="typescript-react-base"
+TEMPLATE_DIR="react-vite-typescript-base"
 PROJECT_NAME="test-react-project"
 COPIER_DATA=(
     "project_name=test-react-project"

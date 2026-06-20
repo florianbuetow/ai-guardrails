@@ -102,7 +102,7 @@ This is an inverted test pattern: a passing test means the project's own CI caug
 - Validation: ktlint, detekt, kotlinc allWarningsAsErrors, semgrep, codespell, dependency-analysis, trivy, Gradle Versions Plugin, Konsist, JUnit 5, Kover
 - Conventions: Justfile workflow, `./gradlew` exclusively, no `@Suppress`, no silent fallbacks, strict compiler warnings as errors
 
-### The TypeScript React Template (`blueprints/typescript-react-base`)
+### The React Vite TypeScript Template (`blueprints/react-vite-typescript-base`)
 
 - React + Vite + TypeScript, Node 22+/24+, npm-only tooling
 - Two-phase generation: Copier provisions guardrails, then a post-task runs `npm create vite` and merges the scaffold into the project root (nothing frozen — current scaffold and tool versions at every apply; network required)

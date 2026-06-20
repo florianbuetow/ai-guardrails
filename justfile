@@ -59,7 +59,7 @@ help:
 	@printf "    %-36s %s\n" "cpp-cli-base" "C++ CLI application"
 	@printf "    %-36s %s\n" "rust-cli-base" "Rust CLI application"
 	@printf "    %-36s %s\n" "kotlin-cli-base" "Kotlin CLI application"
-	@printf "    %-36s %s\n" "typescript-react-base" "React + Vite + TypeScript application"
+	@printf "    %-36s %s\n" "react-vite-typescript-base" "React + Vite + TypeScript application"
 	@echo ""
 	@printf "\033[0;33mCode Quality:\033[0m\n"
 	@printf "  %-40s %s\n" "code-spell" "Check spelling across the repository"

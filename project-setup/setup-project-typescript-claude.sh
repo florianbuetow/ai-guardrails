@@ -15,7 +15,7 @@ if [ ! -f "$SETUP_SCRIPT" ]; then
   exit 1
 fi
 
-"$SETUP_SCRIPT" --template typescript-react-base --target "$TARGET_DIR"
+"$SETUP_SCRIPT" --template react-vite-typescript-base --target "$TARGET_DIR"
 EXIT_CODE=$?
 
 if [ $EXIT_CODE -eq 0 ]; then

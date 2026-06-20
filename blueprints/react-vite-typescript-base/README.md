@@ -1,4 +1,4 @@
-# TypeScript React Base Template
+# React Vite TypeScript Base Template
 
 Production-ready Copier template for React + Vite + TypeScript applications with full validation infrastructure.
 
@@ -31,7 +31,7 @@ Requires network access at generation time (`npm create vite` + `npm install`).
 ## Template Structure
 
 ```
-blueprints/typescript-react-base/
+blueprints/react-vite-typescript-base/
 ├── copier.yml                          # Template configuration
 ├── README.md                           # This file
 └── template/                           # Template files
@@ -82,13 +82,13 @@ Everything else (`package.json`, `vite.config.ts`, `tsconfig*.json`, `index.html
 
 ```bash
 cd /path/to/ai-guardrails
-just create typescript-react-base my-react-app
+just create react-vite-typescript-base my-react-app
 ```
 
 ### Direct Copier usage
 
 ```bash
-copier copy --trust blueprints/typescript-react-base my-react-app
+copier copy --trust blueprints/react-vite-typescript-base my-react-app
 cd my-react-app
 just init
 just run

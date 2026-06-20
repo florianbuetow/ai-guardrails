@@ -2,7 +2,7 @@
 
 ![Made with AI](https://img.shields.io/badge/Made%20with-AI-333333?labelColor=f00) ![Verified by Humans](https://img.shields.io/badge/Verified%20by-Humans-333333?labelColor=brightgreen)
 
-Copier templates for Python, Java, Go, Elixir, C++, Rust, Kotlin, and TypeScript/React that enforce strict validation guardrails on AI-generated code — catching antipatterns, suppressing silent defaults, and providing immediate feedback so AI agents write better, more maintainable code from the start.
+Copier templates for Python, Java, Go, Elixir, C++, Rust, Kotlin, and React/Vite/TypeScript that enforce strict validation guardrails on AI-generated code — catching antipatterns, suppressing silent defaults, and providing immediate feedback so AI agents write better, more maintainable code from the start.
 
 ## Quick Start
 
@@ -69,7 +69,7 @@ just init
 just run
 ```
 
-**TypeScript + React:**
+**React + Vite + TypeScript:**
 
 ```bash
 copier copy https://github.com/florianbuetow/ai-guardrails/blueprints/react-vite-typescript-base my-react-project
@@ -98,13 +98,13 @@ just run
 | [**cpp-cli-base**](blueprints/cpp-cli-base/) | C++23 | CLI apps with [CMake](https://cmake.org/), [clang-format](https://clang.llvm.org/docs/ClangFormat.html), [clang-tidy](https://clang.llvm.org/extra/clang-tidy/), [cppcheck](https://github.com/danmar/cppcheck), [flawfinder](https://github.com/david-a-wheeler/flawfinder), [GoogleTest](https://github.com/google/googletest) |
 | [**rust-cli-base**](blueprints/rust-cli-base/) | Rust 2024 | CLI apps with [clippy](https://github.com/rust-lang/rust-clippy), [cargo-geiger](https://github.com/geiger-rs/cargo-geiger), [cargo-machete](https://github.com/bnjbvr/cargo-machete), [cargo-deny](https://github.com/EmbarkStudios/cargo-deny), [cargo-nextest](https://github.com/nextest-rs/nextest), [grcov](https://github.com/mozilla/grcov) |
 | [**kotlin-cli-base**](blueprints/kotlin-cli-base/) | Kotlin 2.1+ | CLI apps with [Gradle](https://gradle.org/), [ktlint](https://pinterest.github.io/ktlint/), [detekt](https://detekt.dev/), [Kover](https://github.com/Kotlin/kotlinx-kover), [Konsist](https://docs.konsist.lemonappdev.com/), [JUnit 5](https://junit.org/) |
-| [**react-vite-typescript-base**](blueprints/react-vite-typescript-base/) | TypeScript + React | Vite apps with [Prettier](https://prettier.io/), [ESLint](https://eslint.org/), [TypeScript](https://www.typescriptlang.org/), [knip](https://knip.dev/), [Vitest](https://vitest.dev/), [Playwright](https://playwright.dev/) |
+| [**react-vite-typescript-base**](blueprints/react-vite-typescript-base/) | React + Vite + TypeScript | Vite apps with [Prettier](https://prettier.io/), [ESLint](https://eslint.org/), [TypeScript](https://www.typescriptlang.org/), [knip](https://knip.dev/), [Vitest](https://vitest.dev/), [Playwright](https://playwright.dev/) |
 
 ## Validation Tools by Language
 
 Every template runs the same CI check categories via `just ci`. The table below shows which tool handles each check for each language.
 
-| Check | Python | Java | Go | Elixir | C++ | Rust | Kotlin | TypeScript/React |
+| Check | Python | Java | Go | Elixir | C++ | Rust | Kotlin | React/Vite/TypeScript |
 |-------|--------|------|----|--------|-----|------|--------|------------------|
 | Formatting | [ruff](https://github.com/astral-sh/ruff) | [Spotless](https://github.com/diffplug/spotless) | [gofumpt](https://github.com/mvdan/gofumpt) | mix format | [clang-format](https://clang.llvm.org/docs/ClangFormat.html) | [rustfmt](https://github.com/rust-lang/rustfmt) | [ktlint](https://pinterest.github.io/ktlint/) | [Prettier](https://prettier.io/) |
 | Style | [ruff](https://github.com/astral-sh/ruff) | [Checkstyle](https://github.com/checkstyle/checkstyle) | [gofumpt](https://github.com/mvdan/gofumpt) | mix format | [clang-tidy](https://clang.llvm.org/extra/clang-tidy/) | [rustfmt](https://github.com/rust-lang/rustfmt) | [ktlint](https://pinterest.github.io/ktlint/) | [Prettier](https://prettier.io/) |
@@ -154,7 +154,7 @@ Use these plugins after scaffolding a project with AI Guardrails to maintain cod
 - **copier** - Template engine ([installation guide](https://copier.readthedocs.io/))
 
 Each template has its own language-specific prerequisites. See the template READMEs for details:
-[Python](blueprints/python-cli-base/) | [Java](blueprints/java-cli-base/) | [Go](blueprints/go-cli-base/) | [Elixir](blueprints/elixir-otp-base/) | [C++](blueprints/cpp-cli-base/) | [Rust](blueprints/rust-cli-base/) | [Kotlin](blueprints/kotlin-cli-base/) | [TypeScript/React](blueprints/react-vite-typescript-base/)
+[Python](blueprints/python-cli-base/) | [Java](blueprints/java-cli-base/) | [Go](blueprints/go-cli-base/) | [Elixir](blueprints/elixir-otp-base/) | [C++](blueprints/cpp-cli-base/) | [Rust](blueprints/rust-cli-base/) | [Kotlin](blueprints/kotlin-cli-base/) | [React/Vite/TypeScript](blueprints/react-vite-typescript-base/)
 
 ## Installation
 
@@ -206,7 +206,7 @@ just test-elixir   # Run Elixir baseline + violation tests
 just test-cpp      # Run C++ baseline + violation tests
 just test-rust     # Run Rust baseline + violation tests
 just test-kotlin   # Run Kotlin baseline + violation tests
-just test-typescript  # Run TypeScript/React baseline + violation tests
+just test-typescript  # Run React/Vite/TypeScript baseline + violation tests
 ```
 
 Each language suite now runs two phases:
