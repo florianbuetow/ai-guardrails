@@ -112,6 +112,11 @@ just
 - `just code-spell` - Check spelling
 - `just code-semgrep` - Run custom static analysis
 
+`just code-style` runs `clang-tidy` in quiet mode so CI output focuses on
+diagnostics from project-owned source files. To inspect suppressed non-user,
+system, or dependency warning context while debugging the clang-tidy setup,
+remove `--quiet` from the `code-style` recipe in `justfile`.
+
 ### Testing
 
 - `just test` - Run unit tests

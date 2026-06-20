@@ -230,7 +230,7 @@ code-style:
     fi
     FILES=$(find src/ -type f -name "*.cpp" 2>/dev/null)
     if [ -n "$FILES" ]; then
-        echo "$FILES" | xargs clang-tidy -p build/debug $EXTRA_ARGS
+        echo "$FILES" | xargs clang-tidy --quiet -p build/debug $EXTRA_ARGS
     fi
     printf "\033[0;32m✓ Style checks passed\033[0m\n"
     echo ""

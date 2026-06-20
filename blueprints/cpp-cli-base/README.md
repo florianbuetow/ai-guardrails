@@ -106,6 +106,10 @@ Projects created from this template include:
 - **Semgrep rules**: Ban raw new/delete, C-style casts, goto, malloc/free, warning suppression
 - **Directory structure**: src/, include/, tests/, scripts/, data/
 
+The generated `just code-style` recipe runs `clang-tidy` with `--quiet` so
+passing CI logs focus on project-owned diagnostics. Remove `--quiet` from that
+recipe when investigating non-user, system, or dependency warning context.
+
 ## Semgrep Rules
 
 | Rule | Purpose |
