@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed TypeScript/React template from `typescript-react-base` to `react-vite-typescript-base`.
 - Made Vite scaffold bootstrap non-interactive for automated template generation.
 - Kotlin code-security now runs type-resolved Detekt and emits Kover XML coverage reports.
+- Renamed `just info` to `just show-libs`; output now highlights template names in color.
+- Dependency inventory tests now run before template generation suites in `just ci`.
 
 ### Fixed
 
@@ -205,4 +207,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial project setup with automated local templates and prerequisite checks.
 - Git workflow guidelines: explicit file staging, push requirement, no AI attribution in commits.
 
-[Unreleased]: https://github.com/florianbuetow/ai-guardrails/compare/b403d96...HEAD
+[Unreleased]: https://github.com/florianbuetow/ai-guardrails/compare/bcab34c...HEAD
