@@ -230,11 +230,11 @@ test:
     @printf "\033[32m✓ test completed successfully\033[0m\n"
     @echo ""
 
-# Run unit tests with coverage report and threshold check
+# Run unit tests with coverage report (XML) and threshold check
 test-coverage: init
     @echo ""
     @printf "\033[34m=== Running Unit Tests with Coverage ===\033[0m\n"
-    @./gradlew koverVerify --quiet
+    @./gradlew koverXmlReport koverVerify --quiet
     @printf "\033[32m✓ test-coverage completed successfully\033[0m\n"
     @echo ""
 
