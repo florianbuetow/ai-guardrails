@@ -37,8 +37,7 @@ defmodule TestOtpApp.MixProject do
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
       {:plug, "~> 1.7.0"},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
-      {:ex_arch_unit, "~> 0.1.0", only: [:dev, :test], runtime: false},
-      {:git_hooks, "~> 0.8", only: [:dev], runtime: false}
+      {:ex_arch_unit, "~> 0.1.0", only: [:dev, :test], runtime: false}
     ]
   end
 end

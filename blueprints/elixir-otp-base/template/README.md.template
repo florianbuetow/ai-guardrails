@@ -15,7 +15,7 @@
 ├── CLAUDE.md               # Claude Code compatibility (symlink to AGENTS.md)
 ├── README.md               # This file
 ├── config/                 # Configuration files
-│   ├── config.exs          # Application config (git hooks, etc.)
+│   ├── config.exs          # Application config
 │   └── codespell/          # Spell-check configuration
 │       └── ignore.txt      # Spell-check ignore list
 ├── lib/                    # Source code
@@ -35,6 +35,7 @@
 - **Elixir {{elixir_version}}+** - Programming language
 - **Erlang/OTP 26+** - Runtime platform
 - **just** - Command runner ([installation guide](https://github.com/casey/just#installation))
+- **git** - Version control and local hook support
 - **codespell** - Spell checker (optional, `brew install codespell` or `pip install codespell`)
 
 ## Setup
@@ -48,6 +49,7 @@ just init
 This will:
 - Fetch all dependencies via `mix deps.get`
 - Compile the project via `mix compile`
+- Activate the generated `.git/hooks/pre-commit` hook
 
 ## Usage
 

@@ -6,7 +6,7 @@ Production-ready Copier template for Elixir OTP applications with full validatio
 
 - **Elixir 1.17+** with Mix build tool
 - **Just task runner** for all commands
-- **Git hooks** via git_hooks hex package
+- **Repo-owned Git hooks** installed by the template and activated by `just init`
 - **Comprehensive AGENTS.md** for AI-assisted development
 - **Git worktree workflow** support
 
@@ -99,7 +99,7 @@ Projects created from this template include:
 - **Complete validation suite**: Credo, Dialyxir, Sobelow, mix_audit, codespell
 - **Custom Credo checks**: Bans default parameters, fallback operators, Map.get defaults, Dialyzer suppression
 - **Just recipes**: init, run, destroy, code-*, test, ci, ci-quiet
-- **Git hooks**: Runs `just ci-quiet` on commit via git_hooks
+- **Git hooks**: Runs `just ci-quiet` on commit via a generated `.git/hooks/pre-commit` script
 - **AI agent rules**: AGENTS.md with strict development guidelines
 - **Git commit rules**: No AI attribution, explicit file staging
 - **Architecture testing**: ex_arch_unit layer boundary enforcement and cycle detection
