@@ -114,7 +114,7 @@ Every template runs the same CI check categories via `just ci`. The table below 
 | Dependency hygiene | [deptry](https://deptry.com/) | [Gradle](https://gradle.org/) buildHealth | go mod tidy | mix deps.unlock --check-unused | [IWYU](https://github.com/include-what-you-use/include-what-you-use) | [cargo-machete](https://github.com/bnjbvr/cargo-machete) | [dependency-analysis](https://github.com/autonomousapps/dependency-analysis-gradle-plugin) | [knip](https://knip.dev/) |
 | Spell checking | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) |
 | Custom rules | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) | Custom [Credo](https://github.com/rrrene/credo) checks | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) |
-| Vulnerability scan | [pip-audit](https://github.com/pypa/pip-audit) | [Gradle Versions Plugin](https://github.com/ben-manes/gradle-versions-plugin) | [govulncheck](https://golang.org/x/vuln/cmd/govulncheck) | mix deps.audit + hex.audit | — | [cargo-deny](https://github.com/EmbarkStudios/cargo-deny) | [trivy](https://github.com/aquasecurity/trivy) | npm audit |
+| Vulnerability scan | [pip-audit](https://github.com/pypa/pip-audit) | [trivy](https://github.com/aquasecurity/trivy) | [govulncheck](https://golang.org/x/vuln/cmd/govulncheck) | mix deps.audit + hex.audit | — | [cargo-deny](https://github.com/EmbarkStudios/cargo-deny) | [trivy](https://github.com/aquasecurity/trivy) | npm audit |
 | Testing | [pytest](https://pytest.org/) | [JUnit 5](https://junit.org/) | go test | [ExUnit](https://hexdocs.pm/ex_unit/) | [GoogleTest](https://github.com/google/googletest) | [cargo-nextest](https://github.com/nextest-rs/nextest) | [JUnit 5](https://junit.org/) + [Kover](https://github.com/Kotlin/kotlinx-kover) | [Vitest](https://vitest.dev/) + [Playwright](https://playwright.dev/) |
 | Meta-linter | — | — | [golangci-lint](https://golangci-lint.run/) | [Credo](https://github.com/rrrene/credo) | — | — | — | [ESLint](https://eslint.org/) |
 | Architecture | [pytestarch](https://github.com/zyskarch/pytestarch) | [ArchUnit](https://www.archunit.org/) | [arch-go](https://github.com/arch-go/arch-go) | [ex_arch_unit](https://hex.pm/packages/ex_arch_unit) | — | — | [Konsist](https://docs.konsist.lemonappdev.com/) | [dependency-cruiser](https://github.com/sverweij/dependency-cruiser) |
@@ -207,6 +207,7 @@ just test-cpp      # Run C++ baseline + violation tests
 just test-rust     # Run Rust baseline + violation tests
 just test-kotlin   # Run Kotlin baseline + violation tests
 just test-typescript  # Run React/Vite/TypeScript baseline + violation tests
+just test-create      # Smoke-test `just create` for every template, then run its CI
 ```
 
 Each language suite now runs two phases:
@@ -214,6 +215,17 @@ Each language suite now runs two phases:
 2. Violation tests: for every folder under `violations/<language>/`, generate a fresh project, confirm baseline `just ci` passes, overlay the violation files, then assert `just ci` fails.
 
 This verifies both directions of the guardrails: valid generated projects pass, and known-bad patterns are rejected.
+
+`just test-create` adds a repo-level smoke test on top: it runs `just create` for every template, then `just ci` inside each generated project, exercising the scaffolding path end to end. It is also part of the repository's own `just ci`.
+
+### Inspecting Template Dependencies
+
+To list the direct library dependencies (and their version pins) declared by every template:
+
+```bash
+cd ai-guardrails
+just show-libs
+```
 
 ### Updating the Template Repository
 

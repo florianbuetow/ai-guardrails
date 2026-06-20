@@ -13,6 +13,8 @@ ROOT = Path(__file__).resolve().parents[1]
 BLUEPRINTS_DIR = ROOT / "blueprints"
 UNPINNED = "(unpinned)"
 MANAGED = "(managed/no direct version)"
+TEMPLATE_NAME_COLOR = "\033[1;36m"
+RESET_COLOR = "\033[0m"
 
 
 @dataclass(frozen=True)
@@ -28,7 +30,7 @@ def main() -> int:
     for index, template_dir in enumerate(template_dirs):
         if index > 0:
             print()
-        print(template_dir.parent.name)
+        print(f"{TEMPLATE_NAME_COLOR}{template_dir.parent.name}{RESET_COLOR}")
         dependencies = collect_dependencies(template_dir)
         if not dependencies:
             print("  No library dependencies declared.")

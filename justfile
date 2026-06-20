@@ -45,7 +45,7 @@ help:
 	@printf "\033[0;33mSetup & Lifecycle:\033[0m\n"
 	@printf "  %-40s %s\n" "init" "Install templates and set up aliases"
 	@printf "  %-40s %s\n" "check" "Check if all required tools are installed"
-	@printf "  %-40s %s\n" "info" "List direct library dependencies declared by all templates"
+	@printf "  %-40s %s\n" "show-libs" "List direct library dependencies declared by all templates"
 	@printf "  %-40s %s\n" "help" "Show this help message"
 	@echo ""
 	@printf "\033[0;33mProject Scaffolding:\033[0m\n"
@@ -172,7 +172,7 @@ check:
 	@echo ""
 
 # List direct library dependencies declared by all templates
-info:
+show-libs:
 	@echo ""
 	@printf "\033[0;34m=== Template Direct Dependency Info ===\033[0m\n"
 	@echo ""
@@ -186,8 +186,8 @@ info:
 		exit 1; \
 	fi; \
 	"$python_cmd" project-setup/template-info.py \
-		&& printf "\033[32m✓ info completed successfully\033[0m\n" \
-		|| { printf "\033[31m✗ info failed\033[0m\n"; exit 1; }
+		&& printf "\033[32m✓ show-libs completed successfully\033[0m\n" \
+		|| { printf "\033[31m✗ show-libs failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Create new project from template
