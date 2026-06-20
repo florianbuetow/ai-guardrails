@@ -79,6 +79,7 @@ help:
 	@printf "  %-40s %s\n" "baseline-typescript" "Generate TypeScript template and run just ci"
 	@echo ""
 	@printf "\033[0;33mCI & Testing:\033[0m\n"
+	@printf "  %-40s %s\n" "test-info" "Test direct dependency inventory output"
 	@printf "  %-40s %s\n" "test" "Run all baseline + violation tests"
 	@printf "  %-40s %s\n" "test-python" "Run Python baseline + violation tests"
 	@printf "  %-40s %s\n" "test-java" "Run Java baseline + violation tests"
@@ -89,7 +90,6 @@ help:
 	@printf "  %-40s %s\n" "test-kotlin" "Run Kotlin baseline + violation tests"
 	@printf "  %-40s %s\n" "test-typescript" "Run TypeScript baseline + violation tests"
 	@printf "  %-40s %s\n" "test-create" "Run just create for all templates"
-	@printf "  %-40s %s\n" "test-info" "Test direct dependency inventory output"
 	@printf "  %-40s %s\n" "ci" "Run all checks + all template tests"
 	@echo ""
 
@@ -301,6 +301,24 @@ baseline-typescript:
 	@./tests/run-tests.sh typescript baseline && printf "\033[32m✓ typescript baseline passed\033[0m\n" || { printf "\033[31m✗ typescript baseline failed\033[0m\n"; exit 1; }
 	@echo ""
 
+# Test direct dependency inventory output
+test-info:
+	@echo ""
+	@printf "\033[0;34m=== Testing Template Dependency Info ===\033[0m\n"
+	@if command -v python3 >/dev/null 2>&1; then \
+		python_cmd="python3"; \
+	elif command -v python >/dev/null 2>&1; then \
+		python_cmd="python"; \
+	else \
+		printf "\033[31m✗ Error: python is not installed\033[0m\n"; \
+		echo ""; \
+		exit 1; \
+	fi; \
+	"$python_cmd" tests/test_template_info.py \
+		&& printf "\033[32m✓ template info tests passed\033[0m\n" \
+		|| { printf "\033[31m✗ template info tests failed\033[0m\n"; exit 1; }
+	@echo ""
+
 # Test all templates (baseline + violations)
 test:
 	@echo ""
@@ -386,24 +404,6 @@ test-create:
     done
     printf "\033[32m✓ test-create passed for all templates\033[0m\n"
     echo ""
-
-# Test direct dependency inventory output
-test-info:
-	@echo ""
-	@printf "\033[0;34m=== Testing Template Dependency Info ===\033[0m\n"
-	@if command -v python3 >/dev/null 2>&1; then \
-		python_cmd="python3"; \
-	elif command -v python >/dev/null 2>&1; then \
-		python_cmd="python"; \
-	else \
-		printf "\033[31m✗ Error: python is not installed\033[0m\n"; \
-		echo ""; \
-		exit 1; \
-	fi; \
-	"$python_cmd" tests/test_template_info.py \
-		&& printf "\033[32m✓ template info tests passed\033[0m\n" \
-		|| { printf "\033[31m✗ template info tests failed\033[0m\n"; exit 1; }
-	@echo ""
 
 # Run all checks and all template tests
 ci: check code-spell code-semgrep code-shellcheck test-info test test-create
