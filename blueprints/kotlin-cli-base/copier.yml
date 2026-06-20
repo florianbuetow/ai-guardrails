@@ -59,17 +59,24 @@ group_id:
 package_name:
   type: str
   help: Kotlin package name (e.g., com.example.myapp)?
-  default: "{{group_id}}.{{project_name | replace('-', '_') | replace('.', '_')}}"
+  default: "{{group_id}}.{{ project_name | replace('-', '') | replace('.', '') | replace('_', '') | lower }}"
   validator: >-
     {% if not (package_name | regex_search('^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)*$')) %}
     Invalid package name. Must be a valid Kotlin package name.
     {% endif %}
 
+# Hidden: lowercase, separator-free package that satisfies ktlint's strict
+# package-name rule (no underscores), regardless of the supplied package name.
+package_slug:
+  type: str
+  when: false
+  default: "{{ package_name | replace('-', '') | replace('_', '') | lower }}"
+
 # Hidden variable: converts dots to slashes for directory structure
 package_path:
   type: str
   when: false
-  default: "{{package_name | replace('.', '/')}}"
+  default: "{{ package_slug | replace('.', '/') }}"
 
 project_description:
   type: str

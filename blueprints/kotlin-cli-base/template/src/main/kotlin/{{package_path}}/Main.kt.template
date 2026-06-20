@@ -1,4 +1,4 @@
-package {{package_name}}
+package {{package_slug}}
 
 /** Entry point for {{project_name}}. */
 fun main() {

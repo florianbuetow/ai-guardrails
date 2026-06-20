@@ -23,7 +23,7 @@ kotlin {
 }
 
 application {
-    mainClass = "{{package_name}}.MainKt"
+    mainClass = "{{package_slug}}.MainKt"
 }
 
 repositories {
