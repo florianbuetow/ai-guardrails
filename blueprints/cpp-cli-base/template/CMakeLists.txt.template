@@ -18,6 +18,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Strict compiler warnings for project-owned targets.
 option(PROJECT_WARNINGS_AS_ERRORS "Treat project warnings as errors" ON)
+option(THIRD_PARTY_WARNINGS_AS_ERRORS "Treat third-party warnings as errors" OFF)
 
 function(enable_project_warnings target_name)
     if(MSVC)
@@ -83,6 +84,18 @@ if(BUILD_TESTING)
         SYSTEM
     )
     FetchContent_MakeAvailable(googletest)
+
+    if(THIRD_PARTY_WARNINGS_AS_ERRORS)
+        foreach(googletest_target gtest gtest_main gmock gmock_main)
+            if(TARGET ${googletest_target})
+                if(MSVC)
+                    target_compile_options(${googletest_target} PRIVATE /WX)
+                else()
+                    target_compile_options(${googletest_target} PRIVATE -Werror)
+                endif()
+            endif()
+        endforeach()
+    endif()
 
     add_executable(${PROJECT_NAME}_tests
         tests/app_test.cpp
