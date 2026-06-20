@@ -26,8 +26,11 @@ fi
 
 rm -rf "$SCAFFOLD_DIR"
 
-# Target dir is fresh, so create-vite runs fully non-interactively.
-npm create -y vite@latest "$SCAFFOLD_DIR" -- --template react-ts
+# Redirect stdin from /dev/null so create-vite is non-interactive even when
+# run from a terminal: current create-vite otherwise prompts for a package
+# name when a TTY is attached. The real package name is set via `npm pkg set`
+# below, so the scaffold's default name is irrelevant.
+npm create -y vite@latest "$SCAFFOLD_DIR" -- --template react-ts </dev/null
 
 # Merge rule: copy a scaffold file only where no file already exists.
 # Template files (justfile, eslint.config.js, README.md, ...) always win.
