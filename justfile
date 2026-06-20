@@ -45,6 +45,7 @@ help:
 	@printf "\033[0;33mSetup & Lifecycle:\033[0m\n"
 	@printf "  %-40s %s\n" "init" "Install templates and set up aliases"
 	@printf "  %-40s %s\n" "check" "Check if all required tools are installed"
+	@printf "  %-40s %s\n" "info" "List dependency versions declared by all templates"
 	@printf "  %-40s %s\n" "help" "Show this help message"
 	@echo ""
 	@printf "\033[0;33mProject Scaffolding:\033[0m\n"
@@ -167,6 +168,25 @@ check:
 		exit 1; \
 	fi; \
 	printf "\033[32m✓ all required tools are installed\033[0m\n"
+	@echo ""
+
+# List dependency versions declared by all templates
+info:
+	@echo ""
+	@printf "\033[0;34m=== Template Dependency Info ===\033[0m\n"
+	@echo ""
+	@if command -v python3 >/dev/null 2>&1; then \
+		python_cmd="python3"; \
+	elif command -v python >/dev/null 2>&1; then \
+		python_cmd="python"; \
+	else \
+		printf "\033[31m✗ Error: python is not installed\033[0m\n"; \
+		echo ""; \
+		exit 1; \
+	fi; \
+	"$python_cmd" project-setup/template-info.py \
+		&& printf "\033[32m✓ info completed successfully\033[0m\n" \
+		|| { printf "\033[31m✗ info failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Create new project from template
