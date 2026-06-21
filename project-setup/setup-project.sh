@@ -76,8 +76,18 @@ TARGET_ABS_PATH="$(pwd)"
 PROJECT_NAME=$(basename "$TARGET_ABS_PATH")
 cd "$ORIGINAL_DIR"
 
-# Convert hyphens to underscores for package name
-PACKAGE_NAME=$(echo "$PROJECT_NAME" | tr '-' '_')
+# Derive a language-appropriate package identifier from the project name.
+PACKAGE_NAME=$(printf "%s" "$PROJECT_NAME" | tr '-' '_')
+case "$TEMPLATE_NAME" in
+  java-cli-base|kotlin-cli-base)
+    PACKAGE_SLUG=$(printf "%s" "$PROJECT_NAME" | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]')
+    if [ -z "$PACKAGE_SLUG" ]; then
+      printf "${RED}Error: unable to derive JVM package name from project name: %s${NC}\n" "$PROJECT_NAME"
+      exit 1
+    fi
+    PACKAGE_NAME="com.example.$PACKAGE_SLUG"
+    ;;
+esac
 
 echo -e "${BLUE}=== Creating Project ===${NC}"
 echo "Template: $TEMPLATE_NAME"

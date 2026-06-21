@@ -54,17 +54,17 @@ group_id:
   help: Maven group ID (e.g., com.example)?
   default: "com.example"
   validator: >-
-    {% if not (group_id | regex_search('^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)*$')) %}
-    Invalid group ID. Must be a valid Java package prefix (e.g., com.example).
+    {% if not (group_id | regex_search('^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)*$')) %}
+    Invalid group ID. Must be a lowercase Java package prefix (e.g., com.example).
     {% endif %}
 
 package_name:
   type: str
   help: Java package name (e.g., com.example.myapp)?
-  default: "{{group_id}}.{{project_name | replace('-', '_') | replace('.', '_')}}"
+  default: "{{group_id}}.{{project_name | replace('-', '') | replace('.', '') | replace('_', '') | lower}}"
   validator: >-
-    {% if not (package_name | regex_search('^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)*$')) %}
-    Invalid package name. Must be a valid Java package name.
+    {% if not (package_name | regex_search('^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)*$')) %}
+    Invalid package name. Must be lowercase and match the Java package style checks.
     {% endif %}
 
 # Hidden variable: converts dots to slashes for directory structure
