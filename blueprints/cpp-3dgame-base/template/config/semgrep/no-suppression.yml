@@ -1,0 +1,69 @@
+rules:
+  - id: cpp.no-nolint
+    languages: [cpp]
+    message: >
+      NOLINT comments are not allowed. Fix the underlying issue instead of suppressing it.
+      If you believe suppression is required, explain why and propose a fix that avoids it.
+    severity: ERROR
+    pattern-regex: '//\s*NOLINT'
+    paths:
+      include:
+        - src/
+        - include/
+      exclude:
+        - tests/
+
+  - id: cpp.no-nolintnextline
+    languages: [cpp]
+    message: >
+      NOLINTNEXTLINE comments are not allowed. Fix the underlying issue instead of suppressing it.
+    severity: ERROR
+    pattern-regex: '//\s*NOLINTNEXTLINE'
+    paths:
+      include:
+        - src/
+        - include/
+      exclude:
+        - tests/
+
+  - id: cpp.no-pragma-gcc-diagnostic-ignored
+    languages: [cpp]
+    message: >
+      '#pragma GCC diagnostic ignored' is not allowed. Fix the underlying warning instead
+      of suppressing it.
+    severity: ERROR
+    pattern-regex: '#\s*pragma\s+GCC\s+diagnostic\s+ignored'
+    paths:
+      include:
+        - src/
+        - include/
+      exclude:
+        - tests/
+
+  - id: cpp.no-pragma-clang-diagnostic-ignored
+    languages: [cpp]
+    message: >
+      '#pragma clang diagnostic ignored' is not allowed. Fix the underlying warning instead
+      of suppressing it.
+    severity: ERROR
+    pattern-regex: '#\s*pragma\s+clang\s+diagnostic\s+ignored'
+    paths:
+      include:
+        - src/
+        - include/
+      exclude:
+        - tests/
+
+  - id: cpp.no-pragma-warning-disable
+    languages: [cpp]
+    message: >
+      '#pragma warning(disable:...)' is not allowed. Fix the underlying warning instead
+      of suppressing MSVC diagnostics.
+    severity: ERROR
+    pattern-regex: '#\s*pragma\s+warning\s*\(\s*disable'
+    paths:
+      include:
+        - src/
+        - include/
+      exclude:
+        - tests/

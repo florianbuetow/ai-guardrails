@@ -1,0 +1,15 @@
+rules:
+  - id: xrag.no-shellcheck-disable
+    languages: [generic]
+    severity: ERROR
+    message: >
+      Do not use '# shellcheck disable=...' to suppress ShellCheck warnings.
+      Fix the underlying issue instead. If the warning is a false positive,
+      refactor the code so ShellCheck can verify it.
+    pattern-regex: '#\s*shellcheck\s+disable='
+    paths:
+      include:
+        - "*.sh"
+        - "*.bash"
+      exclude:
+        - tests/

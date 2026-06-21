@@ -1,0 +1,17 @@
+# Domain-specific terms that codespell should ignore
+# One word per line, case-insensitive
+
+# C++ / CMake terms
+cmake
+ctest
+gtest
+gmock
+asan
+ubsan
+msan
+tsan
+lcov
+gcov
+iwyu
+cppcheck
+clangd

@@ -1,0 +1,17 @@
+#include <gtest/gtest.h>
+
+#include "{{project_name}}/app.hpp"
+
+namespace {{project_name | replace('-', '_')}}::test {
+
+TEST(AppTest, GreetReturnsExpectedMessage) {
+    auto result = greet();
+    EXPECT_EQ(result, "Hello from {{project_name}}!");
+}
+
+TEST(AppTest, RunReturnsZero) {
+    auto result = run();
+    EXPECT_EQ(result, 0);
+}
+
+}  // namespace {{project_name | replace('-', '_')}}::test

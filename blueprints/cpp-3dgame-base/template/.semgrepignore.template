@@ -1,0 +1,10 @@
+:include .gitignore
+
+# Build directories
+build/
+
+# Reports
+reports/
+
+# Third-party / fetched content
+build/_deps/

@@ -1,0 +1,124 @@
+rules:
+  - id: cpp.no-raw-new
+    languages: [cpp]
+    message: >
+      Raw 'new' is not allowed. Use std::unique_ptr or std::shared_ptr instead.
+      Memory must be managed via RAII and smart pointers.
+    severity: ERROR
+    pattern: new $TYPE(...)
+    paths:
+      include:
+        - src/
+        - include/
+      exclude:
+        - tests/
+
+  - id: cpp.no-raw-new-array
+    languages: [cpp]
+    message: >
+      Raw 'new[]' is not allowed. Use std::vector or std::array instead.
+    severity: ERROR
+    pattern: new $TYPE[$SIZE]
+    paths:
+      include:
+        - src/
+        - include/
+      exclude:
+        - tests/
+
+  - id: cpp.no-raw-delete
+    languages: [cpp]
+    message: >
+      Raw 'delete' is not allowed. Use smart pointers (std::unique_ptr, std::shared_ptr)
+      which handle deallocation automatically via RAII.
+    severity: ERROR
+    pattern: delete $PTR
+    paths:
+      include:
+        - src/
+        - include/
+      exclude:
+        - tests/
+
+  - id: cpp.no-raw-delete-array
+    languages: [cpp]
+    message: >
+      Raw 'delete[]' is not allowed. Use std::vector or smart pointers instead.
+    severity: ERROR
+    pattern: "delete[] $PTR"
+    paths:
+      include:
+        - src/
+        - include/
+      exclude:
+        - tests/
+
+  - id: cpp.no-reinterpret-cast
+    languages: [cpp]
+    message: >
+      reinterpret_cast is not allowed. Use static_cast, dynamic_cast, or std::bit_cast instead.
+      If you believe reinterpret_cast is required, explain why and propose a safe alternative.
+    severity: ERROR
+    pattern: reinterpret_cast<$TO>($FROM)
+    paths:
+      include:
+        - src/
+        - include/
+      exclude:
+        - tests/
+
+  - id: cpp.no-c-style-cast
+    languages: [cpp]
+    message: >
+      C-style casts are not allowed. Use static_cast, dynamic_cast, const_cast,
+      or std::bit_cast instead. C-style casts bypass type safety.
+    severity: ERROR
+    pattern-regex: '\(\s*(const\s+)?(unsigned\s+)?(int|long|short|char|float|double|void|size_t|uint\w+|int\w+)\s*\*?\s*\)'
+    paths:
+      include:
+        - src/
+        - include/
+      exclude:
+        - tests/
+
+  - id: cpp.no-goto
+    languages: [cpp]
+    message: >
+      goto is not allowed. Use structured control flow (loops, functions, exceptions) instead.
+    severity: ERROR
+    pattern-regex: '\bgoto\s+\w+'
+    paths:
+      include:
+        - src/
+        - include/
+      exclude:
+        - tests/
+
+  - id: cpp.no-malloc-free
+    languages: [cpp]
+    message: >
+      C memory functions (malloc/free/calloc/realloc) are not allowed in C++ code.
+      Use std::vector, std::array, or smart pointers instead.
+    severity: ERROR
+    pattern-either:
+      - pattern: malloc(...)
+      - pattern: free(...)
+      - pattern: calloc(...)
+      - pattern: realloc(...)
+    paths:
+      include:
+        - src/
+        - include/
+      exclude:
+        - tests/
+
+  - id: cpp.no-using-namespace-in-headers
+    languages: [cpp]
+    message: >
+      'using namespace' is not allowed in header files.
+      It pollutes the global namespace for all includers. Use fully qualified names instead.
+    severity: ERROR
+    pattern: "using namespace $NS;"
+    paths:
+      include:
+        - include/

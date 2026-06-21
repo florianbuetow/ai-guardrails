@@ -1,0 +1,16 @@
+{% if cpp_standard == "23" -%}
+#include <print>
+{% else -%}
+#include <iostream>
+{% endif -%}
+
+#include "{{project_name}}/app.hpp"
+
+auto main() -> int {
+{% if cpp_standard == "23" -%}
+    std::println("{}", {{project_name | replace('-', '_')}}::greet());
+{% else -%}
+    std::cout << {{project_name | replace('-', '_')}}::greet() << '\n';
+{% endif -%}
+    return {{project_name | replace('-', '_')}}::run();
+}

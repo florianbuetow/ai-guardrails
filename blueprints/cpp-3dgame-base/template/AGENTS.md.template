@@ -1,0 +1,84 @@
+# Development Rules for {{project_name}}
+
+This file provides guidance to AI agents and AI-assisted development tools when working with this project. This includes Claude Code, Cursor IDE, GitHub Copilot, Windsurf, and any other AI coding assistants.
+
+## General Coding Principles
+- **Fail fast — never swallow errors.** Always propagate errors and exit with code 1 immediately. No silent fallbacks, no ignored return codes.
+- **Never assume any default values anywhere.** Check for required values explicitly and fail if something is missing. Default values mask underlying issues and make them hard to debug.
+- **Never suppress checks with annotations.** Fix the underlying issue instead. No `NOLINT`, `NOLINTNEXTLINE`, `#pragma` warning suppression, or any other mechanism that silences a checker.
+- Always be explicit about values, paths, and configurations
+- If a value is not provided, raise an error — never silently fall back to a default
+
+## Git Commit Guidelines
+
+**IMPORTANT:** When creating git commits in this repository:
+- **NEVER include AI attribution in commit messages**
+- **NEVER add "Generated with [AI tool name]" or similar phrases**
+- **NEVER add "Co-Authored-By: [AI name]" or similar attribution**
+- **NEVER run `git add -A` or `git add .` - always stage files explicitly**
+- Keep commit messages professional and focused on the changes made
+- Commit messages should describe what changed and why, without mentioning AI assistance
+- **ALWAYS run `git push` after creating a commit to push changes to the remote repository**
+
+## Testing
+- After **every change** to the code, the tests must be executed
+- Always verify the program runs correctly with `just run` after modifications
+
+## C++ Execution Rules
+- C++ code must be built **only** via CMake presets and just recipes
+  - Use `just init` to configure and build the project
+  - Use `just run` to execute the application
+  - Use `just destroy` to clean build artifacts
+  - **Never** use raw compiler invocations: `g++ ...`, `clang++ ...`, `c++ ...`
+- All build configuration must be managed through `CMakeLists.txt` and `CMakePresets.json`
+
+## C++ Coding Standards
+- All code must compile with `-Wall -Wextra -Wpedantic -Werror`, zero warnings
+- **Never** use raw `new`/`delete` -- use `std::unique_ptr` or `std::shared_ptr`
+- **Never** use C-style casts -- use `static_cast`, `dynamic_cast`, or `std::bit_cast`
+- **Never** use `reinterpret_cast` unless absolutely unavoidable
+- **Never** use `goto`
+- **Never** use `malloc`/`free`/`calloc`/`realloc`
+- **Never** suppress warnings (`NOLINT`, `#pragma`, etc.)
+- **Never** use `using namespace` in header files
+- Prefer `std::expected` over exceptions for recoverable errors (C++23)
+- Prefer `std::print`/`std::println` over `std::cout` (C++23)
+- Use RAII for all resource management
+- Use trailing return types: `auto func() -> ReturnType`
+
+## Justfile Conventions
+- **Use `printf` for colored or formatted output** — never `echo` with ANSI escape sequences, as some terminals won't render colors with `echo`. Plain `echo ""` is acceptable only for blank-line spacing.
+- **Add an empty `@echo ""` line before and after each target's command block** to visually separate output between targets.
+- **The `help` target must be a dedicated recipe** with manually written `printf` lines that group related commands and order them by typical execution flow (setup → run → code quality → testing). Never use `just --list`.
+- **The default target (`_default`) must call `just help`.**
+- **Every target must end with a clear status message**: green (`\033[32m`) on success, red (`\033[31m`) on failure with `exit 1`.
+- **Composite targets (e.g. `ci`) must fail fast**: use `set -e` or `&&` chaining.
+- All builds use CMake presets, never raw compiler commands
+- Use `just init` to set up the project (configure + build)
+- Use `just run` to execute the main program
+- Use `just destroy` to remove build artifacts
+- Use `just ci` to run all validation checks (verbose)
+- Use `just ci-quiet` to run all validation checks (silent, fail-fast)
+
+## Project Structure
+- Implementation files (`.cpp`) live in `src/`
+- Public headers (`.hpp`) live in `include/{{project_name}}/`
+- Test files live in `tests/`
+- Utility scripts go in `scripts/`
+- **Input data is organized**: `data/input/`
+- **Output data is organized**: `data/output/`
+- **Never create `.cpp` files in the project root directory**
+  - Wrong: `./test.cpp`, `./helper.cpp`
+  - Correct: `./src/helper.cpp`, `./tests/helper_test.cpp`
+
+## Error Handling
+- Fail fast — stop immediately on the first error, never continue past failures
+- Use `std::expected` for recoverable errors, propagate immediately on failure
+- Never catch and silently ignore exceptions
+- Exit with code 1 if any operation fails, 0 if all succeeded
+
+## Optimization
+- **Skip processing if output already exists** - Don't reprocess unnecessarily
+- Check if output file exists before starting expensive operations
+- Track skipped items separately in summary reports
+- Allow users to force reprocessing by deleting output files

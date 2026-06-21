@@ -1,0 +1,154 @@
+# {{project_name}}
+
+{{project_description}}
+
+## Repository Structure
+
+```
+{{project_name}}/
+├── CMakeLists.txt              # CMake build configuration
+├── CMakePresets.json            # CMake presets (debug, release, coverage, sanitize)
+├── .clang-format                # Clang-format code style configuration
+├── .clang-tidy                  # Clang-tidy static analysis configuration
+├── .pre-commit-config.yaml      # Pre-commit hooks configuration
+├── .gitignore                   # Git ignore patterns
+├── justfile                     # Task runner with build/test/validation commands
+├── AGENTS.md                    # AI agent development rules
+├── CLAUDE.md                    # Claude Code compatibility (symlink to AGENTS.md)
+├── README.md                    # This file
+├── src/                         # Source code
+│   ├── main.cpp                 # Main entry point
+│   └── app.cpp                  # Application logic
+├── include/                     # Public headers
+│   └── {{project_name}}/        # Project namespace
+│       └── app.hpp              # Application header
+├── tests/                       # Test files
+│   └── app_test.cpp             # Unit tests (Google Test)
+├── scripts/                     # Utility scripts
+├── data/                        # Data files
+│   ├── input/                   # Input data files
+│   └── output/                  # Generated output files
+├── config/                      # Configuration files
+│   ├── semgrep/                 # Semgrep static analysis rules
+│   │   ├── no-unsafe-patterns.yml
+│   │   ├── no-suppression.yml
+│   │   └── no-sneaky-fallbacks.yml
+│   └── codespell/               # Spell-check configuration
+│       └── ignore.txt           # Spell-check ignore list
+└── reports/                     # Generated reports (not in git)
+    ├── coverage/                # Code coverage reports
+    └── security/                # Security scan reports
+```
+
+## Prerequisites
+
+- **cmake 3.25+** - Build system generator ([installation guide](https://cmake.org/download/))
+- **C++{{cpp_standard}} compiler** - GCC 14+ or Clang 18+ ([GCC](https://gcc.gnu.org/) | [LLVM/Clang](https://releases.llvm.org/))
+- **just** - Command runner ([installation guide](https://github.com/casey/just#installation))
+
+The following validation tools are also required:
+
+| Tool | Purpose | Install |
+|------|---------|---------|
+| [clang-format](https://clang.llvm.org/docs/ClangFormat.html) | Code formatting | `brew install clang-format` |
+| [clang-tidy](https://clang.llvm.org/extra/clang-tidy/) | Static analysis / linting | `brew install llvm` |
+| [cppcheck](https://cppcheck.sourceforge.io/) | Static analysis | `brew install cppcheck` |
+| [flawfinder](https://dwheeler.com/flawfinder/) | Security scanning | `brew install flawfinder` |
+| [include-what-you-use](https://include-what-you-use.org/) | Include hygiene (advisory) | `brew install include-what-you-use` |
+| [infer](https://github.com/facebook/infer) | Static analysis (null deref, memory leaks) | [releases](https://github.com/facebook/infer/releases) |
+| [codespell](https://github.com/codespell-project/codespell) | Spell checking | `brew install codespell` |
+| [semgrep](https://semgrep.dev/) | Custom static analysis | `brew install semgrep` |
+| [lcov](https://github.com/linux-test-project/lcov) | Code coverage reporting | `brew install lcov` |
+
+## Setup
+
+Initialize the project environment:
+
+```bash
+just init
+```
+
+This will:
+- Check all prerequisite tools are installed
+- Configure the CMake debug preset
+- Build the project
+
+## Usage
+
+Run the main application:
+
+```bash
+just run
+```
+
+See all available commands:
+
+```bash
+just help
+```
+
+Or simply:
+
+```bash
+just
+```
+
+## Development
+
+### Available Commands
+
+- `just init` - Initialize development environment
+- `just run` - Run the main application
+- `just destroy` - Remove build artifacts
+- `just help` - Show available commands
+
+### Code Quality
+
+- `just code-format` - Auto-fix code formatting (clang-format)
+- `just code-style` - Check code style (clang-tidy)
+- `just code-typecheck` - Run static analysis (cppcheck)
+- `just code-security` - Run security checks (flawfinder)
+- `just code-deptry` - Check include hygiene (IWYU, advisory)
+- `just code-spell` - Check spelling
+- `just code-semgrep` - Run custom static analysis
+
+`just code-style` runs `clang-tidy` in quiet mode so CI output focuses on
+diagnostics from project-owned source files. To inspect suppressed non-user,
+system, or dependency warning context while debugging the clang-tidy setup,
+remove `--quiet` from the `code-style` recipe in `justfile`.
+
+### Testing
+
+- `just test` - Run unit tests
+- `just test-coverage` - Run tests with coverage ({{coverage_threshold}}% threshold)
+- `just code-sanitize` - Run tests with AddressSanitizer + UndefinedBehaviorSanitizer
+
+### CI
+
+- `just ci` - Run all validation checks (verbose)
+- `just ci-quiet` - Run all checks (silent, fail-fast)
+
+The CI pipeline runs the following steps in order:
+1. `init` - Initialize environment
+2. `code-format` - Auto-format code
+3. `code-style` - Check code style (clang-tidy)
+4. `code-typecheck` - Static analysis (cppcheck)
+5. `code-security` - Security scan (flawfinder)
+6. `code-deptry` - Include hygiene (IWYU)
+7. `code-spell` - Spell checking
+8. `code-semgrep` - Custom static analysis
+9. `test` - Unit tests
+10. `code-sanitize` - Sanitizer tests
+
+## Project Rules
+
+See [AGENTS.md](AGENTS.md) for detailed development guidelines including:
+- C++ execution rules (use CMake presets exclusively)
+- C++ coding standards (no raw new/delete, no C-style casts, etc.)
+- Git commit guidelines (no AI attribution)
+- Testing requirements
+- Project structure conventions
+
+## License
+
+<!-- Add your license here -->

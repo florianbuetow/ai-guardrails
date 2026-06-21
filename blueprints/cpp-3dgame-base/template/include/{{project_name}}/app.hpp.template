@@ -1,0 +1,16 @@
+#ifndef {{project_name | upper | replace('-', '_')}}_APP_HPP
+#define {{project_name | upper | replace('-', '_')}}_APP_HPP
+
+#include <string>
+
+namespace {{project_name | replace('-', '_')}} {
+
+/// Returns the application greeting message.
+auto greet() -> std::string;
+
+/// Runs the main application logic.
+auto run() -> int;
+
+}  // namespace {{project_name | replace('-', '_')}}
+
+#endif  // {{project_name | upper | replace('-', '_')}}_APP_HPP

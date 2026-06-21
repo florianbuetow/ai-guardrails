@@ -1,0 +1,39 @@
+rules:
+  - id: cpp.no-empty-catch
+    languages: [cpp]
+    message: >
+      Empty catch blocks silently swallow errors. Either handle the exception,
+      log it, or rethrow. Never ignore exceptions.
+    severity: ERROR
+    pattern: |
+      try { ... } catch (...) {
+      }
+    paths:
+      include:
+        - src/
+        - include/
+      exclude:
+        - tests/
+
+  - id: cpp.no-catch-all-without-rethrow
+    languages: [cpp]
+    message: >
+      catch(...) without rethrow hides all exceptions. Either catch specific exception
+      types or rethrow after logging. Use std::expected for recoverable errors.
+    severity: WARNING
+    pattern: |
+      try { ... } catch (...) {
+        ...
+      }
+    pattern-not: |
+      try { ... } catch (...) {
+        ...
+        throw;
+        ...
+      }
+    paths:
+      include:
+        - src/
+        - include/
+      exclude:
+        - tests/

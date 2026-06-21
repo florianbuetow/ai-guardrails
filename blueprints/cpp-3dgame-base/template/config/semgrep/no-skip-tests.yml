@@ -1,0 +1,24 @@
+rules:
+  - id: cpp.no-disabled-test-prefix
+    languages: [cpp]
+    message: >
+      Do not disable tests with the DISABLED_ prefix. Tests must either pass or fail.
+      Fix the underlying issue instead of disabling the test.
+    severity: ERROR
+    pattern-regex: '\b(TEST|TEST_F|TEST_P|TYPED_TEST|TYPED_TEST_P)\s*\(\s*\w+\s*,\s*DISABLED_\w+'
+
+  - id: cpp.no-disabled-test-suite-prefix
+    languages: [cpp]
+    message: >
+      Do not disable test suites with the DISABLED_ prefix. Tests must either pass or fail.
+      Fix the underlying issue instead of disabling the test suite.
+    severity: ERROR
+    pattern-regex: '\b(TEST|TEST_F|TEST_P|TYPED_TEST|TYPED_TEST_P)\s*\(\s*DISABLED_\w+'
+
+  - id: cpp.no-gtest-skip
+    languages: [cpp]
+    message: >
+      Do not use GTEST_SKIP() to skip tests. Tests must either pass or fail.
+      If a test requires specific conditions, use test fixtures or build flags instead.
+    severity: ERROR
+    pattern-regex: '\bGTEST_SKIP\s*\('

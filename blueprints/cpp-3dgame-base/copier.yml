@@ -1,0 +1,77 @@
+# C++ 3D Game Base Template Configuration
+_min_copier_version: "9.0.0"
+
+_subdirectory: template
+_templates_suffix: ".template"
+_answers_file: .copier-answers.yml
+
+_exclude:
+  - "build"
+  - ".git"
+  - "CLAUDE.md"
+
+_skip_if_exists:
+  - "src/"
+  - "include/"
+  - "tests/"
+  - "data/input/"
+  - "data/output/"
+  - "scripts/"
+
+_message_before_copy: |
+  Creating C++ CLI project with full validation infrastructure.
+  This will set up a production-ready project following strict conventions.
+
+_message_after_copy: |
+  Project {{project_name}} created successfully!
+
+  Next steps:
+    cd {{project_name}}
+    just init    # Configure and build
+    just run     # Run the application
+    just help    # See all available commands
+
+_tasks:
+  - "ln -s AGENTS.md CLAUDE.md"
+  - "git init -q"
+  - "mkdir -p .git/hooks && printf '%s\n' '#!/usr/bin/env sh' 'set -e' 'just ci-quiet' > .git/hooks/pre-commit"
+
+project_name:
+  type: str
+  help: Project name (e.g., my-cli-tool)?
+  validator: >-
+    {% if not (project_name | regex_search('^[a-zA-Z0-9]([a-zA-Z0-9_.-]*[a-zA-Z0-9])?$')) %}
+    Invalid project name. Use letters, digits, -, _, . only.
+    {% endif %}
+
+project_description:
+  type: str
+  help: Short description?
+  default: "A C++ CLI application"
+
+cpp_standard:
+  type: str
+  help: C++ standard version?
+  default: "23"
+  choices:
+    - "20"
+    - "23"
+
+author_name:
+  type: str
+  help: Author name?
+  default: ""
+
+author_email:
+  type: str
+  help: Author email?
+  default: ""
+
+coverage_threshold:
+  type: int
+  help: Code coverage threshold (%)?
+  default: 80
+  validator: >-
+    {% if coverage_threshold < 0 or coverage_threshold > 100 %}
+    Must be 0-100
+    {% endif %}

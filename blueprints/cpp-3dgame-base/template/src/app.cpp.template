@@ -1,0 +1,15 @@
+#include "{{project_name}}/app.hpp"
+
+#include <string>
+
+namespace {{project_name | replace('-', '_')}} {
+
+auto greet() -> std::string {
+    return "Hello from {{project_name}}!";
+}
+
+auto run() -> int {
+    return 0;
+}
+
+}  // namespace {{project_name | replace('-', '_')}}

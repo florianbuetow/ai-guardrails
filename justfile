@@ -58,6 +58,7 @@ help:
 	@printf "    %-36s %s\n" "go-cli-base" "Go CLI application"
 	@printf "    %-36s %s\n" "elixir-otp-base" "Elixir OTP application"
 	@printf "    %-36s %s\n" "cpp-cli-base" "C++ CLI application"
+	@printf "    %-36s %s\n" "cpp-3dgame-base" "C++ 3D game application"
 	@printf "    %-36s %s\n" "rust-cli-base" "Rust CLI application"
 	@printf "    %-36s %s\n" "kotlin-cli-base" "Kotlin CLI application"
 	@printf "    %-36s %s\n" "react-vite-typescript-base" "React + Vite + TypeScript application"
@@ -74,6 +75,7 @@ help:
 	@printf "  %-40s %s\n" "baseline-go" "Generate Go template and run just ci"
 	@printf "  %-40s %s\n" "baseline-elixir" "Generate Elixir template and run just ci"
 	@printf "  %-40s %s\n" "baseline-cpp" "Generate C++ template and run just ci"
+	@printf "  %-40s %s\n" "baseline-cpp-3dgame" "Generate C++ 3D game template and run just ci"
 	@printf "  %-40s %s\n" "baseline-rust" "Generate Rust template and run just ci"
 	@printf "  %-40s %s\n" "baseline-kotlin" "Generate Kotlin template and run just ci"
 	@printf "  %-40s %s\n" "baseline-typescript" "Generate TypeScript template and run just ci"
@@ -86,6 +88,7 @@ help:
 	@printf "  %-40s %s\n" "test-go" "Run Go baseline + violation tests"
 	@printf "  %-40s %s\n" "test-elixir" "Run Elixir baseline + violation tests"
 	@printf "  %-40s %s\n" "test-cpp" "Run C++ baseline + violation tests"
+	@printf "  %-40s %s\n" "test-cpp-3dgame" "Run C++ 3D game baseline + violation tests"
 	@printf "  %-40s %s\n" "test-rust" "Run Rust baseline + violation tests"
 	@printf "  %-40s %s\n" "test-kotlin" "Run Kotlin baseline + violation tests"
 	@printf "  %-40s %s\n" "test-typescript" "Run TypeScript baseline + violation tests"
@@ -283,6 +286,12 @@ baseline-cpp:
 	@./tests/run-tests.sh cpp baseline && printf "\033[32m✓ cpp baseline passed\033[0m\n" || { printf "\033[31m✗ cpp baseline failed\033[0m\n"; exit 1; }
 	@echo ""
 
+# Generate C++ 3D game template and run just ci
+baseline-cpp-3dgame:
+	@echo ""
+	@./tests/run-tests.sh cpp-3dgame baseline && printf "\033[32m✓ cpp-3dgame baseline passed\033[0m\n" || { printf "\033[31m✗ cpp-3dgame baseline failed\033[0m\n"; exit 1; }
+	@echo ""
+
 # Generate Rust template and run just ci
 baseline-rust:
 	@echo ""
@@ -353,6 +362,12 @@ test-elixir:
 test-cpp:
 	@echo ""
 	@./tests/run-tests.sh cpp && printf "\033[32m✓ cpp tests passed\033[0m\n" || { printf "\033[31m✗ cpp tests failed\033[0m\n"; exit 1; }
+	@echo ""
+
+# Test the C++ 3D game template (baseline + violations)
+test-cpp-3dgame:
+	@echo ""
+	@./tests/run-tests.sh cpp-3dgame && printf "\033[32m✓ cpp-3dgame tests passed\033[0m\n" || { printf "\033[31m✗ cpp-3dgame tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Test the Rust template (baseline + violations)

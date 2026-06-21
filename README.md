@@ -51,6 +51,15 @@ just init
 just run
 ```
 
+**C++ 3D Game:**
+
+```bash
+copier copy https://github.com/florianbuetow/ai-guardrails/blueprints/cpp-3dgame-base my-cpp-3dgame-project
+cd my-cpp-3dgame-project
+just init
+just run
+```
+
 **Rust CLI:**
 
 ```bash
@@ -96,6 +105,7 @@ just run
 | [**go-cli-base**](blueprints/go-cli-base/) | Go 1.23+ | CLI apps with [golangci-lint](https://golangci-lint.run/), go vet, [staticcheck](https://staticcheck.dev/), [gosec](https://github.com/securego/gosec), [govulncheck](https://golang.org/x/vuln/cmd/govulncheck) |
 | [**elixir-otp-base**](blueprints/elixir-otp-base/) | Elixir 1.17+ | OTP apps with [Credo](https://github.com/rrrene/credo), [Dialyxir](https://github.com/jeremyjh/dialyxir), [Sobelow](https://github.com/nccgroup/sobelow), [mix_audit](https://github.com/mirego/mix_audit), [ExUnit](https://hexdocs.pm/ex_unit/) |
 | [**cpp-cli-base**](blueprints/cpp-cli-base/) | C++23 | CLI apps with [CMake](https://cmake.org/), [clang-format](https://clang.llvm.org/docs/ClangFormat.html), [clang-tidy](https://clang.llvm.org/extra/clang-tidy/), [cppcheck](https://github.com/danmar/cppcheck), [flawfinder](https://github.com/david-a-wheeler/flawfinder), [GoogleTest](https://github.com/google/googletest) |
+| [**cpp-3dgame-base**](blueprints/cpp-3dgame-base/) | C++23 | 3D game apps with [CMake](https://cmake.org/), [clang-format](https://clang.llvm.org/docs/ClangFormat.html), [clang-tidy](https://clang.llvm.org/extra/clang-tidy/), [cppcheck](https://github.com/danmar/cppcheck), [flawfinder](https://github.com/david-a-wheeler/flawfinder), [GoogleTest](https://github.com/google/googletest) |
 | [**rust-cli-base**](blueprints/rust-cli-base/) | Rust 2024 | CLI apps with [clippy](https://github.com/rust-lang/rust-clippy), [cargo-geiger](https://github.com/geiger-rs/cargo-geiger), [cargo-machete](https://github.com/bnjbvr/cargo-machete), [cargo-deny](https://github.com/EmbarkStudios/cargo-deny), [cargo-nextest](https://github.com/nextest-rs/nextest), [grcov](https://github.com/mozilla/grcov) |
 | [**kotlin-cli-base**](blueprints/kotlin-cli-base/) | Kotlin 2.1+ | CLI apps with [Gradle](https://gradle.org/), [ktlint](https://pinterest.github.io/ktlint/), [detekt](https://detekt.dev/), [Kover](https://github.com/Kotlin/kotlinx-kover), [Konsist](https://docs.konsist.lemonappdev.com/), [JUnit 5](https://junit.org/) |
 | [**react-vite-typescript-base**](blueprints/react-vite-typescript-base/) | React + Vite + TypeScript | Vite apps with [Prettier](https://prettier.io/), [ESLint](https://eslint.org/), [TypeScript](https://www.typescriptlang.org/), [knip](https://knip.dev/), [Vitest](https://vitest.dev/), [Playwright](https://playwright.dev/) |
@@ -154,7 +164,7 @@ Use these plugins after scaffolding a project with AI Guardrails to maintain cod
 - **copier** - Template engine ([installation guide](https://copier.readthedocs.io/))
 
 Each template has its own language-specific prerequisites. See the template READMEs for details:
-[Python](blueprints/python-cli-base/) | [Java](blueprints/java-cli-base/) | [Go](blueprints/go-cli-base/) | [Elixir](blueprints/elixir-otp-base/) | [C++](blueprints/cpp-cli-base/) | [Rust](blueprints/rust-cli-base/) | [Kotlin](blueprints/kotlin-cli-base/) | [React/Vite/TypeScript](blueprints/react-vite-typescript-base/)
+[Python](blueprints/python-cli-base/) | [Java](blueprints/java-cli-base/) | [Go](blueprints/go-cli-base/) | [Elixir](blueprints/elixir-otp-base/) | [C++](blueprints/cpp-cli-base/) | [C++ 3D Game](blueprints/cpp-3dgame-base/) | [Rust](blueprints/rust-cli-base/) | [Kotlin](blueprints/kotlin-cli-base/) | [React/Vite/TypeScript](blueprints/react-vite-typescript-base/)
 
 ## Installation
 
@@ -180,7 +190,7 @@ just run
 ```
 
 The `just create` command takes two arguments:
-1. Template name (e.g., `python-cli-base`, `java-cli-base`, `go-cli-base`, `elixir-otp-base`, `cpp-cli-base`, `rust-cli-base`, `kotlin-cli-base`, or `react-vite-typescript-base`)
+1. Template name (e.g., `python-cli-base`, `java-cli-base`, `go-cli-base`, `elixir-otp-base`, `cpp-cli-base`, `cpp-3dgame-base`, `rust-cli-base`, `kotlin-cli-base`, or `react-vite-typescript-base`)
 2. Target directory (absolute or relative path where the project will be created)
 
 **Method 2: Using Copier directly**
@@ -204,6 +214,7 @@ just test-java     # Run Java baseline + violation tests
 just test-go       # Run Go baseline + violation tests
 just test-elixir   # Run Elixir baseline + violation tests
 just test-cpp      # Run C++ baseline + violation tests
+just test-cpp-3dgame  # Run C++ 3D game baseline + violation tests
 just test-rust     # Run Rust baseline + violation tests
 just test-kotlin   # Run Kotlin baseline + violation tests
 just test-typescript  # Run React/Vite/TypeScript baseline + violation tests
@@ -248,6 +259,7 @@ ai-guardrails/
 │   ├── go-cli-base/                           # Go CLI template
 │   ├── elixir-otp-base/                       # Elixir OTP template
 │   ├── cpp-cli-base/                          # C++ CLI template
+│   ├── cpp-3dgame-base/                       # C++ 3D game template (copy of cpp-cli-base)
 │   ├── rust-cli-base/                         # Rust CLI template
 │   ├── kotlin-cli-base/                       # Kotlin CLI template
 │   └── react-vite-typescript-base/            # React + Vite + TypeScript template
@@ -262,6 +274,7 @@ ai-guardrails/
 │       ├── go.sh
 │       ├── elixir.sh
 │       ├── cpp.sh
+│       ├── cpp-3dgame.sh
 │       ├── rust.sh
 │       ├── kotlin.sh
 │       └── typescript.sh
@@ -271,6 +284,7 @@ ai-guardrails/
 │   ├── go/
 │   ├── elixir/
 │   ├── cpp/
+│   ├── cpp-3dgame/
 │   ├── rust/
 │   ├── kotlin/
 │   └── typescript/

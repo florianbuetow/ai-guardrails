@@ -1,0 +1,15 @@
+# Pre-commit hooks configuration
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+# Skip temporarily: git commit --no-verify
+
+repos:
+  - repo: local
+    hooks:
+      - id: run-just-ci-quiet
+        name: Run just ci-quiet
+        entry: just ci-quiet
+        language: system
+        pass_filenames: false
+        always_run: true
+        verbose: true
