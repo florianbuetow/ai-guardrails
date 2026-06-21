@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fixed Java package derivation and Python pip-audit floors so generated projects pass `test-create` CI.
 - Bounded trivy database download in Java and Kotlin code-audit to prevent CI hangs.
 - Fixed C++ `code-deptry` recipe to use `iwyu_tool.py` with compilation database instead of broken direct `include-what-you-use` invocation that failed to resolve system headers on macOS.
 - Fixed Kotlin template: corrected semgrep rule label, package name rendering, and test prerequisite timeout.
@@ -207,4 +208,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial project setup with automated local templates and prerequisite checks.
 - Git workflow guidelines: explicit file staging, push requirement, no AI attribution in commits.
 
-[Unreleased]: https://github.com/florianbuetow/ai-guardrails/compare/bcab34c...HEAD
+[Unreleased]: https://github.com/florianbuetow/ai-guardrails/compare/8ace9cb...HEAD
