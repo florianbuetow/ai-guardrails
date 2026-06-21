@@ -93,7 +93,7 @@ help:
 	@printf "  %-40s %s\n" "test-kotlin" "Run Kotlin baseline + violation tests"
 	@printf "  %-40s %s\n" "test-typescript" "Run TypeScript baseline + violation tests"
 	@printf "  %-40s %s\n" "test-create" "Run just create for all templates"
-	@printf "  %-40s %s\n" "ci" "Run all checks + all template tests"
+	@printf "  %-40s %s\n" "ci-verbose" "Run all checks + all template tests"
 	@echo ""
 
 # Install templates and set up aliases
@@ -421,7 +421,7 @@ test-create:
     echo ""
 
 # Run all checks and all template tests
-ci: check code-spell code-semgrep code-shellcheck test-info test test-create
+ci-verbose: check code-spell code-semgrep code-shellcheck test-info test test-create
 	@echo ""
-	@printf "\033[32m✓ ci passed\033[0m\n"
+	@printf "\033[32m✓ ci-verbose passed\033[0m\n"
 	@echo ""

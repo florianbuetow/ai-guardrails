@@ -227,7 +227,7 @@ Each language suite now runs two phases:
 
 This verifies both directions of the guardrails: valid generated projects pass, and known-bad patterns are rejected.
 
-`just test-create` adds a repo-level smoke test on top: it runs `just create` for every template, then `just ci` inside each generated project, exercising the scaffolding path end to end. It is also part of the repository's own `just ci`.
+`just test-create` adds a repo-level smoke test on top: it runs `just create` for every template, then `just ci` inside each generated project, exercising the scaffolding path end to end. It is also part of the repository's own `just ci-verbose`.
 
 ### Inspecting Template Dependencies
 
