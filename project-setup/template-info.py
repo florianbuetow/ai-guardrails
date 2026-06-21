@@ -15,10 +15,22 @@ BLUEPRINTS_DIR = ROOT / "blueprints"
 LATEST_VERSION_HELPER = Path(__file__).with_name("latest_version.py")
 UNPINNED = "(unpinned)"
 MANAGED = "(managed/no direct version)"
-TEMPLATE_NAME_COLOR = "\033[1;36m"
+GREEN_COLOR = "\033[32m"
+BLUE_COLOR = "\033[34m"
+RED_COLOR = "\033[31m"
 RESET_COLOR = "\033[0m"
-REPOSITORY_WIDTH = 30
-LATEST_WIDTH = 18
+TABLE_HEADERS = ("Template", "Used version", "Latest version", "Library")
+BOX_HORIZONTAL = "─"
+BOX_TOP_LEFT = "┌"
+BOX_TOP_JOIN = "┬"
+BOX_TOP_RIGHT = "┐"
+BOX_MIDDLE_LEFT = "├"
+BOX_MIDDLE_JOIN = "┼"
+BOX_MIDDLE_RIGHT = "┤"
+BOX_BOTTOM_LEFT = "└"
+BOX_BOTTOM_JOIN = "┴"
+BOX_BOTTOM_RIGHT = "┘"
+BOX_VERTICAL = "│"
 
 
 def load_latest_version_helper():
@@ -44,22 +56,33 @@ class Dependency:
     latest_identifier: str
 
 
+@dataclass(frozen=True)
+class DependencyTableRow:
+    template: str
+    used_version: str
+    latest_version: str
+    library: str
+
+
 def main() -> int:
     template_dirs = discover_template_dirs()
-    for index, template_dir in enumerate(template_dirs):
-        if index > 0:
-            print()
-        print(f"{TEMPLATE_NAME_COLOR}{template_dir.parent.name}{RESET_COLOR}")
+    dependency_entries: list[tuple[str, Dependency]] = []
+    for template_dir in template_dirs:
         dependencies = collect_dependencies(template_dir)
-        if not dependencies:
-            print("  No library dependencies declared.")
-            continue
-        try:
-            latest_versions = resolve_latest_versions(dependencies)
-        except latest_version.LatestVersionError as error:
-            print(f"Error: {error}", file=sys.stderr)
-            return 1
-        print_dependencies(dependencies, latest_versions)
+        dependency_entries.extend((template_dir.parent.name, dependency) for dependency in dependencies)
+
+    if not dependency_entries:
+        print("No library dependencies declared.")
+        return 0
+
+    dependencies = [dependency for _, dependency in dependency_entries]
+    try:
+        latest_versions = resolve_latest_versions(dependencies)
+    except latest_version.LatestVersionError as error:
+        print(f"Error: {error}", file=sys.stderr)
+        return 1
+
+    print_dependencies(dependency_entries, latest_versions)
     return 0
 
 
@@ -102,20 +125,87 @@ def resolve_latest_versions(dependencies: list[Dependency]) -> dict[object, str]
     return latest_version.resolve_latest_versions(requests)
 
 
-def print_dependencies(dependencies: list[Dependency], latest_versions: dict[object, str]) -> None:
-    groups: dict[str, list[Dependency]] = {}
-    for dependency in dependencies:
-        if dependency.group not in groups:
-            groups[dependency.group] = []
-        groups[dependency.group].append(dependency)
+def print_dependencies(dependency_entries: list[tuple[str, Dependency]], latest_versions: dict[object, str]) -> None:
+    rows: list[DependencyTableRow] = []
+    for template, dependency in dependency_entries:
+        latest_request = latest_version.LatestVersionRequest(dependency.latest_registry, dependency.latest_identifier)
+        rows.append(DependencyTableRow(template, dependency.spec, latest_versions[latest_request], dependency.name))
 
-    for group, group_dependencies in groups.items():
-        print(f"  {group}:")
-        print(f"    {'Name':<48} {'Repository':<{REPOSITORY_WIDTH}} {'Latest':<{LATEST_WIDTH}} Source")
-        for dependency in group_dependencies:
-            latest_request = latest_version.LatestVersionRequest(dependency.latest_registry, dependency.latest_identifier)
-            latest = latest_versions[latest_request]
-            print(f"    {dependency.name:<48} {dependency.spec:<{REPOSITORY_WIDTH}} {latest:<{LATEST_WIDTH}} {dependency.source}")
+    print(render_dependency_table(rows))
+
+
+def render_dependency_table(rows: list[DependencyTableRow]) -> str:
+    widths = table_column_widths(rows)
+    lines = [
+        render_table_border(widths, BOX_TOP_LEFT, BOX_TOP_JOIN, BOX_TOP_RIGHT),
+        render_table_row(TABLE_HEADERS, widths, ""),
+        render_table_border(widths, BOX_MIDDLE_LEFT, BOX_MIDDLE_JOIN, BOX_MIDDLE_RIGHT),
+    ]
+
+    for row in rows:
+        cells = (row.template, row.used_version, row.latest_version, row.library)
+        lines.append(render_table_row(cells, widths, version_color(row.used_version, row.latest_version)))
+
+    lines.append(render_table_border(widths, BOX_BOTTOM_LEFT, BOX_BOTTOM_JOIN, BOX_BOTTOM_RIGHT))
+    return "\n".join(lines)
+
+
+def table_column_widths(rows: list[DependencyTableRow]) -> list[int]:
+    widths = [len(header) for header in TABLE_HEADERS]
+    for row in rows:
+        cells = (row.template, row.used_version, row.latest_version, row.library)
+        for index, cell in enumerate(cells):
+            widths[index] = max(widths[index], len(cell))
+    return widths
+
+
+def render_table_border(widths: list[int], left: str, join: str, right: str) -> str:
+    segments = [BOX_HORIZONTAL * (width + 2) for width in widths]
+    return f"{left}{join.join(segments)}{right}"
+
+
+def render_table_row(cells: tuple[str, str, str, str], widths: list[int], used_version_color: str) -> str:
+    rendered_cells = []
+    for index, cell in enumerate(cells):
+        color = ""
+        if index == 1:
+            color = used_version_color
+        rendered_cells.append(render_table_cell(cell, widths[index], color))
+    return f"{BOX_VERTICAL}{BOX_VERTICAL.join(rendered_cells)}{BOX_VERTICAL}"
+
+
+def render_table_cell(value: str, width: int, color: str) -> str:
+    padding = " " * (width - len(value))
+    if color:
+        return f" {color}{value}{RESET_COLOR}{padding} "
+    return f" {value}{padding} "
+
+
+def version_color(used_version: str, latest: str) -> str:
+    used_components = parse_version_components(used_version)
+    latest_components = parse_version_components(latest)
+    if used_components is None or latest_components is None:
+        return RED_COLOR
+
+    used_major, used_minor = used_components
+    latest_major, latest_minor = latest_components
+    if used_major != latest_major:
+        return RED_COLOR
+    if used_minor is not None and latest_minor is not None and used_minor == latest_minor:
+        return GREEN_COLOR
+    return BLUE_COLOR
+
+
+def parse_version_components(value: str) -> tuple[int, int | None] | None:
+    version_match = re.search(r"v?([0-9]+)(?:\.([0-9]+))?", value)
+    if version_match is None:
+        return None
+
+    major = int(version_match.group(1))
+    minor_text = version_match.group(2)
+    if minor_text is None:
+        return major, None
+    return major, int(minor_text)
 
 
 def has_closing_array_bracket(text: str) -> bool:

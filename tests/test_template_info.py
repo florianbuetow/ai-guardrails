@@ -98,11 +98,11 @@ class TemplateInfoTests(unittest.TestCase):
         self.assertNotIn("vite", dependency_names)
         self.assertNotIn("npm scaffold packages", groups(dependencies))
 
-    def test_dependency_output_includes_latest_version_column(self) -> None:
+    def test_dependency_output_uses_box_table_with_requested_columns(self) -> None:
         dependency = template_info.Dependency(
             "Python optional dependencies [dev]",
             "pytest",
-            ">=7.4.0",
+            "8.4.2",
             "pyproject.toml.template",
             "pypi",
             "pytest",
@@ -111,13 +111,30 @@ class TemplateInfoTests(unittest.TestCase):
         output = io.StringIO()
 
         with contextlib.redirect_stdout(output):
-            template_info.print_dependencies([dependency], {latest_request: "8.4.2"})
+            template_info.print_dependencies([("python-cli-base", dependency)], {latest_request: "8.4.7"})
 
         text = output.getvalue()
-        self.assertIn("Repository", text)
-        self.assertIn("Latest", text)
-        self.assertIn(">=7.4.0", text)
-        self.assertIn("8.4.2", text)
+        top_border = text.splitlines()[0]
+        self.assertNotIn("+", top_border)
+        self.assertNotIn("-", top_border)
+        self.assertIn("┌", text)
+        self.assertIn("┬", text)
+        self.assertIn("└", text)
+        self.assertIn("│ Template", text)
+        self.assertIn("Used version", text)
+        self.assertIn("Latest version", text)
+        self.assertIn("Library", text)
+        self.assertIn("python-cli-base", text)
+        self.assertIn(f"{template_info.GREEN_COLOR}8.4.2{template_info.RESET_COLOR}", text)
+        self.assertIn("8.4.7", text)
+        self.assertIn("pytest", text)
+
+    def test_version_color_matches_major_minor_rules(self) -> None:
+        self.assertEqual(template_info.GREEN_COLOR, template_info.version_color("1.2.3", "1.2.9"))
+        self.assertEqual(template_info.BLUE_COLOR, template_info.version_color("^1", "1.9.0"))
+        self.assertEqual(template_info.BLUE_COLOR, template_info.version_color("1.2.3", "1.3.0"))
+        self.assertEqual(template_info.RED_COLOR, template_info.version_color("1.2.3", "2.0.0"))
+        self.assertEqual(template_info.RED_COLOR, template_info.version_color("(unpinned)", "2.0.0"))
 
 
 if __name__ == "__main__":
