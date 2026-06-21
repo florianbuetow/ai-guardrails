@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import contextlib
+import io
 import importlib.util
 from pathlib import Path
 import sys
@@ -34,6 +36,13 @@ def groups(dependencies) -> set[str]:
     return {dependency.group for dependency in dependencies}
 
 
+def dependency_by_name(dependencies, name: str):
+    for dependency in dependencies:
+        if dependency.name == name:
+            return dependency
+    raise AssertionError(f"Dependency not found: {name}")
+
+
 class TemplateInfoTests(unittest.TestCase):
     def test_python_parser_reports_direct_dependencies_only(self) -> None:
         manifest = REPO_ROOT / "blueprints/python-cli-base/template/pyproject.toml.template"
@@ -46,6 +55,9 @@ class TemplateInfoTests(unittest.TestCase):
         self.assertNotIn("hatchling", dependency_names)
         self.assertNotIn("pyjwt", dependency_names)
         self.assertNotIn("Python build-system requirements", groups(dependencies))
+        bandit = dependency_by_name(dependencies, "bandit[toml]")
+        self.assertEqual("pypi", bandit.latest_registry)
+        self.assertEqual("bandit", bandit.latest_identifier)
 
     def test_gradle_parser_excludes_plugins_tool_versions_and_platforms(self) -> None:
         manifest = REPO_ROOT / "blueprints/java-cli-base/template/build.gradle.kts.template"
@@ -61,6 +73,18 @@ class TemplateInfoTests(unittest.TestCase):
         self.assertNotIn("jacoco.toolVersion", dependency_names)
         self.assertNotIn("Gradle plugins", groups(dependencies))
         self.assertNotIn("Gradle tool versions", groups(dependencies))
+        assertj = dependency_by_name(dependencies, "org.assertj:assertj-core")
+        self.assertEqual("maven", assertj.latest_registry)
+        self.assertEqual("org.assertj:assertj-core", assertj.latest_identifier)
+
+    def test_cmake_parser_uses_fetchcontent_repository_for_latest_lookup(self) -> None:
+        manifest = REPO_ROOT / "blueprints/cpp-cli-base/template/CMakeLists.txt.template"
+
+        dependencies = template_info.parse_cmake_manifest(manifest)
+
+        googletest = dependency_by_name(dependencies, "googletest")
+        self.assertEqual("github-tags", googletest.latest_registry)
+        self.assertEqual("https://github.com/google/googletest.git", googletest.latest_identifier)
 
     def test_npm_parser_excludes_scaffold_package(self) -> None:
         manifest = REPO_ROOT / "blueprints/react-vite-typescript-base/template/scripts/bootstrap-vite.sh.template"
@@ -73,6 +97,27 @@ class TemplateInfoTests(unittest.TestCase):
         self.assertIn("@playwright/test", dependency_names)
         self.assertNotIn("vite", dependency_names)
         self.assertNotIn("npm scaffold packages", groups(dependencies))
+
+    def test_dependency_output_includes_latest_version_column(self) -> None:
+        dependency = template_info.Dependency(
+            "Python optional dependencies [dev]",
+            "pytest",
+            ">=7.4.0",
+            "pyproject.toml.template",
+            "pypi",
+            "pytest",
+        )
+        latest_request = template_info.latest_version.LatestVersionRequest("pypi", "pytest")
+        output = io.StringIO()
+
+        with contextlib.redirect_stdout(output):
+            template_info.print_dependencies([dependency], {latest_request: "8.4.2"})
+
+        text = output.getvalue()
+        self.assertIn("Repository", text)
+        self.assertIn("Latest", text)
+        self.assertIn(">=7.4.0", text)
+        self.assertIn("8.4.2", text)
 
 
 if __name__ == "__main__":
