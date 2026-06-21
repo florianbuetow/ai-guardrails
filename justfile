@@ -93,7 +93,8 @@ help:
 	@printf "  %-40s %s\n" "test-kotlin" "Run Kotlin baseline + violation tests"
 	@printf "  %-40s %s\n" "test-typescript" "Run TypeScript baseline + violation tests"
 	@printf "  %-40s %s\n" "test-create" "Run just create for all templates"
-	@printf "  %-40s %s\n" "ci-verbose" "Run all checks + all template tests"
+	@printf "  %-40s %s\n" "ci" "Run all checks + all template tests (quiet)"
+	@printf "  %-40s %s\n" "ci-verbose" "Run all checks + all template tests (verbose)"
 	@echo ""
 
 # Install templates and set up aliases
@@ -425,3 +426,25 @@ ci-verbose: check code-spell code-semgrep code-shellcheck test-info test test-cr
 	@echo ""
 	@printf "\033[32m✓ ci-verbose passed\033[0m\n"
 	@echo ""
+
+# Run all checks and all template tests (quiet; details only on failure)
+ci:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    echo ""
+    # Keep this list identical to ci-verbose's dependencies so both run the
+    # exact same tests; only the output verbosity differs.
+    steps=(check code-spell code-semgrep code-shellcheck test-info test test-create)
+    for step in "${steps[@]}"; do
+        printf "\033[0;34m▶ starting %s\033[0m\n" "$step"
+        if output="$(just "$step" 2>&1)"; then
+            printf "\033[32m  ✓ %s completed\033[0m\n" "$step"
+        else
+            printf "%s\n" "$output"
+            printf "\033[31m✗ ci failed: %s exited with errors\033[0m\n" "$step"
+            exit 1
+        fi
+    done
+    echo ""
+    printf "\033[32m✓ ci passed\033[0m\n"
+    echo ""

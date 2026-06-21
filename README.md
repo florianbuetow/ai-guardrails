@@ -219,7 +219,15 @@ just test-rust     # Run Rust baseline + violation tests
 just test-kotlin   # Run Kotlin baseline + violation tests
 just test-typescript  # Run React/Vite/TypeScript baseline + violation tests
 just test-create      # Smoke-test `just create` for every template, then run its CI
+just ci               # Full repo CI suite, quiet: prints start/done per step, details only on failure
+just ci-verbose       # Full repo CI suite, verbose: streams the full output of every step
 ```
+
+`just ci` and `just ci-verbose` run the exact same steps (`check`, `code-spell`,
+`code-semgrep`, `code-shellcheck`, `test-info`, `test`, `test-create`) and only
+differ in output verbosity. `ci` announces the start and completion of each step
+with a checkmark, suppressing per-step details unless a step fails (then it prints
+that step's full output and exits 1); `ci-verbose` streams every step's output.
 
 Each language suite now runs two phases:
 1. Baseline test: generate a clean project and verify `just ci` succeeds.
