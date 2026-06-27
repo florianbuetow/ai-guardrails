@@ -394,12 +394,23 @@ test-create:
     #!/usr/bin/env bash
     set -euo pipefail
     echo ""
+    # `just ci` wires fd 3 to its live terminal so steps can surface progress
+    # past its output capture. Detect it once; when run directly (fd 3 closed)
+    # this stays a no-op and only the verbose lines below are shown.
+    if { true >&3; } 2>/dev/null; then
+        quiet_progress=1
+    else
+        quiet_progress=0
+    fi
     tmp_dir="$(mktemp -d)"
     trap 'rm -rf "$tmp_dir"' EXIT
     for template_path in blueprints/*/; do
         template="$(basename "$template_path")"
         shortname="${template%-base}"
         target_dir="$tmp_dir/$shortname"
+        if [ "$quiet_progress" = "1" ]; then
+            printf "\033[0;34m  · testing %s\033[0m\n" "$template" >&3
+        fi
         printf "\033[0;34mTesting: just create %s\033[0m\n" "$template"
         if ! just create "$template" "$target_dir"; then
             printf "\033[31m✗ test-create failed for %s\033[0m\n" "$template"
@@ -431,6 +442,9 @@ ci-verbose: check code-spell code-semgrep code-shellcheck test-info test test-cr
 ci:
     #!/usr/bin/env bash
     set -uo pipefail
+    # Wire fd 3 to this live terminal so individual steps can surface per-item
+    # progress past the output capture below (which only prints on failure).
+    exec 3>&1
     echo ""
     # Keep this list identical to ci-verbose's dependencies so both run the
     # exact same tests; only the output verbosity differs.
