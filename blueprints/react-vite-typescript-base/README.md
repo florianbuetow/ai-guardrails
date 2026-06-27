@@ -17,10 +17,10 @@ Requires network access at generation time (`npm create vite` + `npm install`).
 | Tool | Purpose | Why It's Used |
 |------|---------|---------------|
 | **prettier** | Formatting | One consistent style; `code-format` writes, `code-style` checks |
-| **ESLint** | Linting | typescript-eslint strict-type-checked + react-hooks + jsx-a11y; zero warnings allowed |
+| **Oxlint** | Linting | react-hooks + jsx-a11y + correctness rules; zero warnings allowed |
 | **tsc** | Type checks | Strict compiler pass over app, node, and e2e configs (`code-lspchecks`) |
 | **semgrep** | Custom static analysis | Pattern-based scanning — enforces project-specific rules |
-| **ESLint security pass** | Security lint | eslint-plugin-security + no-unsanitized with `--max-warnings 0` (`code-security`) |
+| **Oxlint security pass** | Security lint | oxlint no-eval + correctness with `--deny-warnings` (`code-security`) |
 | **knip** | Dependency hygiene | Detects unused/unlisted dependencies, exports, and files (`code-deptry`) |
 | **dependency-cruiser** | Architecture constraints | No cycles, no orphans, no src→test imports (`code-architecture`) |
 | **codespell** | Spell checking | Catches typos in code, comments, and documentation |
@@ -41,7 +41,7 @@ blueprints/react-vite-typescript-base/
     ├── justfile.template
     ├── README.md.template
     ├── AGENTS.md.template
-    ├── eslint.config.js                # Hardened flat config (replaces scaffold's)
+    ├── .oxlintrc.json                  # Hardened oxlint config (replaces scaffold's)
     ├── .prettierrc / .prettierignore
     ├── vitest.config.ts.template
     ├── playwright.config.ts
@@ -61,8 +61,8 @@ blueprints/react-vite-typescript-base/
     │   ├── input/
     │   └── output/
     └── config/
-        ├── eslint/
-        │   └── security.config.mjs
+        ├── oxlint/
+        │   └── security.oxlintrc.json
         ├── semgrep/
         │   ├── no-default-values.yml
         │   ├── no-sneaky-fallbacks.yml
@@ -74,7 +74,7 @@ blueprints/react-vite-typescript-base/
             └── ignore.txt
 ```
 
-Everything else (`package.json`, `vite.config.ts`, `tsconfig*.json`, `index.html`, `public/`, asset files) comes from the live Vite scaffold at apply time. The merge rule is simple: template files always win; the scaffold fills in the rest. The bootstrap pins `eslint`/`@eslint/js` to `^9` (eslint-plugin-jsx-a11y does not support eslint 10 yet) — everything else installs at its current version.
+Everything else (`package.json`, `vite.config.ts`, `tsconfig*.json`, `index.html`, `public/`, asset files) comes from the live Vite scaffold at apply time. The merge rule is simple: template files always win; the scaffold fills in the rest. The bootstrap installs oxlint plus the rest of the toolchain at current versions; the Vite scaffold already lints with oxlint, so no ESLint stack is needed.
 
 ## Usage
 
@@ -110,7 +110,7 @@ The template will ask:
 Projects created from this template include:
 
 - **npm-only tooling**: All JS tooling via `npm`/`npx` — never yarn, pnpm, or bun
-- **Complete validation suite**: prettier, ESLint, tsc, semgrep, security pass, knip, dependency-cruiser, Vitest, Playwright, npm audit — all wired into `just ci`
+- **Complete validation suite**: prettier, oxlint, tsc, semgrep, security pass, knip, dependency-cruiser, Vitest, Playwright, npm audit — all wired into `just ci`
 - **Just recipes**: init, run, build, destroy, code-*, test, test-coverage, test-e2e, ci, ci-quiet
 - **Pre-commit hooks**: Runs `just ci-quiet` on commit
 - **AI agent rules**: AGENTS.md with strict development guidelines
@@ -125,7 +125,7 @@ Projects created from this template include:
 | `no-default-values` | Bans `import.meta.env.X ?? default` / `process.env.X \|\| default` — fail explicitly on missing configuration |
 | `no-sneaky-fallbacks` | Bans empty `catch {}` blocks — handle failures or let them propagate |
 | `no-skip-tests` | Bans `.skip` / `.only` / `xit` / `xdescribe` / `xtest` — tests must pass or fail |
-| `no-suppression` | Bans `eslint-disable`, `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, `prettier-ignore`, coverage-ignore comments |
+| `no-suppression` | Bans `eslint-disable`, `oxlint-disable`, `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, `prettier-ignore`, coverage-ignore comments |
 | `no-shellcheck-disable` | Bans `# shellcheck disable=` in shell scripts |
 | `security-predictable-random` | Bans `Math.random()` — use `crypto.getRandomValues()` for security-sensitive values |
 
@@ -157,4 +157,4 @@ This will:
 
 Based on:
 - ai-guardrails/blueprints/kotlin-cli-base (conventions) and the [Vite](https://vite.dev/) react-ts scaffold
-- [typescript-eslint](https://typescript-eslint.io/), [Vitest](https://vitest.dev/), [Playwright](https://playwright.dev/), [knip](https://knip.dev/), [dependency-cruiser](https://github.com/sverweij/dependency-cruiser)
+- [oxlint](https://oxc.rs/docs/guide/usage/linter.html), [Vitest](https://vitest.dev/), [Playwright](https://playwright.dev/), [knip](https://knip.dev/), [dependency-cruiser](https://github.com/sverweij/dependency-cruiser)

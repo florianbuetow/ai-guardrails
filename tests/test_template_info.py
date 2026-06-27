@@ -92,7 +92,7 @@ class TemplateInfoTests(unittest.TestCase):
         dependencies = template_info.parse_npm_bootstrap(manifest)
 
         dependency_names = names(dependencies)
-        self.assertIn("eslint", dependency_names)
+        self.assertIn("oxlint", dependency_names)
         self.assertIn("prettier", dependency_names)
         self.assertIn("@playwright/test", dependency_names)
         self.assertNotIn("vite", dependency_names)

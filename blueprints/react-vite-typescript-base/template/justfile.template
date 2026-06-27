@@ -87,11 +87,11 @@ help:
     @echo ""
     @printf "\033[0;33mCode Quality:\033[0m\n"
     @printf "  %-40s %s\n" "code-format" "Auto-format code (prettier)"
-    @printf "  %-40s %s\n" "code-style" "Check formatting and lint (prettier + eslint)"
+    @printf "  %-40s %s\n" "code-style" "Check formatting and lint (prettier + oxlint)"
     @printf "  %-40s %s\n" "code-spell" "Check spelling (codespell)"
     @printf "  %-40s %s\n" "code-semgrep" "Run custom static analysis (Semgrep)"
     @printf "  %-40s %s\n" "code-lspchecks" "Run strict type checks (tsc)"
-    @printf "  %-40s %s\n" "code-security" "Run security lint pass (eslint security plugins)"
+    @printf "  %-40s %s\n" "code-security" "Run security lint pass (oxlint no-eval)"
     @printf "  %-40s %s\n" "code-deptry" "Check dependency hygiene (knip)"
     @printf "  %-40s %s\n" "code-architecture" "Check import architecture (dependency-cruiser)"
     @printf "  %-40s %s\n" "code-audit" "Scan dependencies for vulnerabilities and outdated versions"
@@ -159,7 +159,7 @@ code-style:
     @echo ""
     @printf "\033[34m=== Checking Code Style ===\033[0m\n"
     @npx prettier --log-level warn --check .
-    @npx eslint . --max-warnings 0
+    @npx oxlint --deny-warnings
     @printf "\033[32m✓ code-style completed successfully\033[0m\n"
     @echo ""
 
@@ -192,7 +192,7 @@ code-lspchecks:
 code-security:
     @echo ""
     @printf "\033[34m=== Running Security Lint Pass ===\033[0m\n"
-    @npx eslint --no-config-lookup -c config/eslint/security.config.mjs --max-warnings 0 'src/**/*.{ts,tsx}' 'e2e/**/*.ts'
+    @npx oxlint --deny-warnings -c config/oxlint/security.oxlintrc.json src e2e
     @printf "\033[32m✓ code-security completed successfully\033[0m\n"
     @echo ""
 

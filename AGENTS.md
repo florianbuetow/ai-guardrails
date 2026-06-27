@@ -107,8 +107,8 @@ This is an inverted test pattern: a passing test means the project's own CI caug
 - React + Vite + TypeScript, Node 22+/24+, npm-only tooling
 - Two-phase generation: Copier provisions guardrails, then a post-task runs `npm create vite` and merges the scaffold into the project root (nothing frozen — current scaffold and tool versions at every apply; network required)
 - Project structure: src/, e2e/, scripts/, data/, config/
-- Validation: prettier, eslint (typescript-eslint strict-type-checked, react-hooks, jsx-a11y), tsc, semgrep, codespell, eslint security pass (security + no-unsanitized), knip, dependency-cruiser, vitest + Testing Library, Playwright, npm audit
-- Conventions: Justfile workflow, npm/npx exclusively, no eslint-disable, no @ts-ignore, no skipped tests
+- Validation: prettier, oxlint (react-hooks, jsx-a11y, correctness rules), tsc, semgrep, codespell, oxlint security pass (no-eval + correctness), knip, dependency-cruiser, vitest + Testing Library, Playwright, npm audit
+- Conventions: Justfile workflow, npm/npx exclusively, no eslint-disable/oxlint-disable, no @ts-ignore, no skipped tests
 
 All templates emphasize creating immediately runnable projects with no placeholders, comprehensive CI pipelines, and AGENTS.md/CLAUDE.md files for AI agent guidance.
 

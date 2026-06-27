@@ -5,7 +5,7 @@ This file provides guidance to AI agents and AI-assisted development tools when 
 ## General Coding Principles
 - **Fail fast — never swallow errors.** Always propagate errors and fail immediately. No silent fallbacks, no empty catch blocks.
 - **Never assume any default values anywhere.** Check for required values explicitly and throw if something is missing. Default values mask underlying issues and make them hard to debug.
-- **Never suppress checks with annotations.** Fix the underlying issue instead. No `eslint-disable`, `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, `prettier-ignore`, or any other mechanism that silences a checker.
+- **Never suppress checks with annotations.** Fix the underlying issue instead. No `eslint-disable`, `oxlint-disable`, `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, `prettier-ignore`, or any other mechanism that silences a checker.
 - Always be explicit about values, paths, and configurations
 - If a value is not provided, throw an error — never silently fall back to a default
 
@@ -50,7 +50,7 @@ This file provides guidance to AI agents and AI-assisted development tools when 
 ## Forbidden Patterns
 The following patterns are banned and enforced by Semgrep (`just code-semgrep`):
 
-- **`eslint-disable`** — fix the lint finding instead of suppressing it
+- **`eslint-disable` / `oxlint-disable`** — fix the lint finding instead of suppressing it
 - **`@ts-ignore` / `@ts-expect-error` / `@ts-nocheck`** — fix the type error
 - **`prettier-ignore`** — keep formatting consistent
 - **`istanbul/c8/v8 ignore`** — write a test instead of hiding the coverage gap
@@ -61,9 +61,9 @@ The following patterns are banned and enforced by Semgrep (`just code-semgrep`):
 
 These tools enforce the rules:
 - **prettier** — formatting (`just code-format` / `just code-style`)
-- **ESLint** — typescript-eslint strict-type-checked, react-hooks, jsx-a11y (`just code-style`)
+- **Oxlint** — react-hooks, jsx-a11y, correctness rules; zero warnings (`just code-style`)
 - **tsc** — strict type checks across app, node, and e2e configs (`just code-lspchecks`)
-- **ESLint security pass** — eslint-plugin-security + no-unsanitized (`just code-security`)
+- **Oxlint security pass** — oxlint no-eval + correctness rules (`just code-security`)
 - **knip** — unused/unlisted dependencies, exports, files (`just code-deptry`)
 - **dependency-cruiser** — no cycles, no orphans, no src→test imports (`just code-architecture`)
 - **Vitest coverage** — {{coverage_threshold}}% threshold (`just test-coverage`)
@@ -76,7 +76,7 @@ These tools enforce the rules:
 - Utility scripts go in `scripts/`
 - **Input data is organized**: `data/input/`
 - **Output data is organized**: `data/output/`
-- Configuration files go in `config/` (semgrep, codespell, eslint security pass)
+- Configuration files go in `config/` (semgrep, codespell, oxlint security pass)
 - **Never create source files in the project root directory**
 
 ## Error Handling

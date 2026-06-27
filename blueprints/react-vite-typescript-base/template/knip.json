@@ -1,8 +1,7 @@
 {
   "entry": [
     "src/**/*.test.{ts,tsx}",
-    "e2e/**/*.spec.ts",
-    "config/eslint/security.config.mjs"
+    "e2e/**/*.spec.ts"
   ],
   "project": ["src/**/*.{ts,tsx}", "e2e/**/*.ts"],
   "ignoreDependencies": ["dependency-cruiser", "prettier"]

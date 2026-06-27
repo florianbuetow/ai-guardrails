@@ -1,12 +1,12 @@
 rules:
-  - id: typescript.no-eslint-disable
+  - id: typescript.no-lint-disable
     languages: [generic]
     message: >
-      eslint-disable comments are not allowed. Fix the underlying issue instead
-      of suppressing it. If you believe suppression is required, explain why and
-      propose a fix that avoids suppression.
+      eslint-disable / oxlint-disable comments are not allowed. Fix the
+      underlying lint finding instead of suppressing it. If you believe
+      suppression is required, explain why and propose a fix that avoids it.
     severity: ERROR
-    pattern-regex: 'eslint-disable'
+    pattern-regex: '(eslint|oxlint)-disable'
     paths:
       include:
         - "*.ts"

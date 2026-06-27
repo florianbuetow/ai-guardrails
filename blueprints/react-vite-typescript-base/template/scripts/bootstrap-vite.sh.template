@@ -33,7 +33,7 @@ rm -rf "$SCAFFOLD_DIR"
 npm create -y vite@latest "$SCAFFOLD_DIR" -- --template react-ts </dev/null
 
 # Merge rule: copy a scaffold file only where no file already exists.
-# Template files (justfile, eslint.config.js, README.md, ...) always win.
+# Template files (justfile, .oxlintrc.json, README.md, ...) always win.
 (cd "$SCAFFOLD_DIR" && find . -type f | sed 's|^\./||') | while IFS= read -r rel_path; do
     if [ ! -f "$rel_path" ]; then
         mkdir -p "$(dirname "$rel_path")"
@@ -47,21 +47,13 @@ rm -rf "$SCAFFOLD_DIR"
 npm pkg set name="{{project_name}}" description="{{project_description}}" \
     engines.node=">={{node_version}}"
 
-# Constrain eslint to the v9 line. The current Vite react-ts scaffold pins
-# eslint (and @eslint/js) to v10, but eslint-plugin-jsx-a11y — a required
-# accessibility guardrail — has no v10-compatible release (its peer range tops
-# out at eslint 9). All other plugins support both 9 and 10, so pinning eslint
-# to ^9 is the real compatibility ceiling, not a workaround. Drop this when
-# jsx-a11y ships eslint 10 support.
-npm pkg set devDependencies.eslint="^9" devDependencies.@eslint/js="^9"
-
-# Guardrail toolchain — deliberately unpinned (latest at apply time).
+# Guardrail toolchain — deliberately unpinned (latest at apply time). The Vite
+# react-ts scaffold lints with oxlint and no longer ships an ESLint stack, so
+# the template owns its linter explicitly: oxlint drives both `code-style` and
+# the `code-security` pass via .oxlintrc.json + config/oxlint/security.oxlintrc.json.
 npm install --save-dev \
+    oxlint \
     prettier \
-    eslint-config-prettier \
-    eslint-plugin-jsx-a11y \
-    eslint-plugin-security \
-    eslint-plugin-no-unsanitized \
     vitest \
     @vitest/coverage-v8 \
     jsdom \

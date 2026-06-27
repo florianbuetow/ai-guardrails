@@ -5,7 +5,7 @@
 ## Stack
 
 React + Vite + TypeScript, validated by the full ai-guardrails suite:
-prettier, ESLint (strict type-checked), tsc, semgrep, codespell, an ESLint
+prettier, oxlint, tsc, semgrep, codespell, an oxlint
 security pass, knip, dependency-cruiser, Vitest (+{{coverage_threshold}}%
 coverage), Playwright, and npm audit.
 
@@ -32,10 +32,10 @@ Run `just` (or `just help`) for the full annotated list. The most important:
 | `just run` | Start the Vite dev server |
 | `just build` | Type-check and build for production |
 | `just code-format` | Auto-format with prettier |
-| `just code-style` | prettier --check + eslint --max-warnings 0 |
+| `just code-style` | prettier --check + oxlint --deny-warnings |
 | `just code-semgrep` | Custom guardrail rules (no suppression, no silent defaults, …) |
 | `just code-lspchecks` | tsc over app, node, and e2e configs |
-| `just code-security` | ESLint security plugins pass |
+| `just code-security` | Oxlint security pass |
 | `just code-deptry` | knip dependency hygiene |
 | `just code-architecture` | dependency-cruiser import rules |
 | `just code-audit` | npm audit + outdated report |
@@ -50,7 +50,7 @@ Run `just` (or `just help`) for the full annotated list. The most important:
     scripts/        utility scripts
     data/input/     input data
     data/output/    output data
-    config/         semgrep, codespell, eslint-security configuration
+    config/         semgrep, codespell, oxlint-security configuration
 
 ## Conventions
 
