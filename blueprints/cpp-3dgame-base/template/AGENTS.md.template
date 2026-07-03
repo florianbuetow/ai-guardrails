@@ -28,6 +28,7 @@ This file provides guidance to AI agents and AI-assisted development tools when 
 - C++ code must be built **only** via CMake presets and just recipes
   - Use `just init` to configure and build the project
   - Use `just run` to execute the application
+  - Use `just demo` to run the Vulkan cube demo (visual graphics-stack check; `--auto-quit <seconds>` for non-interactive runs)
   - Use `just destroy` to clean build artifacts
   - **Never** use raw compiler invocations: `g++ ...`, `clang++ ...`, `c++ ...`
 - All build configuration must be managed through `CMakeLists.txt` and `CMakePresets.json`

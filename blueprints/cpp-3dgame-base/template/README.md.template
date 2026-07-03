@@ -19,7 +19,8 @@
 ├── README.md                    # This file
 ├── src/                         # Source code
 │   ├── main.cpp                 # Main entry point
-│   └── app.cpp                  # Application logic
+│   ├── app.cpp                  # Application logic
+│   └── demo/                    # Vulkan cube demo (`just demo`)
 ├── include/                     # Public headers
 │   └── {{project_name}}/        # Project namespace
 │       └── app.hpp              # Application header
@@ -127,6 +128,15 @@ Run the main application:
 just run
 ```
 
+Run the Vulkan cube demo — a visual end-to-end check that the graphics stack
+(SDL3 window, Vulkan loader/driver, vk-bootstrap, shaderc, VMA, GLM, Dear
+ImGui menu) actually works on this machine:
+
+```bash
+just demo                     # interactive: drag to rotate, Esc quits
+just demo --auto-quit 5       # timed smoke run (used by CI-style checks)
+```
+
 See all available commands:
 
 ```bash
@@ -145,6 +155,7 @@ just
 
 - `just init` - Initialize development environment
 - `just run` - Run the main application
+- `just demo` - Run the Vulkan cube demo (visual stack check)
 - `just destroy` - Remove build artifacts
 - `just help` - Show available commands
 

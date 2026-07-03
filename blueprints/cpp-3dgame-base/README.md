@@ -73,6 +73,12 @@ installed by `just init` (first run compiles from source for the local
 LLVM/Clang toolchain). Each library has a headless-safe smoke test in
 `tests/deps/`.
 
+Generated projects also include a **Vulkan cube demo** (`src/demo/`, run with
+`just demo`): an interactive rotating cube with mouse control and a Dear ImGui
+menu that visually verifies the SDL3 + Vulkan (MoltenVK on macOS) +
+vk-bootstrap + shaderc + VMA + GLM + ImGui stack end to end. Pass
+`--auto-quit <seconds>` for a non-interactive smoke run.
+
 | Requested | Delivered as (pin) |
 |-----------|--------------------|
 | SDL3 | `sdl/3.4.8` |
