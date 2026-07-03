@@ -8,6 +8,7 @@
 {{project_name}}/
 ├── CMakeLists.txt              # CMake build configuration
 ├── CMakePresets.json            # CMake presets (debug, release, coverage, sanitize)
+├── conanfile.py                 # Conan 2 dependency manifest (pinned versions)
 ├── .clang-format                # Clang-format code style configuration
 ├── .clang-tidy                  # Clang-tidy static analysis configuration
 ├── .pre-commit-config.yaml      # Pre-commit hooks configuration
@@ -23,7 +24,8 @@
 │   └── {{project_name}}/        # Project namespace
 │       └── app.hpp              # Application header
 ├── tests/                       # Test files
-│   └── app_test.cpp             # Unit tests (Google Test)
+│   ├── app_test.cpp             # Unit tests (Google Test)
+│   └── deps/                    # One smoke test per third-party library
 ├── scripts/                     # Utility scripts
 ├── data/                        # Data files
 │   ├── input/                   # Input data files
@@ -43,8 +45,11 @@
 ## Prerequisites
 
 - **cmake 3.25+** - Build system generator ([installation guide](https://cmake.org/download/))
-- **C++{{cpp_standard}} compiler** - GCC 14+ or Clang 18+ ([GCC](https://gcc.gnu.org/) | [LLVM/Clang](https://releases.llvm.org/))
+- **ninja** - CMake generator used by all presets (`brew install ninja`)
+- **conan 2.x** - C/C++ package manager for all third-party libraries (`brew install conan`)
+- **C++{{cpp_standard}} compiler** - LLVM/Clang (`brew install llvm`; AppleClang is rejected)
 - **just** - Command runner ([installation guide](https://github.com/casey/just#installation))
+- **MoltenVK** (macOS only) - Vulkan driver/ICD (`brew install molten-vk`)
 
 The following validation tools are also required:
 
@@ -60,6 +65,44 @@ The following validation tools are also required:
 | [semgrep](https://semgrep.dev/) | Custom static analysis | `brew install semgrep` |
 | [lcov](https://github.com/linux-test-project/lcov) | Code coverage reporting | `brew install lcov` |
 
+## Dependencies (Conan 2)
+
+All third-party libraries are managed by Conan with exact version pins in
+`conanfile.py` and installed by `just init` into `build/conan/<BuildType>/`.
+The first `init` compiles every dependency from source for the local
+LLVM/Clang toolchain (slow); afterwards the Conan cache makes it fast.
+
+Included library stack:
+
+| Domain | Libraries |
+|--------|-----------|
+| Windowing / input | SDL3 |
+| Graphics (Vulkan) | vulkan-headers, vulkan-loader, volk, vk-bootstrap, VulkanMemoryAllocator, MoltenVK (macOS, via brew) |
+| Shader toolchain | shaderc (bundles glslang), SPIRV-Tools, SPIRV-Cross |
+| Math / ECS / physics | GLM, EnTT, Jolt Physics |
+| Navigation / networking | Recast/Detour (recastnavigation), GameNetworkingSockets |
+| Serialization | bitsery |
+| Audio | Opus, miniaudio |
+| Asset pipeline | tinygltf (glTF 2.0), meshoptimizer, KTX2/Basis Universal (libktx), ozz-animation, MikkTSpace |
+| UI / tooling | Dear ImGui (docking), ImGuizmo, RmlUi, spdlog, fmt, Tracy |
+| Data | SQLite3, libpqxx (PostgreSQL), zstd, xxHash |
+| Testing | GoogleTest |
+
+`gltfpack` (glTF optimizer CLI from the meshoptimizer project) is not
+available through Conan; install it separately from
+https://github.com/zeux/meshoptimizer/tree/master/gltf if needed.
+
+Every library has a smoke test in `tests/deps/` that proves it compiles,
+links, and initializes headlessly — run them with `just test`.
+
+### Adding a dependency
+
+1. Add an exactly-pinned `self.requires("name/version")` to `conanfile.py`.
+2. Add `find_package(...)` and the imported target to `target_link_libraries`
+   in `CMakeLists.txt`.
+3. Add a smoke test under `tests/deps/<name>_test.cpp`.
+4. Run `just init && just test`.
+
 ## Setup
 
 Initialize the project environment:
@@ -70,6 +113,8 @@ just init
 
 This will:
 - Check all prerequisite tools are installed
+- Create the default Conan profile (if missing) and install all dependencies
+  (Debug + Release; the first run compiles them from source)
 - Configure the CMake debug preset
 - Build the project
 

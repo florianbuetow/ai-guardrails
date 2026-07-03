@@ -4,7 +4,8 @@ Production-ready Copier template for C++ CLI applications with full validation i
 
 ## Features
 
-- **C++20/C++23** with CMake build system
+- **C++20/C++23** with CMake build system (Ninja generator)
+- **Conan 2 dependency management** — full 3D-game library stack with exact version pins, one smoke test per library
 - **Just task runner** for all commands
 - **Pre-commit hooks** with CI checks
 - **Comprehensive AGENTS.md** for AI-assisted development
@@ -40,6 +41,7 @@ blueprints/cpp-3dgame-base/
     ├── CLAUDE.md -> AGENTS.md          # Symlink (created via _tasks)
     ├── CMakeLists.txt.template
     ├── CMakePresets.json.template
+    ├── conanfile.py.template           # Conan 2 dependency manifest (pinned)
     ├── justfile.template
     ├── README.md.template
     ├── src/
@@ -49,7 +51,8 @@ blueprints/cpp-3dgame-base/
     │   └── {{project_name}}/
     │       └── app.hpp.template
     ├── tests/
-    │   └── app_test.cpp.template
+    │   ├── app_test.cpp.template
+    │   └── deps/                       # One smoke test per library (jinja-free)
     ├── scripts/
     ├── data/
     │   ├── input/
@@ -62,6 +65,56 @@ blueprints/cpp-3dgame-base/
         └── codespell/
             └── ignore.txt
 ```
+
+## Library Stack (Conan 2)
+
+All third-party libraries are declared in `conanfile.py` with exact pins and
+installed by `just init` (first run compiles from source for the local
+LLVM/Clang toolchain). Each library has a headless-safe smoke test in
+`tests/deps/`.
+
+| Requested | Delivered as (pin) |
+|-----------|--------------------|
+| SDL3 | `sdl/3.4.8` |
+| Vulkan SDK | `vulkan-headers/1.4.313.0` + `vulkan-loader/1.4.313.0` |
+| MoltenVK | brew `molten-vk` (ConanCenter recipe requires apple-clang, incompatible with the LLVM/Clang policy) |
+| volk | `volk/1.4.313.0` |
+| vk-bootstrap | `vk-bootstrap/1.4.350` |
+| Vulkan Memory Allocator | `vulkan-memory-allocator/3.3.0` |
+| DXC or shaderc/glslang | `shaderc/2025.3` (bundles glslang) |
+| SPIRV-Tools | `spirv-tools/1.4.313.0` |
+| SPIRV-Cross | `spirv-cross/1.4.313.0` |
+| GLM | `glm/1.0.3` |
+| EnTT | `entt/3.16.0` |
+| Jolt Physics | `joltphysics/5.2.0` |
+| Recast/Detour | `recastnavigation/1.6.0` |
+| GameNetworkingSockets | `gamenetworkingsockets/1.4.1` |
+| bitsery | `bitsery/5.2.5` |
+| Opus | `opus/1.6.1` |
+| miniaudio | `miniaudio/0.11.22` |
+| glTF 2.0 | format — covered by tinygltf |
+| tinygltf | `tinygltf/2.9.7` |
+| meshoptimizer | `meshoptimizer/1.0` |
+| gltfpack | external CLI tool (not on ConanCenter); install from the meshoptimizer repo |
+| KTX2 / Basis Universal | `ktx/4.4.2` (tools disabled) |
+| ozz-animation | `ozz-animation/0.14.1` |
+| MikkTSpace | `mikktspace/cci.20200325` |
+| Dear ImGui | `imgui/1.90.5-docking` |
+| ImGuizmo | `imguizmo/cci.20231114` |
+| RmlUi | `rmlui/6.2` |
+| spdlog | `spdlog/1.17.0` |
+| fmt | `fmt/12.1.0` |
+| Tracy | `tracy/0.13.1` (on_demand) |
+| GoogleTest | `gtest/1.17.0` (test_requires) |
+| SQLite | `sqlite3/3.53.3` |
+| PostgreSQL/libpqxx | `libpqxx/8.0.1` |
+| zstd | `zstd/1.5.7` |
+| xxHash | `xxhash/0.8.3` |
+
+Version-alignment notes: the Vulkan/SPIR-V stack is pinned to the 1.4.313 SDK
+line (shaderc 2025.3 and ConanCenter's MoltenVK-free graph resolve there);
+imgui stays on 1.90.5-docking because ImGuizmo cci.20231114 uses APIs removed
+in imgui 1.92.
 
 ## Usage
 
@@ -121,7 +174,10 @@ recipe when investigating non-user, system, or dependency warning context.
 ## Requirements
 
 - **cmake 3.25+** - Build system
-- **C++ compiler** - GCC 14+ or Clang 18+ (with C++20/C++23 support)
+- **ninja** - CMake generator (`brew install ninja`)
+- **conan 2.x** - Dependency manager (`brew install conan`)
+- **C++ compiler** - LLVM/Clang (`brew install llvm`; AppleClang is rejected)
+- **MoltenVK** - macOS Vulkan driver (`brew install molten-vk`, macOS only)
 - **clang-format** - Code formatter (`brew install clang-format`)
 - **clang-tidy** - Static analysis (`brew install llvm`)
 - **cppcheck** - Deep static analysis (`brew install cppcheck`)

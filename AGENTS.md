@@ -95,6 +95,15 @@ This is an inverted test pattern: a passing test means the project's own CI caug
 - Validation: clang-format, clang-tidy, cppcheck, flawfinder, IWYU, semgrep, codespell, GoogleTest, ASan/UBSan, lcov coverage
 - Conventions: Justfile workflow, CMakePresets.json, strict compiler warnings (-Wall -Wextra -Wpedantic -Werror)
 
+### The C++ 3D Game Template (`blueprints/cpp-3dgame-base`)
+
+- C++23 (or C++20) with CMake + Ninja and Conan 2 dependency management
+- Project structure: src/, include/, tests/ (incl. tests/deps/ smoke tests), scripts/, data/
+- Full 3D-game library stack via Conan with exact pins: SDL3, Vulkan (headers/loader/volk/vk-bootstrap/VMA; MoltenVK via brew on macOS), shaderc, SPIRV-Tools/-Cross, GLM, EnTT, Jolt Physics, Recast/Detour, GameNetworkingSockets, bitsery, Opus, miniaudio, tinygltf, meshoptimizer, KTX, ozz-animation, MikkTSpace, Dear ImGui (docking), ImGuizmo, RmlUi, spdlog, fmt, Tracy, SQLite3, libpqxx, zstd, xxHash, GoogleTest
+- One headless-safe GoogleTest smoke test per library in tests/deps/
+- Validation: clang-format, clang-tidy, cppcheck, flawfinder, Infer, IWYU, semgrep, codespell, GoogleTest, ASan/UBSan, lcov coverage
+- Conventions: Justfile workflow, CMakePresets.json (Conan toolchains), strict compiler warnings, LLVM/Clang only
+
 ### The Kotlin CLI Template (`blueprints/kotlin-cli-base`)
 
 - Kotlin 2.1+ on the JVM (toolchain 21+) with Gradle Kotlin DSL

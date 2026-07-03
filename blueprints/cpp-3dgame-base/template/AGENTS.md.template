@@ -32,6 +32,17 @@ This file provides guidance to AI agents and AI-assisted development tools when 
   - **Never** use raw compiler invocations: `g++ ...`, `clang++ ...`, `c++ ...`
 - All build configuration must be managed through `CMakeLists.txt` and `CMakePresets.json`
 
+## Dependency Management (Conan 2)
+- All third-party libraries come from Conan, declared in `conanfile.py` with **exact version pins**
+- **Never** vendor sources, add git submodules, or use CMake `FetchContent` for dependencies
+- To add a dependency:
+  1. Add `self.requires("name/version")` to `conanfile.py` (exact pin, no ranges)
+  2. Add `find_package(...)` + the imported target in `CMakeLists.txt`
+  3. Add a smoke test under `tests/deps/<name>_test.cpp` proving it compiles, links, and initializes headlessly
+  4. Run `just init && just test`
+- Dependencies are installed by `just init` into `build/conan/<BuildType>/`; presets reference the generated `conan_toolchain.cmake`
+- MoltenVK (macOS Vulkan driver) intentionally comes from `brew install molten-vk`, not Conan — its ConanCenter recipe requires apple-clang, which this project rejects
+
 ## C++ Coding Standards
 - All code must compile with `-Wall -Wextra -Wpedantic -Werror`, zero warnings
 - **Never** use raw `new`/`delete` -- use `std::unique_ptr` or `std::shared_ptr`
