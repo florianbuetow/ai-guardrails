@@ -5,7 +5,12 @@ rules:
       Raw 'new' is not allowed. Use std::unique_ptr or std::shared_ptr instead.
       Memory must be managed via RAII and smart pointers.
     severity: ERROR
-    pattern: new $TYPE(...)
+    # The pattern-regex intersection is required because semgrep's C++
+    # grammar also matches brace constructions like `std::string{x}` against
+    # `new $TYPE(...)`; a real new-expression must contain the `new` keyword.
+    patterns:
+      - pattern: new $TYPE(...)
+      - pattern-regex: '\bnew\s+\w'
     paths:
       include:
         - src/

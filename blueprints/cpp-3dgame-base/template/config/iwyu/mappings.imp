@@ -1,0 +1,21 @@
+# include-what-you-use mapping file.
+#
+# glm implements its public headers via private detail/*.inl and ext/*.inl
+# files; without these one-to-one mappings IWYU demands the private spellings
+# and suggests removing the public ones (which clang-tidy's
+# misc-include-cleaner correctly enforces).
+[
+  { include: ["<glm/detail/func_trigonometric.inl>", "private", "<glm/trigonometric.hpp>", "public"] },
+  { include: ["<glm/ext/matrix_clip_space.inl>", "private", "<glm/ext/matrix_clip_space.hpp>", "public"] },
+  { include: ["<glm/ext/matrix_transform.inl>", "private", "<glm/ext/matrix_transform.hpp>", "public"] },
+  { include: ["@[<\"]glm/detail/type_mat4x4.*[>\"]", "private", "<glm/ext/matrix_float4x4.hpp>", "public"] },
+  { include: ["@[<\"]glm/detail/type_vec3.*[>\"]", "private", "<glm/ext/vector_float3.hpp>", "public"] },
+  { include: ["@[<\"]glm/detail/type_vec4.*[>\"]", "private", "<glm/ext/vector_float4.hpp>", "public"] },
+  { include: ["<glm/detail/func_common.inl>", "private", "<glm/ext/matrix_transform.hpp>", "public"] },
+  { include: ["<glm/detail/func_exponential.inl>", "private", "<glm/ext/matrix_transform.hpp>", "public"] },
+  { include: ["<glm/detail/func_geometric.inl>", "private", "<glm/ext/matrix_transform.hpp>", "public"] },
+  { include: ["<glm/detail/qualifier.hpp>", "private", "<glm/ext/vector_float3.hpp>", "public"] },
+  # stderr comes from the macOS SDK-private <_stdio.h>; the portable
+  # spelling is <cstdio>.
+  { include: ["<_stdio.h>", "private", "<cstdio>", "public"] },
+]

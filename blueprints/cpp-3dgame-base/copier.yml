@@ -34,7 +34,7 @@ _message_after_copy: |
 _tasks:
   - "ln -s AGENTS.md CLAUDE.md"
   - "git init -q"
-  - "mkdir -p .git/hooks && printf '%s\n' '#!/usr/bin/env sh' 'set -e' 'just ci-quiet' > .git/hooks/pre-commit"
+  - "mkdir -p .git/hooks && printf '%s\n' '#!/usr/bin/env sh' 'set -e' '# Apple git exports CPATH=/usr/local/include into hooks, which shadows Conan includes.' 'unset CPATH' 'just ci-quiet' > .git/hooks/pre-commit"
 
 project_name:
   type: str

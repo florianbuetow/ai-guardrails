@@ -50,6 +50,7 @@ help:
     @echo ""
     @printf "\033[0;33mRun:\033[0m\n"
     @printf "  %-40s %s\n" "run" "Run the main application"
+    @printf "  %-40s %s\n" "demo" "Run the Vulkan cube demo (visual stack check)"
     @echo ""
     @printf "\033[0;33mCode Quality:\033[0m\n"
     @printf "  %-40s %s\n" "code-format" "Auto-fix code formatting with clang-format"
@@ -313,6 +314,30 @@ run:
     @./build/debug/{{project_name}}
     @echo ""
 
+# Run the Vulkan cube demo (pass e.g. `--auto-quit 5` for a timed smoke run)
+demo *args:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo ""
+    printf "\033[0;34m=== Running Vulkan Cube Demo ===\033[0m\n"
+    cmake --build --preset debug
+    # Put the Conan-provided shared libraries (notably the Vulkan loader) on
+    # the dynamic linker path so SDL can locate them at runtime.
+    source build/conan/Debug/conanrun.sh
+    if [ "$(uname -s)" = "Darwin" ]; then
+        MOLTENVK_ICD="$(brew --prefix molten-vk)/etc/vulkan/icd.d/MoltenVK_icd.json"
+        if [ ! -f "$MOLTENVK_ICD" ]; then
+            printf "\033[0;31m✗ Error: MoltenVK ICD manifest not found at %s\033[0m\n" "$MOLTENVK_ICD"
+            printf "  Install with: brew install molten-vk\n"
+            exit 1
+        fi
+        export VK_ICD_FILENAMES="$MOLTENVK_ICD"
+        export VK_DRIVER_FILES="$MOLTENVK_ICD"
+    fi
+    ./build/debug/{{project_name}}_demo {% raw %}{{args}}{% endraw %}
+    printf "\033[0;32m✓ Demo exited cleanly\033[0m\n"
+    echo ""
+
 # Auto-fix code formatting with clang-format
 code-format:
     #!/usr/bin/env bash
@@ -330,6 +355,10 @@ code-format:
 code-style:
     #!/usr/bin/env bash
     set -e
+    # CPATH directories behave like -I (searched before Conan's -isystem and
+    # not treated as system headers); Apple's git exports
+    # CPATH=/usr/local/include inside hooks, shadowing Conan dependencies.
+    unset CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH
     echo ""
     printf "\033[0;34m=== Checking Code Style ===\033[0m\n"
     EXTRA_ARGS=""
@@ -369,7 +398,8 @@ code-security:
 code-infer:
     @echo ""
     @printf "\033[0;34m=== Running Infer Static Analysis ===\033[0m\n"
-    @infer run --fail-on-issue --compilation-database build/debug/compile_commands.json
+    @infer run --fail-on-issue --skip-analysis-in-path ".*\.conan2.*" \
+        --compilation-database build/debug/compile_commands.json
     @printf "\033[0;32m✓ Infer analysis passed\033[0m\n"
     @echo ""
 
@@ -377,6 +407,9 @@ code-infer:
 code-deptry:
     #!/usr/bin/env bash
     set -e
+    # See code-style: keep ambient CPATH-style variables away from
+    # clang-based tooling so Conan includes cannot be shadowed.
+    unset CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH
     echo ""
     printf "\033[0;34m=== Checking Include Hygiene (IWYU) ===\033[0m\n"
     IWYU_OUTPUT=""
@@ -397,8 +430,11 @@ code-deptry:
         exit 1
     fi
     # IWYU exits non-zero even when code is clean; capture output and
-    # let the grep check below decide pass/fail.
-    if ! IWYU_OUTPUT="$($IWYU_CMD -p build/debug $SOURCES -- -Xiwyu --no_fwd_decls 2>&1)"; then
+    # let the grep check below decide pass/fail. The mapping file teaches
+    # IWYU the public spellings for glm's private implementation headers
+    # and the macOS SDK-private <_stdio.h>.
+    if ! IWYU_OUTPUT="$($IWYU_CMD -p build/debug $SOURCES -- -Xiwyu --no_fwd_decls \
+        -Xiwyu --mapping_file="$PWD/config/iwyu/mappings.imp" 2>&1)"; then
         :
     fi
     printf "%s\n" "$IWYU_OUTPUT"

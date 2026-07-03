@@ -21,16 +21,21 @@ rules:
       catch(...) without rethrow hides all exceptions. Either catch specific exception
       types or rethrow after logging. Use std::expected for recoverable errors.
     severity: WARNING
-    pattern: |
-      try { ... } catch (...) {
-        ...
-      }
-    pattern-not: |
-      try { ... } catch (...) {
-        ...
-        throw;
-        ...
-      }
+    # The pattern-regex intersection is required because semgrep's `(...)`
+    # ellipsis also matches typed catch clauses; this rule is only about the
+    # literal catch-all `catch (...)`.
+    patterns:
+      - pattern: |
+          try { ... } catch (...) {
+            ...
+          }
+      - pattern-not: |
+          try { ... } catch (...) {
+            ...
+            throw;
+            ...
+          }
+      - pattern-regex: 'catch\s*\(\s*\.\.\.\s*\)'
     paths:
       include:
         - src/
