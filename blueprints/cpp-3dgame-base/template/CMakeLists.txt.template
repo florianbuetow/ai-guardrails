@@ -71,6 +71,57 @@ add_executable(${PROJECT_NAME} src/main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_lib)
 enable_project_warnings(${PROJECT_NAME})
 
+# Demo executable (src/demo): rotating Vulkan cube with mouse input and an
+# ImGui menu — run with `just demo` to verify the graphics stack works.
+find_package(SDL3 REQUIRED)
+find_package(imgui REQUIRED)
+find_package(glm REQUIRED)
+find_package(shaderc REQUIRED)
+find_package(vk-bootstrap REQUIRED)
+find_package(VulkanMemoryAllocator REQUIRED)
+find_package(VulkanHeaders REQUIRED)
+find_package(VulkanLoader REQUIRED)
+
+# The ImGui Vulkan render backend ships as sources inside the Conan imgui
+# package; build it as third-party code (warnings off, outside src/ so the
+# project guardrail tools do not scan it).
+string(TOUPPER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_UPPER)
+if(NOT DEFINED imgui_PACKAGE_FOLDER_${BUILD_TYPE_UPPER})
+    message(FATAL_ERROR "imgui_PACKAGE_FOLDER_${BUILD_TYPE_UPPER} is not defined; run 'just init'")
+endif()
+set(IMGUI_BINDINGS_DIR "${imgui_PACKAGE_FOLDER_${BUILD_TYPE_UPPER}}/res/bindings")
+add_library(${PROJECT_NAME}_imgui_vulkan STATIC
+    "${IMGUI_BINDINGS_DIR}/imgui_impl_vulkan.cpp"
+)
+target_include_directories(${PROJECT_NAME}_imgui_vulkan SYSTEM PUBLIC "${IMGUI_BINDINGS_DIR}")
+target_link_libraries(${PROJECT_NAME}_imgui_vulkan PUBLIC
+    imgui::imgui
+    vulkan-headers::vulkan-headers
+    Vulkan::Loader
+)
+target_compile_options(${PROJECT_NAME}_imgui_vulkan PRIVATE -w)
+
+add_executable(${PROJECT_NAME}_demo src/demo/main.cpp)
+# VMA configuration: the demo links the Vulkan loader directly, so VMA can use
+# the statically linked functions; the implementation lives in the demo TU.
+target_compile_definitions(${PROJECT_NAME}_demo PRIVATE
+    VMA_STATIC_VULKAN_FUNCTIONS=1
+    VMA_DYNAMIC_VULKAN_FUNCTIONS=0
+    VMA_IMPLEMENTATION
+)
+target_link_libraries(${PROJECT_NAME}_demo PRIVATE
+    SDL3::SDL3
+    imgui::imgui
+    ${PROJECT_NAME}_imgui_vulkan
+    vk-bootstrap::vk-bootstrap
+    GPUOpen::VulkanMemoryAllocator
+    shaderc::shaderc
+    glm::glm
+    vulkan-headers::vulkan-headers
+    Vulkan::Loader
+)
+enable_project_warnings(${PROJECT_NAME}_demo)
+
 # Testing
 option(BUILD_TESTING "Build tests" ON)
 if(BUILD_TESTING)
@@ -80,7 +131,6 @@ if(BUILD_TESTING)
     # Core
     find_package(fmt REQUIRED)
     find_package(spdlog REQUIRED)
-    find_package(glm REQUIRED)
     find_package(EnTT REQUIRED)
     find_package(Bitsery REQUIRED)
     find_package(xxHash REQUIRED)
