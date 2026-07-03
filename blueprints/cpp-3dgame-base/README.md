@@ -90,14 +90,12 @@ renders offscreen — no window, surface, or swapchain — and asserts on the
 pixels read back, so "the GPU pipeline renders" is CI-provable (MoltenVK on
 macOS, lavapipe/Mesa on headless Linux).
 
-## Shader Pipeline (HLSL + DXC only)
+## Shader Pipeline (HLSL + DXC)
 
 Shaders are written in **HLSL** and compiled to SPIR-V at **build time** by
 **DXC** (`shaders/*.hlsl` → `build/<preset>/shaders/*.spv` via CMake custom
-commands; shader syntax errors fail the build). **GLSL is not supported** —
-there is no runtime shader compilation and no glslang/shaderc in the stack;
-glslang's HLSL frontend is deprecated as of April 2026 and must never be
-used for HLSL. DXC sourcing: on macOS it ships with the LunarG Vulkan SDK
+commands; shader syntax errors fail the build). There is no runtime shader
+compilation. DXC sourcing: on macOS it ships with the LunarG Vulkan SDK
 (verified by `just check`); on Linux x86_64 `just init` installs the pinned
 GitHub release (`v1.9.2602.24`).
 
@@ -109,7 +107,7 @@ GitHub release (`v1.9.2602.24`).
 | volk | `volk/1.4.313.0` |
 | vk-bootstrap | `vk-bootstrap/1.4.350` |
 | Vulkan Memory Allocator | `vulkan-memory-allocator/3.3.0` |
-| DXC (HLSL compiler; GLSL is not supported) | prerequisite: LunarG Vulkan SDK on macOS, pinned GitHub release `v1.9.2602.24` installed by `just init` on Linux x86_64 |
+| DXC (HLSL shader compiler) | prerequisite: LunarG Vulkan SDK on macOS, pinned GitHub release `v1.9.2602.24` installed by `just init` on Linux x86_64 |
 | SPIRV-Tools | `spirv-tools/1.4.313.0` |
 | SPIRV-Cross | `spirv-cross/1.4.313.0` |
 | GLM | `glm/1.0.3` |

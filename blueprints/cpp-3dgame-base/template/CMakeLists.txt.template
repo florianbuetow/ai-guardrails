@@ -82,9 +82,9 @@ find_package(VulkanHeaders REQUIRED)
 find_package(VulkanLoader REQUIRED)
 find_package(Tracy REQUIRED)
 
-# Shaders: HLSL compiled to SPIR-V at build time by DXC (the project's only
-# shader path — GLSL is not supported). On macOS DXC ships with the LunarG
-# Vulkan SDK; on Linux/Windows `just init` installs the pinned release.
+# Shaders: HLSL compiled to SPIR-V at build time by DXC. On macOS DXC ships
+# with the LunarG Vulkan SDK; on Linux/Windows `just init` installs the
+# pinned release.
 find_program(DXC_EXECUTABLE dxc PATHS /usr/local/bin "$ENV{HOME}/.local/bin")
 if(NOT DXC_EXECUTABLE)
     message(FATAL_ERROR

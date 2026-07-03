@@ -140,14 +140,14 @@ just demo                     # interactive: drag to rotate, Esc quits
 just demo --auto-quit 5       # timed smoke run (used by CI-style checks)
 ```
 
-## Shaders (HLSL + DXC only)
+## Shaders (HLSL + DXC)
 
 Shaders live in `shaders/*.hlsl` and are compiled to SPIR-V at build time by
 DXC (CMake custom commands; a shader syntax error fails the build, not the
-app start). **GLSL is not supported** and there is no runtime shader
-compilation. To add a shader: create `shaders/<name>.hlsl`, add a matching
-`add_custom_command` block in `CMakeLists.txt`, and load the generated
-`.spv` from `<executable dir>/shaders/`.
+app start). There is no runtime shader compilation. To add a shader: create
+`shaders/<name>.hlsl`, add a matching `add_custom_command` block in
+`CMakeLists.txt`, and load the generated `.spv` from
+`<executable dir>/shaders/`.
 
 See all available commands:
 

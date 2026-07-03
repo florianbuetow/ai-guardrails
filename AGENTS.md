@@ -100,7 +100,7 @@ This is an inverted test pattern: a passing test means the project's own CI caug
 - C++23 (or C++20) with CMake + Ninja and Conan 2 dependency management
 - Project structure: src/, include/, tests/ (incl. tests/deps/ smoke tests), scripts/, data/
 - Full 3D-game library stack via Conan with exact pins: SDL3, Vulkan (headers/loader/volk/vk-bootstrap/VMA; MoltenVK via brew on macOS), SPIRV-Tools/-Cross, GLM, EnTT, Jolt Physics, Recast/Detour, GameNetworkingSockets, bitsery, Opus, miniaudio, tinygltf, meshoptimizer, KTX, ozz-animation, MikkTSpace, Dear ImGui (docking), ImGuizmo, RmlUi, spdlog, fmt, Tracy, SQLite3, libpqxx, zstd, xxHash, GoogleTest
-- Shaders are HLSL only, compiled to SPIR-V at build time by DXC (GLSL/shaderc removed by decision); toktx/ktx, gltfpack, and DXC (Linux) are pinned prerequisite installs via just init
+- Shaders are HLSL only, compiled to SPIR-V at build time by DXC; toktx/ktx, gltfpack, and DXC (Linux) are pinned prerequisite installs via just init
 - One headless-safe GoogleTest smoke test per library in tests/deps/
 - Interactive Vulkan cube demo (src/demo/, `just demo`) with mouse control, ImGui menu, debug-build validation layers (fail-fast), Tracy frame profiling, and a persisted pipeline cache
 - Headless GPU rendering test (`just test-render`, in ci): offscreen render + pixel readback; Linux verification via `just test-cpp-3dgame-linux` (amd64 Docker container with lavapipe)
