@@ -1,0 +1,61 @@
+from conan import ConanFile
+from conan.tools.cmake import CMakeDeps, CMakeToolchain
+
+
+class ProjectConan(ConanFile):
+    settings = "os", "arch", "compiler", "build_type"
+    default_options = {
+        "tracy/*:on_demand": True,
+        "ktx/*:tools": False,
+    }
+
+    def requirements(self):
+        # Windowing / input
+        self.requires("sdl/3.4.8")
+        # Vulkan stack (aligned to SDK 1.4.313; MoltenVK comes from brew on macOS)
+        self.requires("vulkan-headers/1.4.313.0", force=True)
+        self.requires("vulkan-loader/1.4.313.0")
+        self.requires("volk/1.4.313.0")
+        self.requires("vk-bootstrap/1.4.350")
+        self.requires("vulkan-memory-allocator/3.3.0")
+        # Shader toolchain
+        self.requires("shaderc/2025.3")
+        self.requires("spirv-tools/1.4.313.0")
+        self.requires("spirv-cross/1.4.313.0")
+        # Math / ECS / physics / navigation / networking / serialization
+        self.requires("glm/1.0.3")
+        self.requires("entt/3.16.0")
+        self.requires("joltphysics/5.2.0")
+        self.requires("recastnavigation/1.6.0")
+        self.requires("gamenetworkingsockets/1.4.1")
+        self.requires("bitsery/5.2.5")
+        # Audio
+        self.requires("opus/1.6.1")
+        self.requires("miniaudio/0.11.22")
+        # Asset pipeline
+        self.requires("tinygltf/2.9.7")
+        self.requires("meshoptimizer/1.0")
+        self.requires("ktx/4.4.2")
+        self.requires("ozz-animation/0.14.1")
+        self.requires("mikktspace/cci.20200325")
+        # UI / tooling
+        self.requires("imgui/1.90.5-docking", force=True)
+        self.requires("imguizmo/cci.20231114")
+        self.requires("rmlui/6.2")
+        self.requires("spdlog/1.17.0")
+        self.requires("fmt/12.1.0")
+        self.requires("tracy/0.13.1")
+        # Data
+        self.requires("sqlite3/3.53.3")
+        self.requires("libpqxx/8.0.1")
+        self.requires("zstd/1.5.7")
+        self.requires("xxhash/0.8.3")
+        # Testing
+        self.test_requires("gtest/1.17.0")
+
+    def generate(self):
+        deps = CMakeDeps(self)
+        deps.generate()
+        tc = CMakeToolchain(self)
+        tc.user_presets_path = None
+        tc.generate()

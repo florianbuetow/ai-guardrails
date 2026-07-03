@@ -9,7 +9,9 @@
         {
             "name": "debug",
             "displayName": "Debug",
+            "generator": "Ninja",
             "binaryDir": "${sourceDir}/build/debug",
+            "toolchainFile": "${sourceDir}/build/conan/Debug/conan_toolchain.cmake",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "BUILD_TESTING": "ON"
@@ -18,7 +20,9 @@
         {
             "name": "release",
             "displayName": "Release",
+            "generator": "Ninja",
             "binaryDir": "${sourceDir}/build/release",
+            "toolchainFile": "${sourceDir}/build/conan/Release/conan_toolchain.cmake",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
                 "BUILD_TESTING": "OFF"
@@ -27,7 +31,9 @@
         {
             "name": "coverage",
             "displayName": "Coverage",
+            "generator": "Ninja",
             "binaryDir": "${sourceDir}/build/coverage",
+            "toolchainFile": "${sourceDir}/build/conan/Debug/conan_toolchain.cmake",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "BUILD_TESTING": "ON",
@@ -37,7 +43,9 @@
         {
             "name": "sanitize",
             "displayName": "Sanitizers",
+            "generator": "Ninja",
             "binaryDir": "${sourceDir}/build/sanitize",
+            "toolchainFile": "${sourceDir}/build/conan/Debug/conan_toolchain.cmake",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "BUILD_TESTING": "ON",

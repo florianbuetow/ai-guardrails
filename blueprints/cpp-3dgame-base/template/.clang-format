@@ -17,6 +17,12 @@ AllowShortLoopsOnASingleLine: false
 
 IncludeBlocks: Regroup
 SortIncludes: CaseSensitive
+IncludeCategories:
+  # Jolt mandates that <Jolt/Jolt.h> precede every other Jolt header.
+  - Regex: '^<Jolt/Jolt\.h>'
+    Priority: 1
+  - Regex: '.*'
+    Priority: 2
 
 BinPackArguments: false
 BinPackParameters: false

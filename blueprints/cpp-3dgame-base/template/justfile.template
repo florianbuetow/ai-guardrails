@@ -170,6 +170,29 @@ check:
         exit 1; \
     fi
     @printf "\033[0;32m✓ iwyu_tool is installed\033[0m\n"
+    @if ! command -v conan >/dev/null 2>&1; then \
+        printf "\033[0;31m✗ Error: conan is not installed\033[0m\n"; \
+        printf "  Install with: brew install conan\n"; \
+        echo ""; \
+        exit 1; \
+    fi
+    @printf "\033[0;32m✓ conan is installed\033[0m\n"
+    @if ! command -v ninja >/dev/null 2>&1; then \
+        printf "\033[0;31m✗ Error: ninja is not installed\033[0m\n"; \
+        printf "  Install with: brew install ninja\n"; \
+        echo ""; \
+        exit 1; \
+    fi
+    @printf "\033[0;32m✓ ninja is installed\033[0m\n"
+    @if [ "$(uname -s)" = "Darwin" ]; then \
+        if ! brew --prefix molten-vk >/dev/null 2>&1 || [ ! -f "$(brew --prefix molten-vk)/lib/libMoltenVK.dylib" ]; then \
+            printf "\033[0;31m✗ Error: MoltenVK is not installed\033[0m\n"; \
+            printf "  Install with: brew install molten-vk\n"; \
+            echo ""; \
+            exit 1; \
+        fi; \
+        printf "\033[0;32m✓ MoltenVK is installed\033[0m\n"; \
+    fi
     @echo ""
 
 # Initialize the development environment
@@ -179,6 +202,21 @@ init: check
     @if ! git rev-parse --git-dir >/dev/null 2>&1; then printf "Initializing git repository...\n" && git init -q; fi
     @mkdir -p reports/coverage
     @mkdir -p reports/security
+    @if [ ! -f "$HOME/.conan2/profiles/default" ]; then \
+        bin="$(just _llvm-bin)" && CC="$bin/clang" CXX="$bin/clang++" conan profile detect; \
+    fi
+    @echo "Installing Conan dependencies (Debug)..."
+    @bin="$(just _llvm-bin)" && CC="$bin/clang" CXX="$bin/clang++" \
+        CMAKE_POLICY_VERSION_MINIMUM=3.5 conan install . \
+        --output-folder=build/conan/Debug -s build_type=Debug \
+        -s compiler.cppstd={{cpp_standard}} -s "ktx/*:compiler.cppstd=17" \
+        -c tools.cmake.cmaketoolchain:generator=Ninja --build=missing
+    @echo "Installing Conan dependencies (Release)..."
+    @bin="$(just _llvm-bin)" && CC="$bin/clang" CXX="$bin/clang++" \
+        CMAKE_POLICY_VERSION_MINIMUM=3.5 conan install . \
+        --output-folder=build/conan/Release -s build_type=Release \
+        -s compiler.cppstd={{cpp_standard}} -s "ktx/*:compiler.cppstd=17" \
+        -c tools.cmake.cmaketoolchain:generator=Ninja --build=missing
     @echo "Configuring CMake debug preset..."
     @bin="$(just _llvm-bin)" && CC="$bin/clang" CXX="$bin/clang++" cmake --preset debug
     @echo "Building project..."
@@ -367,6 +405,7 @@ test-coverage:
     lcov --remove reports/coverage/coverage.info \
         '/usr/*' \
         '*/googletest/*' \
+        '*/.conan2/*' \
         '*/build/*' \
         '*/tests/*' \
         --output-file reports/coverage/coverage.filtered.info \
