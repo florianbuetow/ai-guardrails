@@ -20,6 +20,17 @@ git config --global user.email "container-ci@example.invalid"
 git config --global user.name "Container CI"
 git config --global init.defaultBranch main
 
+# Let Conan apt-install the system libraries that */system recipes (xorg,
+# libudev, opengl — pulled in by SDL on Linux) declare. The container runs
+# as root, so no sudo. The apt package lists were removed from the image;
+# refresh them once.
+mkdir -p /root/.conan2
+printf '%s\n' \
+    'tools.system.package_manager:mode = install' \
+    'tools.system.package_manager:sudo = False' \
+    > /root/.conan2/global.conf
+apt-get update -qq
+
 printf '\033[0;34m=== Generating project from template (Linux container) ===\033[0m\n'
 rm -rf "$PROJECT_DIR"
 copier copy --trust --defaults \

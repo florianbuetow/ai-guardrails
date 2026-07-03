@@ -32,6 +32,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
         iwyu \
         lcov \
+        libclang-rt-18-dev \
+        libstdc++-14-dev \
         libgl-dev \
         libx11-dev \
         libxcursor-dev \
@@ -43,9 +45,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libxss-dev \
         mesa-vulkan-drivers \
         ninja-build \
-        pipx \
         pkg-config \
         python3 \
+        python3-pip \
         unzip \
         vulkan-tools \
         wayland-protocols \
@@ -71,11 +73,27 @@ RUN curl -fsSL -o /tmp/infer.tar.xz \
     && ln -s /opt/infer-linux-x86_64-${INFER_VERSION}/bin/infer /usr/local/bin/infer \
     && infer --version
 
-# Python tools; conan pinned to the version the template is validated with.
-RUN pipx install --global "conan==2.30.0" \
-    && pipx install --global copier \
-    && pipx install --global semgrep \
-    && conan --version && copier --version && semgrep --version
+# Python tools installed into the system interpreter (this is a
+# single-purpose CI container; /root/.local is shadowed by a volume at
+# runtime, so user-level installs must be avoided). conan is pinned to the
+# version the template is validated with.
+#
+# semgrep's default entrypoint dispatches to the osemgrep binary, which
+# mishandles CLI arguments in this environment and — far worse — exits 0
+# without scanning. Point `semgrep` at the classic pysemgrep implementation
+# and prove violation detection works with a build-time self-test: the image
+# must not build with a silently passing scanner.
+RUN python3 -m pip install --break-system-packages \
+        "conan==2.30.0" copier semgrep \
+    && ln -sf "$(command -v pysemgrep)" /usr/local/bin/semgrep \
+    && conan --version && copier --version && semgrep --version \
+    && mkdir /tmp/semgrep-selftest && cd /tmp/semgrep-selftest \
+    && printf 'rules:\n- id: no-raw-new\n  languages: [cpp]\n  message: raw new\n  severity: ERROR\n  pattern: new int(...)\n' > rule.yml \
+    && printf 'int main(){int* leak = new int(4); return *leak;}\n' > x.cpp \
+    && if semgrep --config rule.yml --error --no-git-ignore x.cpp >/dev/null 2>&1; then \
+           echo "semgrep self-test FAILED: violation was not detected" >&2; exit 1; \
+       fi \
+    && rm -rf /tmp/semgrep-selftest
 
 # The template justfile and Conan need a writable HOME; caches for
 # /root/.conan2 (dependency binaries) and /root/.local (gltfpack/dxc/ktx

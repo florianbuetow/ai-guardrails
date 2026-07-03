@@ -23,4 +23,11 @@
   { symbol: ["std::ios_base", "private", "<ios>", "public"] },
   { symbol: ["std::ios", "private", "<ios>", "public"] },
   { symbol: ["std::streamsize", "private", "<ios>", "public"] },
+  # Older IWYU builds (0.22/clang-18 on Ubuntu 24.04) misattribute these
+  # everyday symbols to transitive providers and suggest removing their
+  # canonical headers; pin the attribution explicitly.
+  { symbol: ["std::string", "private", "<string>", "public"] },
+  { symbol: ["std::chrono::steady_clock", "private", "<chrono>", "public"] },
+  { symbol: ["std::chrono::duration", "private", "<chrono>", "public"] },
+  { symbol: ["std::chrono::time_point", "private", "<chrono>", "public"] },
 ]
