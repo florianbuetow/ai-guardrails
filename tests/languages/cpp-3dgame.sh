@@ -37,4 +37,16 @@ check_prerequisites() {
     require_command semgrep "Install with: brew install semgrep"
     require_command lcov "Install with: brew install lcov"
     require_command infer "Install from: https://github.com/facebook/infer"
+    require_command conan "Install with: brew install conan"
+    require_command ninja "Install with: brew install ninja"
+
+    if [ "$(uname -s)" = "Darwin" ]; then
+        if brew --prefix molten-vk >/dev/null 2>&1 && [ -f "$(brew --prefix molten-vk)/lib/libMoltenVK.dylib" ]; then
+            log_pass "MoltenVK is installed"
+        else
+            log_fail "MoltenVK is not installed"
+            printf "  Install with: brew install molten-vk\n"
+            exit 1
+        fi
+    fi
 }
