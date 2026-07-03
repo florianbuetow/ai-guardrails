@@ -39,6 +39,7 @@ check_prerequisites() {
     require_command infer "Install from: https://github.com/facebook/infer"
     require_command conan "Install with: brew install conan"
     require_command ninja "Install with: brew install ninja"
+    require_command dxc "Install the LunarG Vulkan SDK: https://vulkan.lunarg.com/sdk/home"
 
     if [ "$(uname -s)" = "Darwin" ]; then
         if brew --prefix molten-vk >/dev/null 2>&1 && [ -f "$(brew --prefix molten-vk)/lib/libMoltenVK.dylib" ]; then

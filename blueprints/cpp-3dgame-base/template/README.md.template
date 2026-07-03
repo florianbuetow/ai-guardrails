@@ -51,6 +51,7 @@
 - **C++{{cpp_standard}} compiler** - LLVM/Clang (`brew install llvm`; AppleClang is rejected)
 - **just** - Command runner ([installation guide](https://github.com/casey/just#installation))
 - **MoltenVK** (macOS only) - Vulkan driver/ICD (`brew install molten-vk`)
+- **DXC** - HLSL shader compiler; from the [LunarG Vulkan SDK](https://vulkan.lunarg.com/sdk/home) on macOS, installed by `just init` on Linux x86_64
 
 The following validation tools are also required:
 
@@ -79,7 +80,7 @@ Included library stack:
 |--------|-----------|
 | Windowing / input | SDL3 |
 | Graphics (Vulkan) | vulkan-headers, vulkan-loader, volk, vk-bootstrap, VulkanMemoryAllocator, MoltenVK (macOS, via brew) |
-| Shader toolchain | shaderc (bundles glslang), SPIRV-Tools, SPIRV-Cross |
+| Shader toolchain | DXC (HLSL → SPIR-V at build time; prerequisite, not Conan), SPIRV-Tools, SPIRV-Cross |
 | Math / ECS / physics | GLM, EnTT, Jolt Physics |
 | Navigation / networking | Recast/Detour (recastnavigation), GameNetworkingSockets |
 | Serialization | bitsery |
@@ -129,13 +130,24 @@ just run
 ```
 
 Run the Vulkan cube demo — a visual end-to-end check that the graphics stack
-(SDL3 window, Vulkan loader/driver, vk-bootstrap, shaderc, VMA, GLM, Dear
-ImGui menu) actually works on this machine:
+(SDL3 window, Vulkan loader/driver, vk-bootstrap, DXC-compiled HLSL shaders,
+VMA, GLM, Dear ImGui menu) actually works on this machine. Debug builds run
+under the Khronos validation layers (validation errors abort), and a
+`VkPipelineCache` is persisted next to the binary across runs:
 
 ```bash
 just demo                     # interactive: drag to rotate, Esc quits
 just demo --auto-quit 5       # timed smoke run (used by CI-style checks)
 ```
+
+## Shaders (HLSL + DXC only)
+
+Shaders live in `shaders/*.hlsl` and are compiled to SPIR-V at build time by
+DXC (CMake custom commands; a shader syntax error fails the build, not the
+app start). **GLSL is not supported** and there is no runtime shader
+compilation. To add a shader: create `shaders/<name>.hlsl`, add a matching
+`add_custom_command` block in `CMakeLists.txt`, and load the generated
+`.spv` from `<executable dir>/shaders/`.
 
 See all available commands:
 
@@ -177,6 +189,7 @@ remove `--quiet` from the `code-style` recipe in `justfile`.
 ### Testing
 
 - `just test` - Run unit tests
+- `just test-render` - Run the headless GPU rendering test (offscreen render + pixel readback)
 - `just test-coverage` - Run tests with coverage ({{coverage_threshold}}% threshold)
 - `just code-sanitize` - Run tests with AddressSanitizer + UndefinedBehaviorSanitizer
 

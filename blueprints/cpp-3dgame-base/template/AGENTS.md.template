@@ -44,6 +44,13 @@ This file provides guidance to AI agents and AI-assisted development tools when 
 - Dependencies are installed by `just init` into `build/conan/<BuildType>/`; presets reference the generated `conan_toolchain.cmake`
 - MoltenVK (macOS Vulkan driver) intentionally comes from `brew install molten-vk`, not Conan — its ConanCenter recipe requires apple-clang, which this project rejects
 
+## Shader Rules (HLSL + DXC only)
+- Shaders are written in **HLSL** in `shaders/` and compiled to SPIR-V at **build time** by DXC (CMake custom commands)
+- **GLSL is not supported** — never add GLSL sources, runtime shader compilation, or glslang/shaderc (glslang's HLSL frontend is deprecated; DXC is the only HLSL compiler)
+- New shaders need an `add_custom_command` entry in `CMakeLists.txt`; binaries load `.spv` from `<executable dir>/shaders/`
+- GPU rendering changes must keep `just test-render` (headless offscreen render + pixel readback) green
+- Debug builds run under the Khronos validation layers with a fail-fast callback — validation errors abort; fix them, never filter them
+
 ## C++ Coding Standards
 - All code must compile with `-Wall -Wextra -Wpedantic -Werror`, zero warnings
 - **Never** use raw `new`/`delete` -- use `std::unique_ptr` or `std::shared_ptr`

@@ -31,6 +31,8 @@ Production-ready Copier template for C++ CLI applications with full validation i
 blueprints/cpp-3dgame-base/
 ├── copier.yml                          # Template configuration
 ├── README.md                           # This file
+├── docker/
+│   └── Dockerfile.linux-ci             # Linux (amd64) CI image for `just test-cpp-3dgame-linux`
 └── template/                           # Template files
     ├── .clang-format
     ├── .clang-tidy
@@ -50,9 +52,11 @@ blueprints/cpp-3dgame-base/
     ├── include/
     │   └── {{project_name}}/
     │       └── app.hpp.template
+    ├── shaders/                        # HLSL sources, compiled by DXC at build time
     ├── tests/
     │   ├── app_test.cpp.template
-    │   └── deps/                       # One smoke test per library (jinja-free)
+    │   ├── deps/                       # One smoke test per library (jinja-free)
+    │   └── render/                     # Headless GPU rendering test (`just test-render`)
     ├── scripts/
     ├── data/
     │   ├── input/
@@ -76,8 +80,26 @@ LLVM/Clang toolchain). Each library has a headless-safe smoke test in
 Generated projects also include a **Vulkan cube demo** (`src/demo/`, run with
 `just demo`): an interactive rotating cube with mouse control and a Dear ImGui
 menu that visually verifies the SDL3 + Vulkan (MoltenVK on macOS) +
-vk-bootstrap + shaderc + VMA + GLM + ImGui stack end to end. Pass
+vk-bootstrap + DXC-compiled HLSL shaders + VMA + GLM + ImGui stack end to
+end. Debug builds run under the Khronos validation layers with a fail-fast
+error callback, and the demo persists a `VkPipelineCache` across runs. Pass
 `--auto-quit <seconds>` for a non-interactive smoke run.
+
+A **headless GPU rendering test** (`just test-render`, part of `just ci`)
+renders offscreen — no window, surface, or swapchain — and asserts on the
+pixels read back, so "the GPU pipeline renders" is CI-provable (MoltenVK on
+macOS, lavapipe/Mesa on headless Linux).
+
+## Shader Pipeline (HLSL + DXC only)
+
+Shaders are written in **HLSL** and compiled to SPIR-V at **build time** by
+**DXC** (`shaders/*.hlsl` → `build/<preset>/shaders/*.spv` via CMake custom
+commands; shader syntax errors fail the build). **GLSL is not supported** —
+there is no runtime shader compilation and no glslang/shaderc in the stack;
+glslang's HLSL frontend is deprecated as of April 2026 and must never be
+used for HLSL. DXC sourcing: on macOS it ships with the LunarG Vulkan SDK
+(verified by `just check`); on Linux x86_64 `just init` installs the pinned
+GitHub release (`v1.9.2602.24`).
 
 | Requested | Delivered as (pin) |
 |-----------|--------------------|
@@ -87,7 +109,7 @@ vk-bootstrap + shaderc + VMA + GLM + ImGui stack end to end. Pass
 | volk | `volk/1.4.313.0` |
 | vk-bootstrap | `vk-bootstrap/1.4.350` |
 | Vulkan Memory Allocator | `vulkan-memory-allocator/3.3.0` |
-| DXC or shaderc/glslang | `shaderc/2025.3` (bundles glslang) |
+| DXC (HLSL compiler; GLSL is not supported) | prerequisite: LunarG Vulkan SDK on macOS, pinned GitHub release `v1.9.2602.24` installed by `just init` on Linux x86_64 |
 | SPIRV-Tools | `spirv-tools/1.4.313.0` |
 | SPIRV-Cross | `spirv-cross/1.4.313.0` |
 | GLM | `glm/1.0.3` |
@@ -102,7 +124,7 @@ vk-bootstrap + shaderc + VMA + GLM + ImGui stack end to end. Pass
 | tinygltf | `tinygltf/2.9.7` |
 | meshoptimizer | `meshoptimizer/1.0` |
 | gltfpack | prebuilt CLI installed by `just init` into `~/.local/bin` (GitHub release v1.0, pinned to the meshoptimizer library version; mac/linux/windows) |
-| KTX2 / Basis Universal | `ktx/4.4.2` (tools disabled) |
+| KTX2 / Basis Universal | `ktx/4.4.2` library (Conan, CLI tools disabled there) + `toktx`/`ktx` CLIs installed by `just init` from the pinned KTX-Software 4.4.2 release |
 | ozz-animation | `ozz-animation/0.14.1` |
 | MikkTSpace | `mikktspace/cci.20200325` |
 | Dear ImGui | `imgui/1.90.5-docking` |
@@ -118,9 +140,14 @@ vk-bootstrap + shaderc + VMA + GLM + ImGui stack end to end. Pass
 | xxHash | `xxhash/0.8.3` |
 
 Version-alignment notes: the Vulkan/SPIR-V stack is pinned to the 1.4.313 SDK
-line (shaderc 2025.3 and ConanCenter's MoltenVK-free graph resolve there);
-imgui stays on 1.90.5-docking because ImGuizmo cci.20231114 uses APIs removed
-in imgui 1.92.
+line; imgui stays on 1.90.5-docking because ImGuizmo cci.20231114 uses APIs
+removed in imgui 1.92.
+
+**Bumping the Vulkan stack:** move `vulkan-headers` (force-override),
+`vulkan-loader`, `volk`, `spirv-tools`, and `spirv-cross` in lockstep to one
+SDK line, re-check the `vk-bootstrap` force-override, keep the pinned DXC
+release on the same SDK line, then run `just test-cpp-3dgame`. brew MoltenVK
+moves independently (currently 1.4.1).
 
 ## Usage
 
