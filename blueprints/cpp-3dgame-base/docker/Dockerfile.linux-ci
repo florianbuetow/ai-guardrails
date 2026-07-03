@@ -1,0 +1,84 @@
+# Linux CI image for cpp-3dgame-base template verification.
+#
+# Architecture decision: linux/amd64 only. Three required tools ship official
+# Linux binaries exclusively for x86_64 — Facebook Infer, DXC, and gltfpack —
+# so the container targets amd64 and runs via Rosetta on Apple Silicon
+# (colima --vz-rosetta or Docker Desktop) and natively on x86_64 hosts.
+#
+# The clang/clang-tidy/IWYU set comes from the Ubuntu 24.04 archive so that
+# include-what-you-use matches the exact clang major it was built against.
+#
+# Build:  docker build --platform linux/amd64 -f Dockerfile.linux-ci -t cpp-3dgame-linux-ci .
+# Used by the repo-level `just test-cpp-3dgame-linux` target.
+
+FROM --platform=linux/amd64 ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Toolchain + guardrail tools from the distro archive.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        bc \
+        build-essential \
+        bzip2 \
+        ca-certificates \
+        clang \
+        clang-format \
+        clang-tidy \
+        cmake \
+        codespell \
+        cppcheck \
+        curl \
+        flawfinder \
+        git \
+        iwyu \
+        lcov \
+        libgl-dev \
+        libx11-dev \
+        libxcursor-dev \
+        libxext-dev \
+        libxi-dev \
+        libxinerama-dev \
+        libxkbcommon-dev \
+        libxrandr-dev \
+        libxss-dev \
+        mesa-vulkan-drivers \
+        ninja-build \
+        pipx \
+        pkg-config \
+        python3 \
+        unzip \
+        vulkan-tools \
+        wayland-protocols \
+        libwayland-dev \
+        libegl-dev \
+        xz-utils \
+        && rm -rf /var/lib/apt/lists/*
+
+# just (task runner) — pinned release binary.
+ARG JUST_VERSION=1.55.1
+RUN curl -fsSL -o /tmp/just.tar.gz \
+        "https://github.com/casey/just/releases/download/${JUST_VERSION}/just-${JUST_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
+    && tar -xzf /tmp/just.tar.gz -C /usr/local/bin just \
+    && rm /tmp/just.tar.gz \
+    && just --version
+
+# Facebook Infer — pinned release (x86_64 only; the reason this image is amd64).
+ARG INFER_VERSION=v1.3.0
+RUN curl -fsSL -o /tmp/infer.tar.xz \
+        "https://github.com/facebook/infer/releases/download/${INFER_VERSION}/infer-linux-x86_64-${INFER_VERSION}.tar.xz" \
+    && tar -xJf /tmp/infer.tar.xz -C /opt \
+    && rm /tmp/infer.tar.xz \
+    && ln -s /opt/infer-linux-x86_64-${INFER_VERSION}/bin/infer /usr/local/bin/infer \
+    && infer --version
+
+# Python tools; conan pinned to the version the template is validated with.
+RUN pipx install --global "conan==2.30.0" \
+    && pipx install --global copier \
+    && pipx install --global semgrep \
+    && conan --version && copier --version && semgrep --version
+
+# The template justfile and Conan need a writable HOME; caches for
+# /root/.conan2 (dependency binaries) and /root/.local (gltfpack/dxc/ktx
+# tool installs) are provided as volumes by the repo harness target.
+ENV HOME=/root
+WORKDIR /work

@@ -89,6 +89,7 @@ help:
 	@printf "  %-40s %s\n" "test-elixir" "Run Elixir baseline + violation tests"
 	@printf "  %-40s %s\n" "test-cpp" "Run C++ baseline + violation tests"
 	@printf "  %-40s %s\n" "test-cpp-3dgame" "Run C++ 3D game baseline + violation tests"
+	@printf "  %-40s %s\n" "test-cpp-3dgame-linux" "Run C++ 3D game full CI in a Linux (amd64) container"
 	@printf "  %-40s %s\n" "test-rust" "Run Rust baseline + violation tests"
 	@printf "  %-40s %s\n" "test-kotlin" "Run Kotlin baseline + violation tests"
 	@printf "  %-40s %s\n" "test-typescript" "Run TypeScript baseline + violation tests"
@@ -370,6 +371,38 @@ test-cpp-3dgame:
 	@echo ""
 	@./tests/run-tests.sh cpp-3dgame && printf "\033[32m✓ cpp-3dgame tests passed\033[0m\n" || { printf "\033[31m✗ cpp-3dgame tests failed\033[0m\n"; exit 1; }
 	@echo ""
+
+# Run the C++ 3D game template's full CI inside a Linux amd64 container.
+# amd64-only by decision: Infer, DXC, and gltfpack ship official Linux
+# binaries exclusively for x86_64 (runs via Rosetta on Apple Silicon).
+# Conan dependencies and installed tools persist in named Docker volumes,
+# so only the first run pays the from-source dependency build.
+test-cpp-3dgame-linux:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	echo ""
+	if ! command -v docker >/dev/null 2>&1; then
+		printf "\033[31m✗ docker is not installed\033[0m\n"
+		exit 1
+	fi
+	if ! docker info >/dev/null 2>&1; then
+		printf "\033[31m✗ docker daemon is not running (start Docker Desktop or 'colima start --vz-rosetta')\033[0m\n"
+		exit 1
+	fi
+	printf "\033[0;34m=== Building Linux CI image ===\033[0m\n"
+	docker build --platform linux/amd64 \
+		-f blueprints/cpp-3dgame-base/docker/Dockerfile.linux-ci \
+		-t cpp-3dgame-linux-ci \
+		blueprints/cpp-3dgame-base/docker
+	printf "\033[0;34m=== Running template CI in Linux container ===\033[0m\n"
+	docker run --rm --platform linux/amd64 \
+		-v cpp-3dgame-conan-cache:/root/.conan2 \
+		-v cpp-3dgame-tools-cache:/root/.local \
+		-v "$(pwd)":/repo:ro \
+		cpp-3dgame-linux-ci /repo/tests/docker/cpp-3dgame-linux-ci.sh \
+		&& printf "\033[32m✓ cpp-3dgame Linux container CI passed\033[0m\n" \
+		|| { printf "\033[31m✗ cpp-3dgame Linux container CI failed\033[0m\n"; exit 1; }
+	echo ""
 
 # Test the Rust template (baseline + violations)
 test-rust:
