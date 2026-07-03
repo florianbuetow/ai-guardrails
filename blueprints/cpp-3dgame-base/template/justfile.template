@@ -95,6 +95,70 @@ _llvm-bin:
             ;;
     esac
 
+# Install the gltfpack CLI (glTF optimizer from the meshoptimizer project).
+# Pinned to the same version as the Conan meshoptimizer dependency so that
+# gltfpack output stays decodable by the runtime library.
+[private]
+_install-gltfpack:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    GLTFPACK_VERSION="1.0"
+    INSTALL_DIR="$HOME/.local/bin"
+    if command -v gltfpack >/dev/null 2>&1; then
+        printf "\033[0;32m✓ gltfpack is installed (%s)\033[0m\n" "$(command -v gltfpack)"
+        exit 0
+    fi
+    if [ -x "$INSTALL_DIR/gltfpack" ] || [ -x "$INSTALL_DIR/gltfpack.exe" ]; then
+        printf "\033[0;32m✓ gltfpack is installed in %s\033[0m\n" "$INSTALL_DIR"
+        exit 0
+    fi
+    if ! command -v curl >/dev/null 2>&1; then
+        printf "\033[0;31m✗ Error: curl is required to install gltfpack\033[0m\n"
+        exit 1
+    fi
+    if ! command -v unzip >/dev/null 2>&1; then
+        printf "\033[0;31m✗ Error: unzip is required to install gltfpack\033[0m\n"
+        exit 1
+    fi
+    case "$(uname -s)" in
+        Darwin)
+            if [ "$(uname -m)" = "arm64" ]; then
+                ASSET="gltfpack-macos.zip"
+            else
+                ASSET="gltfpack-macos-intel.zip"
+            fi
+            BINARY="gltfpack"
+            ;;
+        Linux)
+            ASSET="gltfpack-ubuntu.zip"
+            BINARY="gltfpack"
+            ;;
+        MINGW*|MSYS*|CYGWIN*)
+            ASSET="gltfpack-windows.zip"
+            BINARY="gltfpack.exe"
+            ;;
+        *)
+            printf "\033[0;31m✗ Error: unsupported platform for gltfpack: %s\033[0m\n" "$(uname -s)"
+            exit 1
+            ;;
+    esac
+    printf "Installing gltfpack %s (%s)...\n" "$GLTFPACK_VERSION" "$ASSET"
+    WORK_DIR="$(mktemp -d)"
+    trap 'rm -rf "$WORK_DIR"' EXIT
+    curl -fsSL -o "$WORK_DIR/$ASSET" \
+        "https://github.com/zeux/meshoptimizer/releases/download/v$GLTFPACK_VERSION/$ASSET"
+    unzip -q "$WORK_DIR/$ASSET" -d "$WORK_DIR"
+    if [ ! -f "$WORK_DIR/$BINARY" ]; then
+        printf "\033[0;31m✗ Error: %s not found in downloaded archive\033[0m\n" "$BINARY"
+        exit 1
+    fi
+    mkdir -p "$INSTALL_DIR"
+    install -m 0755 "$WORK_DIR/$BINARY" "$INSTALL_DIR/$BINARY"
+    if ! command -v "$BINARY" >/dev/null 2>&1; then
+        printf "  Note: add %s to your PATH to invoke gltfpack directly.\n" "$INSTALL_DIR"
+    fi
+    printf "\033[0;32m✓ gltfpack %s installed to %s\033[0m\n" "$GLTFPACK_VERSION" "$INSTALL_DIR"
+
 # Check prerequisites
 check:
     @echo ""
@@ -217,6 +281,7 @@ init: check
         --output-folder=build/conan/Release -s build_type=Release \
         -s compiler.cppstd={{cpp_standard}} -s "ktx/*:compiler.cppstd=17" \
         -c tools.cmake.cmaketoolchain:generator=Ninja --build=missing
+    @just _install-gltfpack
     @echo "Configuring CMake debug preset..."
     @bin="$(just _llvm-bin)" && CC="$bin/clang" CXX="$bin/clang++" cmake --preset debug
     @echo "Building project..."

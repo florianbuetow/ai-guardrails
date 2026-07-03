@@ -95,7 +95,7 @@ LLVM/Clang toolchain). Each library has a headless-safe smoke test in
 | glTF 2.0 | format — covered by tinygltf |
 | tinygltf | `tinygltf/2.9.7` |
 | meshoptimizer | `meshoptimizer/1.0` |
-| gltfpack | external CLI tool (not on ConanCenter); install from the meshoptimizer repo |
+| gltfpack | prebuilt CLI installed by `just init` into `~/.local/bin` (GitHub release v1.0, pinned to the meshoptimizer library version; mac/linux/windows) |
 | KTX2 / Basis Universal | `ktx/4.4.2` (tools disabled) |
 | ozz-animation | `ozz-animation/0.14.1` |
 | MikkTSpace | `mikktspace/cci.20200325` |

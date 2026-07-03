@@ -89,8 +89,9 @@ Included library stack:
 | Testing | GoogleTest |
 
 `gltfpack` (glTF optimizer CLI from the meshoptimizer project) is not
-available through Conan; install it separately from
-https://github.com/zeux/meshoptimizer/tree/master/gltf if needed.
+available through Conan; `just init` installs its prebuilt binary (pinned to
+the meshoptimizer library version) into `~/.local/bin` on macOS, Linux, and
+Windows (Git Bash/MSYS).
 
 Every library has a smoke test in `tests/deps/` that proves it compiles,
 links, and initializes headlessly — run them with `just test`.
