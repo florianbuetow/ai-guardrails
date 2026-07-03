@@ -3,8 +3,10 @@
 // Running `just demo` verifies that the template's graphics stack really works
 // end to end on this machine: SDL3 (window + mouse input), the Vulkan loader
 // and driver (MoltenVK on macOS), vk-bootstrap (instance/device/swapchain),
-// shaderc (GLSL compiled to SPIR-V at startup), VMA (vertex buffer memory),
-// GLM (transforms), and Dear ImGui (menu overlay).
+// HLSL shaders compiled to SPIR-V by DXC at build time, VMA (vertex buffer
+// memory), GLM (transforms), Dear ImGui (menu overlay), Tracy (frame
+// profiling; connect the Tracy profiler to a running demo), and — in debug
+// builds — the Khronos validation layers with a fail-fast error callback.
 //
 // Controls: drag with the left mouse button to rotate the cube, use the menu
 // to toggle auto-rotation, Esc or closing the window quits. Pass
@@ -15,6 +17,7 @@
 
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_events.h>
+#include <SDL3/SDL_filesystem.h>
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_keycode.h>
 #include <SDL3/SDL_mouse.h>
@@ -28,8 +31,11 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
+#include <cstdlib>
 #include <exception>
+#include <filesystem>
 #include <format>
+#include <fstream>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -37,17 +43,18 @@
 #include <glm/trigonometric.hpp>
 #include <imgui.h>
 #include <imgui_impl_vulkan.h>
+#include <ios>
+#include <iterator>
 #include <print>
-#include <shaderc/shaderc.h>
-#include <shaderc/shaderc.hpp>
-#include <shaderc/status.h>
 #include <span>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 #include <system_error>
+#include <tracy/Tracy.hpp>
 #include <vector>
 #include <vk_mem_alloc.h>
+#include <vulkan/vk_platform.h>
 #include <vulkan/vulkan_core.h>
 
 namespace demo {
@@ -56,25 +63,6 @@ namespace {
 constexpr int window_width = 1280;
 constexpr int window_height = 720;
 constexpr std::uint32_t frames_in_flight = 2;
-
-constexpr std::string_view vertex_shader_glsl = R"(#version 450
-layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec3 in_color;
-layout(push_constant) uniform PushConstants { mat4 mvp; } push;
-layout(location = 0) out vec3 frag_color;
-void main() {
-    gl_Position = push.mvp * vec4(in_position, 1.0);
-    frag_color = in_color;
-}
-)";
-
-constexpr std::string_view fragment_shader_glsl = R"(#version 450
-layout(location = 0) in vec3 frag_color;
-layout(location = 0) out vec4 out_color;
-void main() {
-    out_color = vec4(frag_color, 1.0);
-}
-)";
 
 struct Vertex {
     std::array<float, 3> position;
@@ -129,15 +117,64 @@ void vk_check(VkResult result, std::string_view what) {
     }
 }
 
-std::vector<std::uint32_t> compile_shader(std::string_view source, shaderc_shader_kind kind, std::string_view name) {
-    const shaderc::Compiler compiler;
-    const shaderc::CompileOptions options;
-    const shaderc::SpvCompilationResult result =
-        compiler.CompileGlslToSpv(std::string{source}, kind, std::string{name}.c_str(), options);
-    if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
-        throw std::runtime_error(std::format("shader compilation of {} failed: {}", name, result.GetErrorMessage()));
+// Directory of the running executable; DXC-compiled .spv files and the
+// pipeline cache live next to it.
+std::filesystem::path executable_dir() {
+    const char* base_path = SDL_GetBasePath();
+    if (base_path == nullptr) {
+        throw std::runtime_error(std::format("SDL_GetBasePath failed: {}", SDL_GetError()));
     }
-    return {result.cbegin(), result.cend()};
+    return std::filesystem::path{base_path};
+}
+
+std::vector<char> read_binary_file(const std::filesystem::path& path) {
+    std::ifstream file{path, std::ios::binary};
+    if (!file) {
+        throw std::runtime_error(std::format("cannot open {}", path.string()));
+    }
+    std::vector<char> bytes{std::istreambuf_iterator<char>{file}, std::istreambuf_iterator<char>{}};
+    if (file.bad()) {
+        throw std::runtime_error(std::format("cannot read {}", path.string()));
+    }
+    return bytes;
+}
+
+// Load a SPIR-V module produced by DXC at build time (HLSL is the project's
+// only shader language; there is no runtime shader compilation).
+std::vector<std::uint32_t> load_spirv_file(const std::filesystem::path& path) {
+    const std::vector<char> bytes = read_binary_file(path);
+    if (bytes.empty() || bytes.size() % sizeof(std::uint32_t) != 0) {
+        throw std::runtime_error(std::format("{} is not a SPIR-V module", path.string()));
+    }
+    // SPIR-V files are little-endian; decode explicitly.
+    std::vector<std::uint32_t> words(bytes.size() / sizeof(std::uint32_t));
+    for (std::size_t idx = 0; idx < words.size(); ++idx) {
+        const std::size_t base = idx * sizeof(std::uint32_t);
+        const auto byte_at = [&bytes](std::size_t offset) {
+            return static_cast<std::uint32_t>(static_cast<unsigned char>(bytes.at(offset)));
+        };
+        words.at(idx) =
+            byte_at(base) | (byte_at(base + 1) << 8U) | (byte_at(base + 2) << 16U) | (byte_at(base + 3) << 24U);
+    }
+    constexpr std::uint32_t spirv_magic = 0x07230203U;
+    if (words.front() != spirv_magic) {
+        throw std::runtime_error(std::format("{} has no SPIR-V magic number", path.string()));
+    }
+    return words;
+}
+
+// Fail-fast validation-layer callback: warnings are printed, errors abort.
+VKAPI_ATTR VkBool32 VKAPI_CALL validation_callback(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
+                                                   VkDebugUtilsMessageTypeFlagsEXT /*type*/,
+                                                   const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
+                                                   void* /*user_data*/) {
+    const char* message = callback_data != nullptr ? callback_data->pMessage : "(no message)";
+    if (severity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
+        std::println(stderr, "demo: Vulkan validation ERROR: {}", message);
+        std::abort();
+    }
+    std::println(stderr, "demo: Vulkan validation: {}", message);
+    return VK_FALSE;
 }
 
 struct FrameSync {
@@ -164,7 +201,23 @@ class DemoApp {
 
     void init_vulkan() {
         vkb::InstanceBuilder builder{vkGetInstanceProcAddr};
-        auto instance_result = builder.set_app_name("Vulkan Cube Demo").require_api_version(1, 3, 0).build();
+        builder.set_app_name("Vulkan Cube Demo").require_api_version(1, 3, 0);
+#ifndef NDEBUG
+        // Debug builds enable the Khronos validation layers when present;
+        // validation errors abort via validation_callback (fail fast).
+        auto system_info_result = vkb::SystemInfo::get_system_info(vkGetInstanceProcAddr);
+        if (!system_info_result) {
+            throw std::runtime_error(
+                std::format("querying Vulkan system info failed: {}", system_info_result.error().message()));
+        }
+        if (system_info_result->validation_layers_available) {
+            builder.request_validation_layers(true).set_debug_callback(validation_callback);
+            std::println("demo: Vulkan validation layers enabled (errors are fatal)");
+        } else {
+            std::println("demo: Vulkan validation layers not available on this system");
+        }
+#endif
+        auto instance_result = builder.build();
         if (!instance_result) {
             throw std::runtime_error(
                 std::format("Vulkan instance creation failed: {}", instance_result.error().message()));
@@ -272,10 +325,12 @@ class DemoApp {
     }
 
     void create_pipeline() {
-        const std::vector<std::uint32_t> vertex_spirv =
-            compile_shader(vertex_shader_glsl, shaderc_glsl_vertex_shader, "cube.vert");
-        const std::vector<std::uint32_t> fragment_spirv =
-            compile_shader(fragment_shader_glsl, shaderc_glsl_fragment_shader, "cube.frag");
+        create_pipeline_cache();
+
+        const std::filesystem::path shader_dir = executable_dir() / "shaders";
+        const std::vector<std::uint32_t> vertex_spirv = load_spirv_file(shader_dir / "cube.vert.spv");
+        const std::vector<std::uint32_t> fragment_spirv = load_spirv_file(shader_dir / "cube.frag.spv");
+        std::println("demo: loaded DXC-compiled shaders from {}", shader_dir.string());
 
         VkShaderModule vertex_module = create_shader_module(vertex_spirv, "vertex");
         VkShaderModule fragment_module = create_shader_module(fragment_spirv, "fragment");
@@ -404,7 +459,7 @@ class DemoApp {
         pipeline_info.pColorBlendState = &color_blend;
         pipeline_info.pDynamicState = &dynamic_state;
         pipeline_info.layout = pipeline_layout_;
-        vk_check(vkCreateGraphicsPipelines(device_.device, VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &pipeline_),
+        vk_check(vkCreateGraphicsPipelines(device_.device, pipeline_cache_, 1, &pipeline_info, nullptr, &pipeline_),
                  "vkCreateGraphicsPipelines");
 
         vkDestroyShaderModule(device_.device, vertex_module, nullptr);
@@ -468,7 +523,7 @@ class DemoApp {
             .MinImageCount = frames_in_flight,
             .ImageCount = static_cast<std::uint32_t>(swapchain_images_.size()),
             .MSAASamples = VK_SAMPLE_COUNT_1_BIT,
-            .PipelineCache = VK_NULL_HANDLE,
+            .PipelineCache = pipeline_cache_,
             .Subpass = 0,
             .UseDynamicRendering = true,
             .PipelineRenderingCreateInfo =
@@ -521,6 +576,7 @@ class DemoApp {
             ImGui::Render();
 
             draw_frame(compute_mvp());
+            FrameMark;
 
             if (auto_quit_seconds > 0) {
                 const float elapsed_seconds = std::chrono::duration<float>(now - start_time).count();
@@ -546,6 +602,8 @@ class DemoApp {
         }
         vkDestroyPipeline(device_.device, pipeline_, nullptr);
         vkDestroyPipelineLayout(device_.device, pipeline_layout_, nullptr);
+        save_pipeline_cache();
+        vkDestroyPipelineCache(device_.device, pipeline_cache_, nullptr);
         vmaDestroyBuffer(allocator_, vertex_buffer_, vertex_allocation_);
         vmaDestroyAllocator(allocator_);
         destroy_swapchain_views();
@@ -560,6 +618,46 @@ class DemoApp {
     [[nodiscard]] std::uint64_t rendered_frames() const { return frames_rendered_; }
 
    private:
+    // MoltenVK converts SPIR-V to MSL at pipeline-creation time, so a
+    // persisted pipeline cache saves real work on macOS in particular.
+    void create_pipeline_cache() {
+        const std::filesystem::path cache_path = executable_dir() / "pipeline_cache.bin";
+        std::vector<char> cache_data;
+        if (std::filesystem::exists(cache_path)) {
+            cache_data = read_binary_file(cache_path);
+        }
+        // The cache header starts with its own length (>= 32) and version 1;
+        // anything else is a stale or corrupt file and must not be passed on.
+        constexpr std::size_t min_cache_header_size = 32;
+        const bool cache_usable = cache_data.size() >= min_cache_header_size;
+        if (cache_usable) {
+            std::println("demo: pipeline cache loaded ({} bytes from {})", cache_data.size(), cache_path.string());
+        } else {
+            std::println("demo: pipeline cache not found, starting empty");
+        }
+        VkPipelineCacheCreateInfo cache_info{};
+        cache_info.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
+        cache_info.initialDataSize = cache_usable ? cache_data.size() : 0;
+        cache_info.pInitialData = cache_usable ? cache_data.data() : nullptr;
+        vk_check(vkCreatePipelineCache(device_.device, &cache_info, nullptr, &pipeline_cache_),
+                 "vkCreatePipelineCache");
+    }
+
+    void save_pipeline_cache() const {
+        std::size_t byte_count = 0;
+        vk_check(vkGetPipelineCacheData(device_.device, pipeline_cache_, &byte_count, nullptr),
+                 "vkGetPipelineCacheData(size)");
+        std::vector<char> cache_data(byte_count);
+        vk_check(vkGetPipelineCacheData(device_.device, pipeline_cache_, &byte_count, cache_data.data()),
+                 "vkGetPipelineCacheData");
+        const std::filesystem::path cache_path = executable_dir() / "pipeline_cache.bin";
+        std::ofstream file{cache_path, std::ios::binary | std::ios::trunc};
+        if (!file || !file.write(cache_data.data(), static_cast<std::streamsize>(byte_count))) {
+            throw std::runtime_error(std::format("cannot write {}", cache_path.string()));
+        }
+        std::println("demo: pipeline cache saved ({} bytes to {})", byte_count, cache_path.string());
+    }
+
     [[nodiscard]] VkShaderModule create_shader_module(const std::vector<std::uint32_t>& spirv,
                                                       std::string_view what) const {
         VkShaderModuleCreateInfo module_info{};
@@ -670,6 +768,7 @@ class DemoApp {
     void build_menu(bool& running) {
         ImGui::Begin("Demo Menu");
         ImGui::TextUnformatted("Vulkan cube demo - the stack is alive!");
+        ImGui::TextUnformatted("Shaders: HLSL compiled by DXC at build time");
         ImGui::Checkbox("Auto-rotate", &auto_rotate_);
         ImGui::SliderFloat("Speed", &rotation_speed_, 0.0F, 4.0F);
         ImGui::TextUnformatted("Drag with the left mouse button to rotate.");
@@ -694,6 +793,7 @@ class DemoApp {
     }
 
     void record_and_submit(std::uint32_t image_index, const glm::mat4& mvp) {
+        ZoneScopedN("demo::record_and_submit");
         const FrameSync& frame = frames_.at(frame_index_);
         VkCommandBuffer cmd = frame.command_buffer;
         vk_check(vkResetCommandBuffer(cmd, 0), "vkResetCommandBuffer");
@@ -798,6 +898,7 @@ class DemoApp {
     }
 
     void draw_frame(const glm::mat4& mvp) {
+        ZoneScopedN("demo::draw_frame");
         const FrameSync& frame = frames_.at(frame_index_);
         vk_check(vkWaitForFences(device_.device, 1, &frame.in_flight, VK_TRUE, UINT64_MAX), "vkWaitForFences");
 
@@ -852,6 +953,7 @@ class DemoApp {
 
     VkPipelineLayout pipeline_layout_ = VK_NULL_HANDLE;
     VkPipeline pipeline_ = VK_NULL_HANDLE;
+    VkPipelineCache pipeline_cache_ = VK_NULL_HANDLE;
     VkDescriptorPool imgui_pool_ = VK_NULL_HANDLE;
 
     std::array<FrameSync, frames_in_flight> frames_{};

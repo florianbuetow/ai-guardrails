@@ -18,4 +18,9 @@
   # stderr comes from the macOS SDK-private <_stdio.h>; the portable
   # spelling is <cstdio>.
   { include: ["<_stdio.h>", "private", "<cstdio>", "public"] },
+  # clang-tidy's misc-include-cleaner requires <ios> for std::ios and
+  # std::streamsize; stop IWYU from crediting <fstream> instead.
+  { symbol: ["std::ios_base", "private", "<ios>", "public"] },
+  { symbol: ["std::ios", "private", "<ios>", "public"] },
+  { symbol: ["std::streamsize", "private", "<ios>", "public"] },
 ]

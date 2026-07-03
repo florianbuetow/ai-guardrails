@@ -76,11 +76,50 @@ enable_project_warnings(${PROJECT_NAME})
 find_package(SDL3 REQUIRED)
 find_package(imgui REQUIRED)
 find_package(glm REQUIRED)
-find_package(shaderc REQUIRED)
 find_package(vk-bootstrap REQUIRED)
 find_package(VulkanMemoryAllocator REQUIRED)
 find_package(VulkanHeaders REQUIRED)
 find_package(VulkanLoader REQUIRED)
+find_package(Tracy REQUIRED)
+
+# Shaders: HLSL compiled to SPIR-V at build time by DXC (the project's only
+# shader path — GLSL is not supported). On macOS DXC ships with the LunarG
+# Vulkan SDK; on Linux/Windows `just init` installs the pinned release.
+find_program(DXC_EXECUTABLE dxc PATHS /usr/local/bin "$ENV{HOME}/.local/bin")
+if(NOT DXC_EXECUTABLE)
+    message(FATAL_ERROR
+        "dxc (DirectX Shader Compiler) not found. "
+        "macOS: install the LunarG Vulkan SDK. Linux: run 'just init'.")
+endif()
+
+set(SHADER_OUTPUT_DIR "${CMAKE_BINARY_DIR}/shaders")
+file(MAKE_DIRECTORY "${SHADER_OUTPUT_DIR}")
+
+# -Zpc packs matrices column-major so GLM matrices upload without transpose.
+add_custom_command(
+    OUTPUT "${SHADER_OUTPUT_DIR}/cube.vert.spv"
+    COMMAND "${DXC_EXECUTABLE}" -spirv -fspv-target-env=vulkan1.3
+            -T vs_6_0 -E main -Zpc
+            -Fo "${SHADER_OUTPUT_DIR}/cube.vert.spv"
+            "${CMAKE_SOURCE_DIR}/shaders/cube.vert.hlsl"
+    DEPENDS "${CMAKE_SOURCE_DIR}/shaders/cube.vert.hlsl"
+    COMMENT "DXC: cube.vert.hlsl -> cube.vert.spv"
+    VERBATIM
+)
+add_custom_command(
+    OUTPUT "${SHADER_OUTPUT_DIR}/cube.frag.spv"
+    COMMAND "${DXC_EXECUTABLE}" -spirv -fspv-target-env=vulkan1.3
+            -T ps_6_0 -E main
+            -Fo "${SHADER_OUTPUT_DIR}/cube.frag.spv"
+            "${CMAKE_SOURCE_DIR}/shaders/cube.frag.hlsl"
+    DEPENDS "${CMAKE_SOURCE_DIR}/shaders/cube.frag.hlsl"
+    COMMENT "DXC: cube.frag.hlsl -> cube.frag.spv"
+    VERBATIM
+)
+add_custom_target(${PROJECT_NAME}_shaders ALL DEPENDS
+    "${SHADER_OUTPUT_DIR}/cube.vert.spv"
+    "${SHADER_OUTPUT_DIR}/cube.frag.spv"
+)
 
 # The ImGui Vulkan render backend ships as sources inside the Conan imgui
 # package; build it as third-party code (warnings off, outside src/ so the
@@ -102,6 +141,7 @@ target_link_libraries(${PROJECT_NAME}_imgui_vulkan PUBLIC
 target_compile_options(${PROJECT_NAME}_imgui_vulkan PRIVATE -w)
 
 add_executable(${PROJECT_NAME}_demo src/demo/main.cpp)
+add_dependencies(${PROJECT_NAME}_demo ${PROJECT_NAME}_shaders)
 # VMA configuration: the demo links the Vulkan loader directly, so VMA can use
 # the statically linked functions; the implementation lives in the demo TU.
 target_compile_definitions(${PROJECT_NAME}_demo PRIVATE
@@ -115,10 +155,10 @@ target_link_libraries(${PROJECT_NAME}_demo PRIVATE
     ${PROJECT_NAME}_imgui_vulkan
     vk-bootstrap::vk-bootstrap
     GPUOpen::VulkanMemoryAllocator
-    shaderc::shaderc
     glm::glm
     vulkan-headers::vulkan-headers
     Vulkan::Loader
+    Tracy::TracyClient
 )
 enable_project_warnings(${PROJECT_NAME}_demo)
 
@@ -153,7 +193,6 @@ if(BUILD_TESTING)
     find_package(volk REQUIRED)
     find_package(vk-bootstrap REQUIRED)
     find_package(VulkanMemoryAllocator REQUIRED)
-    find_package(shaderc REQUIRED)
     find_package(SPIRV-Tools REQUIRED)
     find_package(spirv-cross REQUIRED)
 
@@ -189,7 +228,6 @@ if(BUILD_TESTING)
         tests/deps/volk_test.cpp
         tests/deps/vk_bootstrap_test.cpp
         tests/deps/vma_test.cpp
-        tests/deps/shaderc_test.cpp
         tests/deps/spirv_tools_test.cpp
         tests/deps/spirv_cross_test.cpp
         tests/deps/sdl_test.cpp
@@ -237,7 +275,6 @@ if(BUILD_TESTING)
         volk::volk
         vk-bootstrap::vk-bootstrap
         GPUOpen::VulkanMemoryAllocator
-        shaderc::shaderc
         spirv-tools::spirv-tools
         spirv-cross::spirv-cross
         SDL3::SDL3
@@ -263,6 +300,20 @@ if(BUILD_TESTING)
     )
     enable_project_warnings(${PROJECT_NAME}_vkloader_tests)
     gtest_discover_tests(${PROJECT_NAME}_vkloader_tests)
+
+    # Headless GPU rendering test: renders offscreen and reads pixels back.
+    # It needs a Vulkan implementation at runtime, so it is deliberately not
+    # registered with ctest; run it via `just test-render`.
+    add_executable(${PROJECT_NAME}_render_tests tests/render/offscreen_test.cpp)
+    add_dependencies(${PROJECT_NAME}_render_tests ${PROJECT_NAME}_shaders)
+    target_link_libraries(${PROJECT_NAME}_render_tests PRIVATE
+        GTest::gtest_main
+        vk-bootstrap::vk-bootstrap
+        glm::glm
+        vulkan-headers::vulkan-headers
+        Vulkan::Loader
+    )
+    enable_project_warnings(${PROJECT_NAME}_render_tests)
 
     if(APPLE)
         # MoltenVK is the macOS Vulkan driver; ConanCenter's recipe requires

@@ -65,6 +65,7 @@ help:
     @echo ""
     @printf "\033[0;33mCI & Testing:\033[0m\n"
     @printf "  %-40s %s\n" "test" "Run unit tests"
+    @printf "  %-40s %s\n" "test-render" "Run headless GPU rendering test"
     @printf "  %-40s %s\n" "test-coverage" "Run tests with coverage report"
     @printf "  %-40s %s\n" "ci" "Run ALL validation checks (verbose)"
     @printf "  %-40s %s\n" "ci-quiet" "Run ALL validation checks silently"
@@ -159,6 +160,141 @@ _install-gltfpack:
         printf "  Note: add %s to your PATH to invoke gltfpack directly.\n" "$INSTALL_DIR"
     fi
     printf "\033[0;32m✓ gltfpack %s installed to %s\033[0m\n" "$GLTFPACK_VERSION" "$INSTALL_DIR"
+
+# Install the DirectX Shader Compiler (HLSL -> SPIR-V; the project's only
+# shader path). macOS has no official release binaries: DXC ships with the
+# LunarG Vulkan SDK there and is only verified. Linux release binaries are
+# x86_64-only.
+[private]
+_install-dxc:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    DXC_TAG="v1.9.2602.24"
+    DXC_LINUX_ASSET="linux_dxc_2026_05_26.x86_64.tar.gz"
+    INSTALL_ROOT="$HOME/.local"
+    if command -v dxc >/dev/null 2>&1; then
+        printf "\033[0;32m✓ dxc is installed (%s)\033[0m\n" "$(command -v dxc)"
+        exit 0
+    fi
+    case "$(uname -s)" in
+        Darwin)
+            printf "\033[0;31m✗ Error: dxc not found. Install the LunarG Vulkan SDK: https://vulkan.lunarg.com/sdk/home\033[0m\n"
+            exit 1
+            ;;
+        Linux)
+            if [ "$(uname -m)" != "x86_64" ]; then
+                printf "\033[0;31m✗ Error: official DXC Linux binaries are x86_64-only (this is %s)\033[0m\n" "$(uname -m)"
+                printf "  Build DXC from source or use an x86_64 environment.\n"
+                exit 1
+            fi
+            printf "Installing dxc %s...\n" "$DXC_TAG"
+            WORK_DIR="$(mktemp -d)"
+            trap 'rm -rf "$WORK_DIR"' EXIT
+            curl -fsSL -o "$WORK_DIR/dxc.tar.gz" \
+                "https://github.com/microsoft/DirectXShaderCompiler/releases/download/$DXC_TAG/$DXC_LINUX_ASSET"
+            mkdir -p "$INSTALL_ROOT/opt/dxc"
+            tar -xzf "$WORK_DIR/dxc.tar.gz" -C "$INSTALL_ROOT/opt/dxc"
+            if [ ! -f "$INSTALL_ROOT/opt/dxc/bin/dxc" ]; then
+                printf "\033[0;31m✗ Error: bin/dxc not found in DXC archive\033[0m\n"
+                exit 1
+            fi
+            chmod +x "$INSTALL_ROOT/opt/dxc/bin/dxc"
+            mkdir -p "$INSTALL_ROOT/bin"
+            printf '%s\n' '#!/bin/sh' \
+                'exec env LD_LIBRARY_PATH="$HOME/.local/opt/dxc/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" "$HOME/.local/opt/dxc/bin/dxc" "$@"' \
+                > "$INSTALL_ROOT/bin/dxc"
+            chmod +x "$INSTALL_ROOT/bin/dxc"
+            printf "\033[0;32m✓ dxc %s installed to %s\033[0m\n" "$DXC_TAG" "$INSTALL_ROOT/bin/dxc"
+            ;;
+        *)
+            printf "\033[0;31m✗ Error: automatic dxc install is not supported on %s\033[0m\n" "$(uname -s)"
+            printf "  Install DXC from https://github.com/microsoft/DirectXShaderCompiler/releases\n"
+            exit 1
+            ;;
+    esac
+
+# Install the KTX-Software CLI tools (toktx, ktx) for the texture pipeline.
+# Pinned to the Conan ktx library version so CLI output stays loadable.
+[private]
+_install-ktx-tools:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    KTX_VERSION="4.4.2"
+    INSTALL_ROOT="$HOME/.local"
+    if command -v toktx >/dev/null 2>&1; then
+        printf "\033[0;32m✓ toktx is installed (%s)\033[0m\n" "$(command -v toktx)"
+        exit 0
+    fi
+    if [ -x "$INSTALL_ROOT/bin/toktx" ]; then
+        printf "\033[0;32m✓ toktx is installed in %s/bin\033[0m\n" "$INSTALL_ROOT"
+        exit 0
+    fi
+    WORK_DIR="$(mktemp -d)"
+    trap 'rm -rf "$WORK_DIR"' EXIT
+    case "$(uname -s)" in
+        Darwin)
+            ASSET="KTX-Software-$KTX_VERSION-Darwin-$(uname -m).pkg"
+            printf "Installing KTX tools %s (%s)...\n" "$KTX_VERSION" "$ASSET"
+            curl -fsSL -o "$WORK_DIR/ktx.pkg" \
+                "https://github.com/KhronosGroup/KTX-Software/releases/download/v$KTX_VERSION/$ASSET"
+            # Expand the pkg without sudo. It is a distribution of
+            # sub-packages: tools binaries and the library live in separate
+            # Payload trees, each mirroring /usr/local.
+            pkgutil --expand-full "$WORK_DIR/ktx.pkg" "$WORK_DIR/expanded"
+            TOKTX_PATH="$(find "$WORK_DIR/expanded" -type f -path '*/Payload/usr/local/bin/toktx' | head -1)"
+            if [ -z "$TOKTX_PATH" ]; then
+                printf "\033[0;31m✗ Error: toktx not found in KTX pkg payloads\033[0m\n"
+                exit 1
+            fi
+            mkdir -p "$INSTALL_ROOT/opt/ktx/bin" "$INSTALL_ROOT/opt/ktx/lib" "$INSTALL_ROOT/bin"
+            cp -R "$(dirname "$TOKTX_PATH")/." "$INSTALL_ROOT/opt/ktx/bin/"
+            find "$WORK_DIR/expanded" -type d -path '*/Payload/usr/local/lib' | while IFS= read -r libdir; do
+                cp -R "$libdir/." "$INSTALL_ROOT/opt/ktx/lib/"
+            done
+            for tool in toktx ktx ktxinfo ktx2check ktx2ktx2 ktxsc; do
+                if [ -f "$INSTALL_ROOT/opt/ktx/bin/$tool" ]; then
+                    chmod +x "$INSTALL_ROOT/opt/ktx/bin/$tool"
+                    printf '%s\n' '#!/bin/sh' \
+                        "exec env DYLD_LIBRARY_PATH=\"\$HOME/.local/opt/ktx/lib\${DYLD_LIBRARY_PATH:+:\$DYLD_LIBRARY_PATH}\" \"\$HOME/.local/opt/ktx/bin/$tool\" \"\$@\"" \
+                        > "$INSTALL_ROOT/bin/$tool"
+                    chmod +x "$INSTALL_ROOT/bin/$tool"
+                fi
+            done
+            ;;
+        Linux)
+            ASSET="KTX-Software-$KTX_VERSION-Linux-$(uname -m).tar.bz2"
+            printf "Installing KTX tools %s (%s)...\n" "$KTX_VERSION" "$ASSET"
+            curl -fsSL -o "$WORK_DIR/ktx.tar.bz2" \
+                "https://github.com/KhronosGroup/KTX-Software/releases/download/v$KTX_VERSION/$ASSET"
+            mkdir -p "$INSTALL_ROOT/opt/ktx"
+            tar -xjf "$WORK_DIR/ktx.tar.bz2" -C "$INSTALL_ROOT/opt/ktx" --strip-components=1
+            if [ ! -f "$INSTALL_ROOT/opt/ktx/bin/toktx" ]; then
+                printf "\033[0;31m✗ Error: bin/toktx not found in KTX archive\033[0m\n"
+                exit 1
+            fi
+            mkdir -p "$INSTALL_ROOT/bin"
+            for tool in toktx ktx ktxinfo ktx2check ktx2ktx2 ktxsc; do
+                if [ -f "$INSTALL_ROOT/opt/ktx/bin/$tool" ]; then
+                    chmod +x "$INSTALL_ROOT/opt/ktx/bin/$tool"
+                    printf '%s\n' '#!/bin/sh' \
+                        "exec env LD_LIBRARY_PATH=\"\$HOME/.local/opt/ktx/lib\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}\" \"\$HOME/.local/opt/ktx/bin/$tool\" \"\$@\"" \
+                        > "$INSTALL_ROOT/bin/$tool"
+                    chmod +x "$INSTALL_ROOT/bin/$tool"
+                fi
+            done
+            ;;
+        *)
+            printf "\033[0;31m✗ Error: automatic KTX tools install is not supported on %s\033[0m\n" "$(uname -s)"
+            printf "  Install from https://github.com/KhronosGroup/KTX-Software/releases\n"
+            exit 1
+            ;;
+    esac
+    if ! "$INSTALL_ROOT/bin/toktx" --version >/dev/null 2>&1; then
+        printf "\033[0;31m✗ Error: installed toktx does not run\033[0m\n"
+        exit 1
+    fi
+    printf "\033[0;32m✓ KTX tools %s installed to %s/bin (toktx %s)\033[0m\n" \
+        "$KTX_VERSION" "$INSTALL_ROOT" "$("$INSTALL_ROOT/bin/toktx" --version 2>&1 | head -1)"
 
 # Check prerequisites
 check:
@@ -258,6 +394,13 @@ check:
         fi; \
         printf "\033[0;32m✓ MoltenVK is installed\033[0m\n"; \
     fi
+    @if [ "$(uname -s)" = "Darwin" ] && ! command -v dxc >/dev/null 2>&1; then \
+        printf "\033[0;31m✗ Error: dxc is not installed (HLSL shader compiler)\033[0m\n"; \
+        printf "  Install the LunarG Vulkan SDK: https://vulkan.lunarg.com/sdk/home\n"; \
+        echo ""; \
+        exit 1; \
+    fi
+    @if [ "$(uname -s)" = "Darwin" ]; then printf "\033[0;32m✓ dxc is installed\033[0m\n"; fi
     @echo ""
 
 # Initialize the development environment
@@ -283,6 +426,8 @@ init: check
         -s compiler.cppstd={{cpp_standard}} -s "ktx/*:compiler.cppstd=17" \
         -c tools.cmake.cmaketoolchain:generator=Ninja --build=missing
     @just _install-gltfpack
+    @just _install-dxc
+    @just _install-ktx-tools
     @echo "Configuring CMake debug preset..."
     @bin="$(just _llvm-bin)" && CC="$bin/clang" CXX="$bin/clang++" cmake --preset debug
     @echo "Building project..."
@@ -333,6 +478,11 @@ demo *args:
         fi
         export VK_ICD_FILENAMES="$MOLTENVK_ICD"
         export VK_DRIVER_FILES="$MOLTENVK_ICD"
+        # Expose the LunarG SDK's validation layers (debug builds enable them).
+        SDK_LAYER_DIR="/usr/local/share/vulkan/explicit_layer.d"
+        if [ -f "$SDK_LAYER_DIR/VkLayer_khronos_validation.json" ]; then
+            export VK_LAYER_PATH="$SDK_LAYER_DIR"
+        fi
     fi
     ./build/debug/{{project_name}}_demo {% raw %}{{args}}{% endraw %}
     printf "\033[0;32m✓ Demo exited cleanly\033[0m\n"
@@ -438,7 +588,11 @@ code-deptry:
         :
     fi
     printf "%s\n" "$IWYU_OUTPUT"
-    if printf "%s\n" "$IWYU_OUTPUT" | grep -q '^- #include'; then
+    # <ios> is the one known IWYU/clang-tidy conflict: include-cleaner
+    # requires it for std::ios/std::streamsize while IWYU's libc++ mapping
+    # credits <fstream> and wants it removed. include-cleaner wins; this is
+    # the single named exception to IWYU's removal check.
+    if printf "%s\n" "$IWYU_OUTPUT" | grep '^- #include' | grep -v '^- #include <ios>' | grep -q .; then
         printf "\033[0;31m✗ Unnecessary includes found (see IWYU output above)\033[0m\n"
         exit 1
     fi
@@ -479,6 +633,30 @@ test:
     @ctest --preset debug
     @printf "\033[0;32m✓ Tests passed\033[0m\n"
     @echo ""
+
+# Run the headless GPU rendering test (offscreen render + pixel readback).
+# Requires a Vulkan implementation: MoltenVK on macOS, lavapipe/Mesa on
+# headless Linux. Fails loudly when none is present.
+test-render:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo ""
+    printf "\033[0;34m=== Running Headless GPU Render Test ===\033[0m\n"
+    cmake --build --preset debug
+    source build/conan/Debug/conanrun.sh
+    if [ "$(uname -s)" = "Darwin" ]; then
+        MOLTENVK_ICD="$(brew --prefix molten-vk)/etc/vulkan/icd.d/MoltenVK_icd.json"
+        if [ ! -f "$MOLTENVK_ICD" ]; then
+            printf "\033[0;31m✗ Error: MoltenVK ICD manifest not found at %s\033[0m\n" "$MOLTENVK_ICD"
+            printf "  Install with: brew install molten-vk\n"
+            exit 1
+        fi
+        export VK_ICD_FILENAMES="$MOLTENVK_ICD"
+        export VK_DRIVER_FILES="$MOLTENVK_ICD"
+    fi
+    SHADER_DIR="$PWD/build/debug/shaders" ./build/debug/{{project_name}}_render_tests
+    printf "\033[0;32m✓ Headless GPU render test passed\033[0m\n"
+    echo ""
 
 # Run tests with coverage report and threshold check
 test-coverage:
@@ -551,6 +729,7 @@ ci:
     just code-spell
     just code-semgrep
     just test
+    just test-render
     just code-sanitize
     echo ""
     printf "\033[0;32m✓ All CI checks passed\033[0m\n"
@@ -596,6 +775,9 @@ ci-quiet:
 
     just test > $TMPFILE 2>&1 || { printf "\033[0;31m✗ Test failed\033[0m\n"; cat $TMPFILE; exit 1; }
     printf "\033[0;32m✓ Test passed\033[0m\n"
+
+    just test-render > $TMPFILE 2>&1 || { printf "\033[0;31m✗ Test-render failed\033[0m\n"; cat $TMPFILE; exit 1; }
+    printf "\033[0;32m✓ Test-render passed\033[0m\n"
 
     just code-sanitize > $TMPFILE 2>&1 || { printf "\033[0;31m✗ Code-sanitize failed\033[0m\n"; cat $TMPFILE; exit 1; }
     printf "\033[0;32m✓ Code-sanitize passed\033[0m\n"

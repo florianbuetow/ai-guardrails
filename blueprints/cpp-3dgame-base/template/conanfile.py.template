@@ -18,8 +18,8 @@ class ProjectConan(ConanFile):
         self.requires("volk/1.4.313.0")
         self.requires("vk-bootstrap/1.4.350")
         self.requires("vulkan-memory-allocator/3.3.0")
-        # Shader toolchain
-        self.requires("shaderc/2025.3")
+        # SPIR-V tooling (shaders are HLSL compiled by DXC at build time; DXC
+        # is a prerequisite installed by `just init`, not a Conan package)
         self.requires("spirv-tools/1.4.313.0")
         self.requires("spirv-cross/1.4.313.0")
         # Math / ECS / physics / navigation / networking / serialization
