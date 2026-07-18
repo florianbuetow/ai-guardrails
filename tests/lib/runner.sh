@@ -188,9 +188,12 @@ run_language_tests() {
         log_pass "Violation '$violation_name' correctly detected"
         passed_tests=$((passed_tests + 1))
 
-        # Restore original files and git state for the next test
+        # Restore original files and git state for the next test. git reset
+        # --hard is required (not git checkout): the violation files were
+        # staged above, so checkout would restore the violation from the
+        # index and leak it into every subsequent test.
         restore_violation "$violation_dir" "$project_dir" "$backup_dir"
-        (cd "$project_dir" && git checkout -q . && git clean -qfd)
+        (cd "$project_dir" && git reset -q --hard HEAD && git clean -qfd)
     done
 
     # --- Cleanup ---
