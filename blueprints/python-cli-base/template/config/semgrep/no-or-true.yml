@@ -1,0 +1,43 @@
+rules:
+  - id: xrag.no-or-true-in-shell
+    languages: [generic]
+    severity: ERROR
+    message: >
+      '|| true' (and variants like '|| :', '|| exit 0', '|| /bin/true') silently
+      swallows command failures. If the command can legitimately fail, handle the
+      error explicitly. If it must not fail, let the non-zero exit code propagate
+      so the CI pipeline catches it.
+
+      Example violations:
+        # WRONG - hides failures
+        some_command || true
+        some_command || :
+        some_command || exit 0
+
+        # CORRECT - handle the error explicitly
+        if ! some_command; then
+            echo "some_command failed, handling gracefully" >&2
+            # ... take corrective action
+        fi
+
+        # CORRECT - let it fail (default behavior)
+        some_command
+    pattern-regex: '\|\|\s*(?:[Tt]rue\b|:\s*$|exit\s+0|/bin/true\b)'
+    paths:
+      include:
+        - "*.sh"
+        - "*.bash"
+        - justfile
+        - Justfile
+        - scripts/
+        - src/
+      exclude:
+        - tests/
+        - "*.py"
+        - "*.go"
+        - "*.java"
+        - "*.rs"
+        - "*.cpp"
+        - "*.c"
+        - "*.h"
+        - "*.hpp"

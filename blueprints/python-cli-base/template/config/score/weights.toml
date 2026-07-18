@@ -30,6 +30,7 @@
 "semgrep/no-mypy-disable-error-code" = 5
 "semgrep/no-pyright-ignore" = 5
 "semgrep/no-noqa-for-typing" = 5
+"semgrep/no-or-true-in-shell" = 5
 
 # Security
 "bandit/B105" = 5
