@@ -30,6 +30,10 @@
 #      E.g. printf "\033[31m✗ ci failed: tests exited with errors\033[0m\n"
 # 7. Targets must be shown in groups separated by empty newlines in the help section.
 #    - init/destroy/clean/help on top, ci and other tests on the bottom, between other groups
+#
+# 8. scripts/score.py mirrors the check recipes' commands in machine-readable
+#    mode. When changing any code-* or test recipe's tool, flags, or paths,
+#    update scripts/score.py to match (and vice versa).
 # =============================================================================
 
 # Default recipe: show available commands
@@ -63,6 +67,7 @@ help:
     @printf "  %-40s %s\n" "code-audit" "Scan dependencies for known vulnerabilities"
     @printf "  %-40s %s\n" "code-architecture" "Run architecture import rule tests"
     @printf "  %-40s %s\n" "code-stats" "Generate code statistics with pygount"
+    @printf "  %-40s %s\n" "score" "Compute the codebase quality score"
     @echo ""
     @printf "\033[0;33mCI & Testing:\033[0m\n"
     @printf "  %-40s %s\n" "test" "Run unit tests only (fast)"
@@ -242,6 +247,15 @@ code-stats:
     @echo ""
     @uv run pygount src/ tests/ scripts/ *.md *.toml --suffix=py,md,txt,toml,yaml,yml --format=summary > reports/code-stats.txt
     @printf "\033[0;32m✓ Report saved to reports/code-stats.txt\033[0m\n"
+    @echo ""
+
+# Compute the deterministic codebase quality score
+score:
+    @echo ""
+    @printf "\033[0;34m=== Computing Codebase Quality Score ===\033[0m\n"
+    @mkdir -p reports/score
+    @uv run python scripts/score.py
+    @printf "\033[0;32m✓ Score report written to reports/score/score.json\033[0m\n"
     @echo ""
 
 # Run unit tests only (fast)

@@ -103,6 +103,7 @@ just
 - `just code-spell` - Check spelling
 - `just code-audit` - Scan for vulnerabilities
 - `just code-semgrep` - Run custom static analysis
+- `just score` - Compute the codebase quality score
 
 ### Testing
 
