@@ -205,10 +205,21 @@ code-semgrep:
     @echo ""
 
 # Scan dependencies for known vulnerabilities
+# Ignored advisories (unfixable: every semgrep release pins click~=8.1.8 and
+# mcp==1.23.3, while fixes only exist in click 8.3.3 / mcp 1.27.2+ — remove
+# these ignores as soon as semgrep relaxes its pins):
+#   PYSEC-2026-2132  click: command injection via click.edit()
+#   CVE-2026-52870   mcp: cross-session task visibility
+#   CVE-2026-52869   mcp: session takeover via session id
+#   CVE-2026-59950   mcp: websocket transport missing origin validation
 code-audit:
     @echo ""
     @printf "\033[0;34m=== Scanning Dependencies for Vulnerabilities ===\033[0m\n"
-    @uv run pip-audit
+    @uv run pip-audit \
+        --ignore-vuln PYSEC-2026-2132 \
+        --ignore-vuln CVE-2026-52870 \
+        --ignore-vuln CVE-2026-52869 \
+        --ignore-vuln CVE-2026-59950
     @echo ""
     @printf "\033[0;32m✓ No known vulnerabilities found\033[0m\n"
     @echo ""

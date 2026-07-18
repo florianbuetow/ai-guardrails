@@ -35,7 +35,7 @@ Example rules to add as your project develops layers:
 from __future__ import annotations
 
 import pytest
-from pytestarch import EvaluableArchitecture, Rule
+from pytestarch import EvaluableArchitecture
 
 # Mark all tests in this module as architecture tests
 pytestmark = pytest.mark.architecture
