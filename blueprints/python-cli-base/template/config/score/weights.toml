@@ -1,0 +1,51 @@
+# Weight table for scripts/score.py.
+# Every rule id that fires must have an entry here — the scorer aborts and
+# lists any missing ids (no default weights, by policy).
+# Weight classes: guardrail-evasion & security = 5, correctness = 3, hygiene = 1.
+
+[weights]
+# Custom semgrep guardrails (short ids = last segment of the rule id)
+"semgrep/no-ignore-missing-imports" = 5
+"semgrep/no-filterwarnings" = 5
+"semgrep/no-skip-tests" = 5
+"semgrep/no-unittest-skip-tests" = 5
+"semgrep/no-conditional-none-assignment" = 5
+"semgrep/no-conditional-not-assignment" = 5
+"semgrep/no-conditional-equality-assignment" = 5
+"semgrep/no-inline-conditional-none-assignment" = 5
+"semgrep/no-inline-conditional-not-assignment" = 5
+"semgrep/no-default-parameter-values" = 5
+"semgrep/no-dict-get-with-default" = 5
+"semgrep/no-pydantic-field-default" = 5
+"semgrep/no-shellcheck-disable" = 5
+"semgrep/no-nosec" = 5
+"semgrep/no-conditional-expression-fallback" = 5
+"semgrep/no-or-operator-fallback" = 5
+"semgrep/no-getattr-with-default" = 5
+"semgrep/no-ternary-none-check-fallback" = 5
+"semgrep/no-walrus-or-fallback" = 5
+"semgrep/no-module-level-constants" = 5
+"semgrep/no-type-ignore" = 5
+"semgrep/no-mypy-ignore-errors" = 5
+"semgrep/no-mypy-disable-error-code" = 5
+"semgrep/no-pyright-ignore" = 5
+"semgrep/no-noqa-for-typing" = 5
+
+# Security
+"bandit/B105" = 5
+"pip-audit/vulnerability" = 5
+
+# Correctness
+"pytest/test-failure" = 5
+"pytest/architecture-failure" = 5
+"deptry/DEP001" = 3
+"deptry/DEP002" = 3
+"deptry/DEP003" = 3
+"deptry/DEP004" = 3
+"deptry/DEP005" = 3
+"ruff/syntax-error" = 3
+"pyright/no-rule" = 3
+
+# Hygiene
+"ruff-format/would-reformat" = 1
+"codespell/misspelling" = 1
