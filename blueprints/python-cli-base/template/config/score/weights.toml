@@ -45,7 +45,14 @@
 "deptry/DEP005" = 3
 "ruff/syntax-error" = 3
 "pyright/no-rule" = 3
+"pyright/reportReturnType" = 3
+"pyright/reportMissingImports" = 3
+"mypy/return-value" = 3
+"mypy/no-untyped-def" = 3
+"mypy/import-not-found" = 3
 
 # Hygiene
 "ruff-format/would-reformat" = 1
 "codespell/misspelling" = 1
+"ruff/D103" = 1
+"ruff/ANN201" = 1
