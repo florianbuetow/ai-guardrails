@@ -96,6 +96,12 @@ run_language_tests() {
     local total_tests=0
     local passed_tests=0
 
+    # Language configs may define an optional post-baseline hook; make sure a
+    # previous language's definition never leaks into this run.
+    if declare -F post_baseline_tests >/dev/null; then
+        unset -f post_baseline_tests
+    fi
+
     # shellcheck source=/dev/null
     source "$LANG_CONFIG_FILE"
 
@@ -141,6 +147,17 @@ run_language_tests() {
     fi
     log_pass "Pre-commit hook fired and passed"
     passed_tests=$((passed_tests + 1))
+
+    # --- Optional language-specific post-baseline checks ---
+    if declare -F post_baseline_tests >/dev/null; then
+        total_tests=$((total_tests + 1))
+        if ! post_baseline_tests "$project_dir"; then
+            log_fail "$LANG_NAME post-baseline checks failed"
+            cleanup_dir "$temp_dir"
+            return 1
+        fi
+        passed_tests=$((passed_tests + 1))
+    fi
 
     # --- Discover violation tests (skip in baseline mode) ---
     violation_root="$REPO_ROOT/violations/$LANG_SLUG"
