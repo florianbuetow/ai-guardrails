@@ -231,7 +231,7 @@ def build_runners(root: Path, run_tmp: Path) -> tuple[Runner, ...]:
         ),
         Runner(
             "semgrep",
-            ("uv", "run", "semgrep", "--config", "config/semgrep/", "--error", "--json", "src", "scripts"),
+            ("uv", "run", "semgrep", "--config", "config/semgrep/", "--error", "--json", "src", "scripts", "tests", "pyproject.toml"),
             1,
             None,
             False,
