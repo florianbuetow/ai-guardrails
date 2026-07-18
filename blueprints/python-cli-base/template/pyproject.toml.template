@@ -33,7 +33,7 @@ dev = [
     "ruff>=0.1.0",
 
     # Type Checking
-    "mypy>=1.7.0",
+    "mypy>=1.11.0",
     "pyright>=1.1.0",
 
     # Architecture

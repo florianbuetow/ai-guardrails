@@ -27,7 +27,6 @@ _skip_if_exists:
   - "tests/architecture/test_architecture.py"
   - "data/input/"
   - "data/output/"
-  - "scripts/"
 
 # Messages
 _message_before_copy: |
