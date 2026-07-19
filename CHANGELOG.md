@@ -223,4 +223,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial project setup with automated local templates and prerequisite checks.
 - Git workflow guidelines: explicit file staging, push requirement, no AI attribution in commits.
 
-[Unreleased]: https://github.com/florianbuetow/ai-guardrails/compare/8ace9cb...HEAD
+[Unreleased]: https://github.com/florianbuetow/ai-guardrails/compare/e25408e...HEAD
