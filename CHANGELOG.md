@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - IWYU prerequisite check in C++ template `check` recipe.
 - Language-specific project setup scripts for all supported blueprints.
 - Added `test-create` target to smoke-test template creation across all blueprints.
+- C++ 3D game template (cpp-3dgame-base) with a Vulkan cube demo and pinned Conan 2 dependency graph.
+- `gamecpp` project-setup alias and Docker-based Linux CI for the cpp-3dgame template.
+- Deterministic codebase quality scorer with a `just score` target in the Python template.
+- Dependency drift reporting in the template inventory.
 
 ### Changed
 
@@ -31,6 +35,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Kotlin code-security now runs type-resolved Detekt and emits Kover XML coverage reports.
 - Renamed `just info` to `just show-libs`; output now highlights template names in color.
 - Dependency inventory tests now run before template generation suites in `just ci`.
+- Migrated the React/Vite template from ESLint to oxlint.
+- Switched cpp-3dgame shaders to HLSL and DXC only, with Vulkan validation layers.
+- Raised the mypy floor to 1.11 in the Python template.
+- Semgrep recipe now also scans `tests/` and `pyproject.toml`.
+
+### Removed
+
+- Removed the beads issue tracker and its `.beads` directory from the repo.
 
 ### Fixed
 
@@ -40,6 +52,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Kotlin template: corrected semgrep rule label, package name rendering, and test prerequisite timeout.
 - Fixed TypeScript template: code-security now fails on warnings; resolved generation smoke test issues.
 - Fixed Go test-coverage to propagate failed coverage parse errors via `pipefail`.
+- Fixed guardrail false positives exposed by real graphics code.
+- Fixed violation test isolation and retargeted two undetectable LSP fixtures.
+- Restored the no-or-true shell rule in the Python template.
 
 ### Security
 
