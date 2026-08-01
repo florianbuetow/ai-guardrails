@@ -3,6 +3,9 @@
 This file provides guidance to AI agents and AI-assisted development tools when working with this project. This includes Claude Code, Cursor IDE, GitHub Copilot, Windsurf, and any other AI coding assistants.
 
 ## General Coding Principles
+- **Do not preserve backward compatibility.**
+- **Choose the simplest implementation that fully meets the current requirements.**
+- **Prefer established, well-maintained libraries over custom implementations.**
 - **Fail fast — never swallow errors.** Always propagate errors and fail immediately. No silent fallbacks, no empty catch blocks.
 - **Never assume any default values anywhere.** Check for required values explicitly and throw if something is missing. Default values mask underlying issues and make them hard to debug.
 - **Never suppress checks with annotations.** Fix the underlying issue instead. No `eslint-disable`, `oxlint-disable`, `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, `prettier-ignore`, or any other mechanism that silences a checker.

@@ -1,5 +1,6 @@
 # AGENTS.md
 
+
 This file provides guidance to AI agents and AI-assisted development tools when working with code in this repository. This includes Claude Code, Cursor IDE, GitHub Copilot, Windsurf, and any other AI coding assistants.
 
 ## Repository Overview
@@ -14,6 +15,10 @@ These rules apply everywhere — repo scripts, justfiles, test infrastructure, a
 2. **No default values — never assume missing values.** Check for required values explicitly and exit 1 if something is missing. Default values mask underlying issues and make them hard to debug.
 3. **Never suppress checks with annotations.** Fix the underlying issue instead. No `@SuppressWarnings`, `# noqa`, `# type: ignore`, `#[allow(...)]`, `NOLINT`, `// noinspection`, `NOSONAR`, `@dialyzer`, `# shellcheck disable`, or any other mechanism that silences a checker.
 4. **Use `printf` for color output — never `echo`.** Some terminals won't render ANSI escape sequences with `echo`. In shell scripts and justfiles, always use `printf` for colored or formatted text output. Plain `echo ""` is acceptable only for blank-line spacing.
+
+5. **Do not preserve backward compatibility.**
+6. **Choose the simplest implementation that fully meets the current requirements.**
+7. **Prefer established, well-maintained libraries over custom implementations.**
 
 ## Git Commit Guidelines
 
