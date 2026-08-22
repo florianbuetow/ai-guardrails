@@ -230,9 +230,9 @@ exclude-newer = "30 days"
 # vulnerable transitive releases out of fresh generated environments while uv
 # still selects the newest compatible direct tools automatically.
 constraint-dependencies = [
-    "cryptography>=48.0.1",
+    "cryptography>=50.0.0",
     "msgpack>=1.2.1",
-    "pip>=26.1.2",
+    "pip>=26.2.1",
     "pydantic-settings>=2.14.2",
     "pyjwt>=2.13.0",
     "python-multipart>=0.0.31",
@@ -240,9 +240,9 @@ constraint-dependencies = [
 ]
 
 [tool.uv.exclude-newer-package]
-cryptography = "2026-06-21T00:00:00Z"
+cryptography = "2026-08-01T00:00:00Z"
 msgpack = "2026-06-21T00:00:00Z"
-pip = "2026-06-21T00:00:00Z"
+pip = "2026-08-05T00:00:00Z"
 pydantic-settings = "2026-06-21T00:00:00Z"
 python-multipart = "2026-06-21T00:00:00Z"
 semgrep = "2026-06-21T00:00:00Z"

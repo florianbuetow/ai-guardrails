@@ -63,17 +63,15 @@ def parse_ruff_check(stdout: str, artifact: Path | None) -> Counter[str]:
 
 def parse_ruff_format(stdout: str, artifact: Path | None) -> Counter[str]:
     """Count files that ruff format would rewrite."""
+    files: set[str] = set()
+    for item in json.loads(stdout):
+        filename = item["filename"]
+        if not filename:
+            raise ScorerError(f"ruff format reported a finding without a filename: {item!r}")
+        files.add(filename)
     counts: Counter[str] = Counter()
-    for line in stdout.splitlines():
-        stripped = line.strip()
-        if not stripped:
-            continue
-        if stripped.startswith("Would reformat: "):
-            counts["ruff-format/would-reformat"] += 1
-        elif "formatted" in stripped or "left unchanged" in stripped:
-            continue
-        else:
-            raise ScorerError(f"ruff format produced an unrecognized line: {stripped!r}")
+    if files:
+        counts["ruff-format/would-reformat"] += len(files)
     return counts
 
 
@@ -216,7 +214,14 @@ def build_runners(root: Path, run_tmp: Path) -> tuple[Runner, ...]:
     toml_files = tuple(sorted(path.name for path in root.glob("*.toml")))
     return (
         Runner("ruff-check", ("uv", "run", "ruff", "check", ".", "--output-format", "json"), 1, None, False, parse_ruff_check),
-        Runner("ruff-format", ("uv", "run", "ruff", "format", "--check", "."), 1, None, False, parse_ruff_format),
+        Runner(
+            "ruff-format",
+            ("uv", "run", "ruff", "format", "--check", "--output-format", "json", "."),
+            1,
+            None,
+            False,
+            parse_ruff_format,
+        ),
         Runner("mypy", ("uv", "run", "mypy", "src/", "--output", "json"), 1, None, False, parse_mypy),
         Runner("pyright", ("uv", "run", "pyright", "--project", "pyrightconfig.json", "--outputjson"), 1, None, False, parse_pyright),
         Runner("bandit", ("uv", "run", "bandit", "-c", "pyproject.toml", "-r", "src", "-f", "json"), 1, None, False, parse_bandit),
