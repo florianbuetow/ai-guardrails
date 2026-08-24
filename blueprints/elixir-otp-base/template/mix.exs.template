@@ -9,13 +9,7 @@ defmodule {{module_name}}.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       test_coverage: [
-        threshold: {{coverage_threshold}},
-        ignore_modules: [
-          Credo.Check.Custom.NoDefaultParameterValues,
-          Credo.Check.Custom.NoFallbackOperator,
-          Credo.Check.Custom.NoMapGetDefault,
-          Credo.Check.Custom.NoDialyzerSuppress
-        ]
+        threshold: {{coverage_threshold}}
       ],
       dialyzer: [
         plt_add_apps: [:mix, :ex_unit, :credo],
@@ -34,8 +28,7 @@ defmodule {{module_name}}.MixProject do
     [
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
-      {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
+      {:sobelow, "~> 0.15", only: [:dev, :test], runtime: false},
       {:ex_arch_unit, "~> 0.1.0", only: [:dev, :test], runtime: false}
     ]
   end

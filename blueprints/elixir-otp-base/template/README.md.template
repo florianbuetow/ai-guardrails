@@ -14,17 +14,17 @@
 ├── AGENTS.md               # AI agent development rules
 ├── CLAUDE.md               # Claude Code compatibility (symlink to AGENTS.md)
 ├── README.md               # This file
-├── config/                 # Configuration files
+├── config/                 # Application and tooling configuration
 │   ├── config.exs          # Application config
-│   └── codespell/          # Spell-check configuration
-│       └── ignore.txt      # Spell-check ignore list
-├── lib/                    # Source code
-│   ├── {{app_name}}.ex     # Main module
-│   └── credo/check/        # Custom Credo checks (static analysis rules)
+│   ├── codespell/          # Spell-check configuration
+│   │   └── ignore.txt      # Spell-check ignore list
+│   └── credo/check/        # Custom Credo checks (tooling only)
 │       ├── no_default_parameter_values.ex
 │       ├── no_fallback_operator.ex
 │       ├── no_map_get_default.ex
 │       └── no_dialyzer_suppress.ex
+├── lib/                    # Source code
+│   └── {{app_name}}.ex     # Main module
 └── test/                   # Test files
     ├── test_helper.exs     # Test configuration
     └── {{app_name}}_test.exs # Main module tests
@@ -34,6 +34,7 @@
 
 - **Elixir {{elixir_version}}+** - Programming language
 - **Erlang/OTP 26+** - Runtime platform
+- **Hex 2.5+** - Package manager with retired-package and security-advisory auditing
 - **just** - Command runner ([installation guide](https://github.com/casey/just#installation))
 - **git** - Version control and local hook support
 - **codespell** - Spell checker (optional, `brew install codespell` or `pip install codespell`)
@@ -48,7 +49,7 @@ just init
 
 This will:
 - Fetch all dependencies via `mix deps.get`
-- Compile the project via `mix compile`
+- Compile the project with warnings treated as errors
 - Activate the generated `.git/hooks/pre-commit` hook
 
 ## Usage
@@ -80,11 +81,11 @@ just help
 - `just code-format` - Auto-format code
 - `just code-lint` - Run Credo static analysis (strict)
 - `just code-typecheck` - Run Dialyzer type checking
-- `just code-security` - Run Sobelow security scan
+- `just code-security` - Run Sobelow security scan without Phoenix router assumptions
 - `just code-deptry` - Check dependency hygiene
 - `just code-spell` - Check spelling
 - `just code-semgrep` - Run custom static analysis checks
-- `just code-audit` - Scan for dependency vulnerabilities
+- `just code-audit` - Scan dependencies for retired packages and security advisories
 - `just code-lspchecks` - Run strict compiler checks
 
 ### Testing

@@ -57,7 +57,7 @@ help:
     @printf "  %-40s %s\n" "code-lint" "Run Credo static analysis"
     @printf "  %-40s %s\n" "code-typecheck" "Run Dialyzer type checking"
     @printf "  %-40s %s\n" "code-lspchecks" "Run strict compiler checks"
-    @printf "  %-40s %s\n" "code-security" "Run Sobelow security checks"
+    @printf "  %-40s %s\n" "code-security" "Run Sobelow security checks without Phoenix router assumptions"
     @printf "  %-40s %s\n" "code-deptry" "Check dependency hygiene"
     @printf "  %-40s %s\n" "code-spell" "Check spelling in code and documentation"
     @printf "  %-40s %s\n" "code-semgrep" "Run custom static analysis (Semgrep + Credo)"
@@ -87,6 +87,23 @@ check:
         exit 1; \
     fi
     @printf "\033[0;32m✓ mix is installed\033[0m\n"
+    @hex_version="$(mix hex.info 2>/dev/null | sed -n 's/^Hex:[[:space:]]*//p')"; \
+    if [ -z "$hex_version" ]; then \
+        printf "\033[0;31m✗ Error: Hex is not installed\033[0m\n"; \
+        printf "  Install Hex 2.5+ with: mix local.hex --force\n"; \
+        echo ""; \
+        exit 1; \
+    fi; \
+    hex_major="${hex_version%%.*}"; \
+    hex_minor_patch="${hex_version#*.}"; \
+    hex_minor="${hex_minor_patch%%.*}"; \
+    if [ "$hex_major" -lt 2 ] || { [ "$hex_major" -eq 2 ] && [ "$hex_minor" -lt 5 ]; }; then \
+        printf "\033[0;31m✗ Error: Hex 2.5+ is required, found %s\033[0m\n" "$hex_version"; \
+        printf "  Update Hex with: mix local.hex --force\n"; \
+        echo ""; \
+        exit 1; \
+    fi; \
+    printf "\033[0;32m✓ Hex %s is installed\033[0m\n" "$hex_version"
     @if ! command -v git >/dev/null 2>&1; then \
         printf "\033[0;31m✗ Error: git is not installed\033[0m\n"; \
         printf "  Install Git before initializing this project\n"; \
@@ -118,7 +135,7 @@ init: check
     @printf "Fetching dependencies...\n"
     @mix deps.get
     @printf "Compiling project...\n"
-    @mix compile
+    @ERL_COMPILER_OPTIONS=warnings_as_errors mix compile --warnings-as-errors --all-warnings
     @printf "Activating git hooks...\n"
     @if [ ! -f ".git/hooks/pre-commit" ]; then \
         printf "\033[0;31m✗ Error: .git/hooks/pre-commit is missing\033[0m\n"; \
@@ -192,7 +209,7 @@ code-lspchecks:
 code-security:
     @echo ""
     @printf "\033[0;34m=== Running Security Checks ===\033[0m\n"
-    @mix sobelow --exit
+    @mix sobelow --exit --no-router --private --strict
     @echo ""
     @printf "\033[0;32m✓ Security checks passed\033[0m\n"
     @echo ""
@@ -221,7 +238,7 @@ code-semgrep:
     @echo ""
     @printf "\033[0;34m=== Running Custom Static Analysis ===\033[0m\n"
     @mix credo --strict --checks Credo.Check.Custom.NoDefaultParameterValues,Credo.Check.Custom.NoFallbackOperator,Credo.Check.Custom.NoMapGetDefault,Credo.Check.Custom.NoDialyzerSuppress
-    @semgrep --config config/semgrep/ --error lib/ test/ scripts/
+    @semgrep --config config/semgrep/ --error lib/ test/ scripts/ config/credo/
     @echo ""
     @printf "\033[0;32m✓ Custom checks passed\033[0m\n"
     @echo ""
@@ -230,7 +247,6 @@ code-semgrep:
 code-audit:
     @echo ""
     @printf "\033[0;34m=== Scanning Dependencies for Vulnerabilities ===\033[0m\n"
-    @mix deps.audit
     @mix hex.audit
     @echo ""
     @printf "\033[0;32m✓ No known vulnerabilities found\033[0m\n"
@@ -249,7 +265,7 @@ code-architecture:
 test:
     @echo ""
     @printf "\033[0;34m=== Running Tests ===\033[0m\n"
-    @mix test --cover --warnings-as-errors
+    @ERL_COMPILER_OPTIONS=warnings_as_errors mix test --cover --warnings-as-errors
     @echo ""
 
 # Run ALL validation checks (verbose)

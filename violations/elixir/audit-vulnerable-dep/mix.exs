@@ -34,9 +34,8 @@ defmodule TestOtpApp.MixProject do
     [
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
+      {:sobelow, "~> 0.15", only: [:dev, :test], runtime: false},
       {:plug, "~> 1.7.0"},
-      {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
       {:ex_arch_unit, "~> 0.1.0", only: [:dev, :test], runtime: false}
     ]
   end

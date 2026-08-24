@@ -16,5 +16,6 @@ rules:
     paths:
       include:
         - lib/
+        - /config/credo/
       exclude:
         - test/

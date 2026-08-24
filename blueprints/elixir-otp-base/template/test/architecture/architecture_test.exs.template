@@ -23,14 +23,6 @@ defmodule {{module_name}}.ArchitectureTest do
   use ExArchUnit, config: "arch.exs"
 
   # ---------------------------------------------------------------------------
-  # Layer boundary: app code must not depend on Credo check internals
-  # ---------------------------------------------------------------------------
-
-  test "app modules must not depend on custom Credo checks" do
-    forbid "{{module_name}}.*", depends_on: "Credo.Check.Custom.*"
-  end
-
-  # ---------------------------------------------------------------------------
   # Cycle detection
   # ---------------------------------------------------------------------------
 

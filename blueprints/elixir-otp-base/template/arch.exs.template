@@ -12,10 +12,6 @@ layers do
   # Active layers — these are enforced now
   # -------------------------------------------------------------------
   layer :app, "{{module_name}}.*"
-  layer :tooling, "Credo.Check.Custom.*"
-
-  # App code must never depend on internal Credo check modules
-  forbid :app, depends_on: [:tooling]
 
   # -------------------------------------------------------------------
   # Example layers — uncomment and adapt as the project grows
@@ -31,7 +27,6 @@ layers do
   # Module filtering — narrow the analysis scope
   # -------------------------------------------------------------------
   include "{{module_name}}.*"
-  include "Credo.Check.Custom.*"
 
   # exclude "{{module_name}}.Legacy.*"
 end

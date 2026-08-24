@@ -96,10 +96,13 @@ run_language_tests() {
     local total_tests=0
     local passed_tests=0
 
-    # Language configs may define an optional post-baseline hook; make sure a
-    # previous language's definition never leaks into this run.
+    # Language configs may define optional baseline hooks; make sure a
+    # previous language's definitions never leak into this run.
     if declare -F post_baseline_tests >/dev/null; then
         unset -f post_baseline_tests
+    fi
+    if declare -F validate_baseline_output >/dev/null; then
+        unset -f validate_baseline_output
     fi
 
     # shellcheck source=/dev/null
@@ -128,8 +131,13 @@ run_language_tests() {
     # Disable uv exclude-newer during testing — the supply-chain protection
     # intentionally pins older packages, which can cause pip-audit to flag
     # vulnerabilities whose fixes are too recent to install.
-    if ! (cd "$project_dir" && UV_EXCLUDE_NEWER="2099-01-01" just ci); then
+    local baseline_output="$temp_dir/baseline-ci.log"
+    if ! (cd "$project_dir" && UV_EXCLUDE_NEWER="2099-01-01" just ci) 2>&1 | tee "$baseline_output"; then
         log_fail "Baseline CI failed"
+        cleanup_dir "$temp_dir"
+        return 1
+    fi
+    if declare -F validate_baseline_output >/dev/null && ! validate_baseline_output "$baseline_output"; then
         cleanup_dir "$temp_dir"
         return 1
     fi

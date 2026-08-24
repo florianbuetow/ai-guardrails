@@ -62,7 +62,7 @@ This file provides guidance to AI agents and AI-assisted development tools when 
   - Correct: `./lib/helper.ex`, `./test/helper_test.exs`
 
 ## Custom Credo Checks
-- Custom checks live in `lib/credo/check/` and enforce strict coding patterns
+- Custom checks live in `config/credo/check/` and are loaded only by Credo, never compiled into the application
 - **NoDefaultParameterValues** — bans `def foo(bar \\ "default")` in lib/
 - **NoFallbackOperator** — bans `value || fallback` in lib/
 - **NoMapGetDefault** — bans `Map.get(map, key, default)` and `Keyword.get(map, key, default)` in lib/

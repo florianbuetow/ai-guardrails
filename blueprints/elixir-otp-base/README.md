@@ -18,11 +18,11 @@ Production-ready Copier template for Elixir OTP applications with full validatio
 | **Credo** | Linting | Static analysis for code consistency, readability, and refactoring opportunities (strict mode) |
 | **Dialyxir** | Type checking | Erlang Dialyzer wrapper - catches type errors, unreachable code, and spec violations |
 | **mix compile** | LSP analysis | Compiler warnings-as-errors catches unused variables, imports, aliases, and deprecated calls |
-| **Sobelow** | Security scanning | Finds security issues in Elixir code (SQL injection, XSS, directory traversal, etc.) |
+| **Sobelow** | Security scanning | Finds security issues in Elixir code without assuming a Phoenix router |
 | **mix deps** | Dependency hygiene | Detects unused dependencies and lock file drift |
 | **codespell** | Spell checking | Catches typos in code, comments, and documentation |
 | **Custom Credo checks** | Custom rules | Bans default parameters, fallback operators, Map.get defaults, and Dialyzer suppression |
-| **mix_audit** | Vulnerability scanning | Scans Hex dependencies for known security vulnerabilities |
+| **mix hex.audit** | Vulnerability scanning | Scans Hex dependencies for retired packages and security advisories (Hex 2.5+) |
 | **ExUnit** | Testing framework | Built-in testing with coverage support and async test execution |
 | **ex_arch_unit** | Architecture testing | Enforces module dependency boundaries and detects circular dependencies |
 
@@ -44,16 +44,16 @@ blueprints/elixir-otp-base/
     ├── mix.exs.template
     ├── config/
     │   ├── config.exs.template
-    │   └── codespell/
-    │       └── ignore.txt
-    ├── lib/
-    │   ├── {{app_name}}.ex.template
+    │   ├── codespell/
+    │   │   └── ignore.txt
     │   └── credo/
     │       └── check/
     │           ├── no_default_parameter_values.ex
     │           ├── no_dialyzer_suppress.ex
     │           ├── no_fallback_operator.ex
     │           └── no_map_get_default.ex
+    ├── lib/
+    │   └── {{app_name}}.ex.template
     └── test/
         ├── architecture/
         │   └── architecture_test.exs.template
@@ -96,7 +96,7 @@ The template will ask:
 Projects created from this template include:
 
 - **Mix build system**: Standard Elixir project with OTP application structure
-- **Complete validation suite**: Credo, Dialyxir, Sobelow, mix_audit, codespell
+- **Complete validation suite**: Credo, Dialyxir, Sobelow, Hex audit, codespell
 - **Custom Credo checks**: Bans default parameters, fallback operators, Map.get defaults, Dialyzer suppression
 - **Just recipes**: init, run, destroy, code-*, test, ci, ci-quiet
 - **Git hooks**: Runs `just ci-quiet` on commit via a generated `.git/hooks/pre-commit` script

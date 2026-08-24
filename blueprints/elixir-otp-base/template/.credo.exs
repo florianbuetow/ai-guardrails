@@ -3,16 +3,11 @@
     %{
       name: "default",
       files: %{
-        included: ["lib/", "test/"],
+        included: ["lib/", "test/", "config/credo/"],
         excluded: [~r"/_build/", ~r"/deps/"]
       },
       plugins: [],
-      # The custom checks in lib/credo/ are loaded twice — once compiled into
-      # the app (so the arch test's :tooling layer can see them) and once here.
-      # This double-load triggers a harmless "redefining module" warning. Keep
-      # both: each path also backs a guardrail, so dropping either weakens a
-      # check. The warning is the cost of that intentional redundancy.
-      requires: ["lib/credo/**/*.ex"],
+      requires: ["config/credo/check/**/*.ex"],
       strict: true,
       parse_timeout: 5000,
       color: true,
