@@ -1,0 +1,18 @@
+(ns {{namespace_name}}.properties.greeting-properties-test
+  (:require [clojure.string :as str]
+            [clojure.test.check.clojure-test :refer [defspec]]
+            [clojure.test.check.generators :as gen]
+            [clojure.test.check.properties :as prop]
+            [{{namespace_name}}.application.greeting-service :as greeting-service]))
+
+(def non-blank-recipient
+  (gen/such-that
+   (fn [value]
+     (not (str/blank? value)))
+   gen/string-alphanumeric
+   100))
+
+(defspec greeting-includes-recipient 100
+  (prop/for-all [recipient non-blank-recipient]
+                (= {:message (str "Hello, " recipient "!")}
+                   (greeting-service/create-greeting recipient))))

@@ -1,0 +1,28 @@
+(ns {{namespace_name}}.main-test
+  (:require [clojure.test :refer [deftest is testing]]
+            [{{namespace_name}}.application.greeting-service :as greeting-service]
+            [{{namespace_name}}.cli.main :as main]))
+
+(deftest creates-greeting-for-valid-recipient
+  (testing "valid domain input produces a greeting"
+    (is (= {:message "Hello, Clojure!"}
+           (greeting-service/create-greeting "Clojure")))))
+
+(deftest rejects-blank-recipient
+  (testing "boundary validation rejects blank input"
+    (is (thrown-with-msg?
+         clojure.lang.ExceptionInfo
+         #"recipient must not be blank"
+         (greeting-service/create-greeting "   ")))))
+
+(deftest rejects-command-line-arguments
+  (testing "unexpected CLI args fail explicitly"
+    (is (thrown-with-msg?
+         clojure.lang.ExceptionInfo
+         #"this application does not accept command-line arguments"
+         (main/execute ["unexpected"])))))
+
+(deftest runs-application-without-arguments
+  (testing "main execution returns the expected output"
+    (is (= "Hello, Clojure!"
+           (main/execute [])))))

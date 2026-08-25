@@ -1,0 +1,12 @@
+#kaocha/v1
+{:tests [{:id :unit
+          :test-paths ["test/clojure"]
+          :ns-patterns [".*-test$"]}]
+ :plugins [:kaocha.plugin/profiling]
+ :cloverage/opts {:fail-threshold {{coverage_threshold}}
+                  :high-watermark {{coverage_threshold}}
+                  :low-watermark 50
+                  :output "target/coverage"
+                  :summary? true
+                  :text? true
+                  :html? true}}

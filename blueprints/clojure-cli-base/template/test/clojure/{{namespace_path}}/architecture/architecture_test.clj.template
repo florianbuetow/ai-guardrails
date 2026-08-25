@@ -1,0 +1,10 @@
+(ns {{namespace_name}}.architecture.architecture-test
+  (:require [clojure.test :refer [deftest is]]
+            [{{namespace_name}}.application.greeting-service]
+            [{{namespace_name}}.cli.main]
+            [{{namespace_name}}.domain.greeting]))
+
+(deftest architecture-smoke-test
+  (is (some? (find-ns '{{namespace_name}}.cli.main)))
+  (is (some? (find-ns '{{namespace_name}}.application.greeting-service)))
+  (is (some? (find-ns '{{namespace_name}}.domain.greeting))))

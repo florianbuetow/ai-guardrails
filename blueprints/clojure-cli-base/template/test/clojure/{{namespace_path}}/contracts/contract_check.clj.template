@@ -1,0 +1,38 @@
+(ns {{namespace_name}}.contracts.contract-check
+  (:require [clojure.test.check :as tc]
+            [clojure.test.check.generators :as gen]
+            [clojure.test.check.properties :as prop]
+            [{{namespace_name}}.domain.greeting :as greeting]
+            [malli.core :as m]
+            [malli.generator :as mg]
+            [malli.instrument :as mi]))
+
+(def success-contract
+  (prop/for-all [recipient (mg/generator greeting/recipient-schema)]
+                (m/validate greeting/greeting-schema (greeting/create recipient))))
+
+(def failure-contract
+  (prop/for-all [blank-recipient (gen/elements ["" " " "\t" "\n"])]
+                (try
+                  (greeting/create blank-recipient)
+                  false
+                  (catch clojure.lang.ExceptionInfo error
+                    (= "recipient must not be blank" (ex-message error))))))
+
+(defn assert-contract
+  [contract-name property]
+  (let [result (tc/quick-check 100 property)]
+    (when-not (:pass? result)
+      (throw (ex-info (str "contract failed: " contract-name) result)))))
+
+(defn -main
+  [& args]
+  (when-not (empty? args)
+    (throw (ex-info "contract check accepts no command-line arguments" {:args args})))
+  (let [function-errors (mi/check)]
+    (when (seq function-errors)
+      (throw (ex-info "Malli function contract check failed"
+                      {:errors function-errors}))))
+  (assert-contract "valid recipients satisfy the greeting schema" success-contract)
+  (assert-contract "blank recipients fail explicitly" failure-contract)
+  (println "Malli contracts passed"))
