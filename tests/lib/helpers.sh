@@ -57,7 +57,11 @@ generate_project() {
         "${copier_args[@]}" \
         "$template_path" "$target_dir"
 
-    # Semgrep only scans git-tracked files, so initialize a repo.
+    if [ "${NO_GIT_MUTATIONS:-false}" = "true" ]; then
+        return 0
+    fi
+
+    # Semgrep scans tracked files by default for the established language suites.
     (cd "$target_dir" && \
         git init -q && \
         git config user.email template-tests@example.invalid && \

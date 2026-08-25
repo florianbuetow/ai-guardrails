@@ -14,6 +14,7 @@ import xml.etree.ElementTree as ET
 
 
 REGISTRY_CARGO = "cargo"
+REGISTRY_CLOJARS = "clojars"
 REGISTRY_GITHUB_TAGS = "github-tags"
 REGISTRY_GO = "go"
 REGISTRY_HEX = "hex"
@@ -46,6 +47,8 @@ def resolve_latest_versions(requests: list[LatestVersionRequest]) -> dict[Latest
 def resolve_latest_version(request: LatestVersionRequest) -> str:
     if request.registry == REGISTRY_CARGO:
         return resolve_cargo_latest(request.identifier)
+    if request.registry == REGISTRY_CLOJARS:
+        return resolve_clojars_latest(request.identifier)
     if request.registry == REGISTRY_GITHUB_TAGS:
         return resolve_github_tags_latest(request.identifier)
     if request.registry == REGISTRY_GO:
@@ -67,6 +70,26 @@ def resolve_cargo_latest(crate_name: str) -> str:
     if "max_stable_version" in crate and is_non_empty_string(crate["max_stable_version"]):
         return crate["max_stable_version"]
     return require_string(crate, "max_version")
+
+
+def resolve_clojars_latest(coordinate: str) -> str:
+    group_id, artifact_id = split_clojars_coordinate(coordinate)
+    payload = fetch_json(f"https://clojars.org/api/artifacts/{url_quote(group_id)}/{url_quote(artifact_id)}")
+    if not isinstance(payload, dict):
+        raise LatestVersionError(f"Expected Clojars package metadata object for {coordinate}")
+    for key in ("latest_version", "latest_stable_version", "version"):
+        if key in payload and is_non_empty_string(payload[key]):
+            return payload[key]
+    versions = payload.get("versions")
+    if isinstance(versions, list) and versions:
+        latest = versions[0]
+        if isinstance(latest, dict):
+            for key in ("version", "name"):
+                if key in latest and is_non_empty_string(latest[key]):
+                    return latest[key]
+        if is_non_empty_string(latest):
+            return latest
+    raise LatestVersionError(f"Clojars metadata for {coordinate} does not contain a latest version")
 
 
 def resolve_github_tags_latest(repository_url: str) -> str:
@@ -202,6 +225,17 @@ def split_maven_coordinate(coordinate: str) -> tuple[str, str]:
     artifact_id = parts[1]
     if not group_id or not artifact_id:
         raise LatestVersionError(f"Expected non-empty Maven group and artifact: {coordinate}")
+    return group_id, artifact_id
+
+
+def split_clojars_coordinate(coordinate: str) -> tuple[str, str]:
+    parts = coordinate.split("/")
+    if len(parts) != 2:
+        raise LatestVersionError(f"Expected Clojars coordinate in group/artifact form: {coordinate}")
+    group_id = parts[0]
+    artifact_id = parts[1]
+    if not group_id or not artifact_id:
+        raise LatestVersionError(f"Expected non-empty Clojars group and artifact: {coordinate}")
     return group_id, artifact_id
 
 

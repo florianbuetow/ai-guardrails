@@ -222,15 +222,16 @@ skip = ".git,.venv,venv,build,dist,reports,*.lock,uv.lock"
 ignore-words = "config/codespell/ignore.txt"
 
 [tool.uv]
-# Supply-chain protection: ignore packages published in the last 30 days,
+# Supply-chain protection: ignore packages published in the last 7 days,
 # giving the community time to detect and yank malicious releases.
-exclude-newer = "30 days"
+exclude-newer = "7 days"
 
 # Security floors: some quality tools pull large dependency graphs. Keep
 # vulnerable transitive releases out of fresh generated environments while uv
 # still selects the newest compatible direct tools automatically.
 constraint-dependencies = [
     "cryptography>=50.0.0",
+    "gitpython>=3.1.58",
     "msgpack>=1.2.1",
     "pip>=26.2.1",
     "pydantic-settings>=2.14.2",
@@ -241,6 +242,7 @@ constraint-dependencies = [
 
 [tool.uv.exclude-newer-package]
 cryptography = "2026-08-01T00:00:00Z"
+gitpython = "2026-08-11T00:00:00Z"
 msgpack = "2026-06-21T00:00:00Z"
 pip = "2026-08-05T00:00:00Z"
 pydantic-settings = "2026-06-21T00:00:00Z"

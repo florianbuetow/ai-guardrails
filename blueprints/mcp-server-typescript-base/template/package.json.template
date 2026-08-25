@@ -1,0 +1,40 @@
+{
+  "name": "{{project_name}}",
+  "version": "0.1.0",
+  "private": true,
+  "description": "{{project_description}}",
+  "author": "{{author_name}}{% if author_email %} <{{author_email}}>{% endif %}",
+  "type": "module",
+  "engines": {
+    "node": ">={{node_version}}"
+  },
+  "bin": {
+    "{{project_name}}": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.0.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "2.0.0",
+    "@types/node": "^22.0.0",
+    "@vitest/coverage-v8": "4.1.11",
+    "dependency-cruiser": "17.4.3",
+    "knip": "6.32.2",
+    "npm-check-updates": "22.2.9",
+    "oxlint": "1.79.0",
+    "prettier": "3.9.6",
+    "tsx": "4.23.12",
+    "typescript": "6.0.3",
+    "vitest": "4.1.11"
+  }
+}

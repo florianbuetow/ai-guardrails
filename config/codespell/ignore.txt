@@ -27,6 +27,9 @@ openai
 httpx
 hiredis
 
+# Clojure & Data Formats
+edn
+
 # Project-specific
 proto
 protobuf

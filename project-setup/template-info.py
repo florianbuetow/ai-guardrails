@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import importlib.util
+import json
 from pathlib import Path
 import re
 import sys
@@ -103,10 +104,13 @@ def collect_dependencies(template_dir: Path) -> list[Dependency]:
     manifest_parsers = (
         ("pyproject.toml.template", parse_python_manifest),
         ("build.gradle.kts.template", parse_gradle_manifest),
+        ("build.sbt.template", parse_sbt_manifest),
+        ("deps.edn.template", parse_clojure_manifest),
         ("go.mod.template", parse_go_manifest),
         ("mix.exs.template", parse_elixir_manifest),
         ("Cargo.toml.template", parse_rust_manifest),
         ("CMakeLists.txt.template", parse_cmake_manifest),
+        ("package.json.template", parse_npm_manifest),
         ("scripts/bootstrap-vite.sh.template", parse_npm_bootstrap),
     )
 
@@ -340,6 +344,111 @@ def parse_gradle_dependency_line(path: Path, stripped: str) -> list[Dependency]:
     return [Dependency(f"Gradle dependencies [{configuration}]", name, spec, path.name, latest_version.REGISTRY_MAVEN, name)]
 
 
+def parse_sbt_manifest(path: Path) -> list[Dependency]:
+    dependencies: list[Dependency] = []
+    in_library_dependencies = False
+
+    for line in path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("//"):
+            continue
+
+        if stripped.startswith("libraryDependencies ++= Seq("):
+            in_library_dependencies = True
+            continue
+        if in_library_dependencies and stripped == "),":
+            in_library_dependencies = False
+            continue
+        if not in_library_dependencies:
+            continue
+
+        dependency_match = re.match(
+            r'"([^"]+)"\s*(%%?)\s*"([^"]+)"\s*%\s*"([^"]+)"(?:\s*%\s*([A-Za-z]+))?',
+            stripped,
+        )
+        if dependency_match is None:
+            continue
+
+        organization, cross_operator, artifact, version, configuration = dependency_match.groups()
+        lookup_artifact = f"{artifact}_3" if cross_operator == "%%" else artifact
+        coordinate = f"{organization}:{lookup_artifact}"
+        dependency_group = "sbt dependencies"
+        if configuration:
+            dependency_group = f"sbt dependencies [{configuration}]"
+        dependencies.append(
+            Dependency(
+                dependency_group,
+                coordinate,
+                version,
+                path.name,
+                latest_version.REGISTRY_MAVEN,
+                coordinate,
+            )
+        )
+
+    return dependencies
+
+
+def parse_clojure_manifest(path: Path) -> list[Dependency]:
+    text = path.read_text(encoding="utf-8")
+    dependencies: list[Dependency] = []
+    for match in re.finditer(r"([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)\s+\{([^{}]*)\}", text):
+        coordinate = match.group(1)
+        body = match.group(2)
+
+        mvn_match = re.search(r':mvn/version\s+"([^"]+)"', body)
+        if mvn_match:
+            dependencies.append(
+                Dependency(
+                    "Clojure deps.edn",
+                    coordinate,
+                    mvn_match.group(1),
+                    path.name,
+                    clojure_latest_registry(coordinate),
+                    clojure_latest_identifier(coordinate),
+                )
+            )
+            continue
+
+        git_tag_match = re.search(r':git/tag\s+"([^"]+)"', body)
+        if git_tag_match:
+            repository = clojure_github_repository(coordinate)
+            dependencies.append(
+                Dependency(
+                    "Clojure git deps.edn",
+                    coordinate,
+                    git_tag_match.group(1),
+                    path.name,
+                    latest_version.REGISTRY_GITHUB_TAGS,
+                    repository,
+                )
+            )
+
+    return dependencies
+
+
+def clojure_latest_registry(coordinate: str) -> str:
+    if coordinate.startswith("org.clojure/") or coordinate.startswith("io.github.clojure/"):
+        return latest_version.REGISTRY_MAVEN
+    return latest_version.REGISTRY_CLOJARS
+
+
+def clojure_latest_identifier(coordinate: str) -> str:
+    if coordinate.startswith("org.clojure/") or coordinate.startswith("io.github.clojure/"):
+        group_id, artifact_id = coordinate.split("/", 1)
+        return f"{group_id}:{artifact_id}"
+    return coordinate
+
+
+def clojure_github_repository(coordinate: str) -> str:
+    group_id, artifact_id = coordinate.split("/", 1)
+    if not group_id.startswith("io.github."):
+        print(f"Error: unable to derive GitHub repository for Clojure git dependency: {coordinate}", file=sys.stderr)
+        raise SystemExit(1)
+    owner = group_id.removeprefix("io.github.")
+    return f"https://github.com/{owner}/{artifact_id}.git"
+
+
 def split_colon_coordinate(coordinate: str) -> tuple[str, str]:
     parts = coordinate.split(":")
     if len(parts) >= 3:
@@ -523,6 +632,36 @@ def parse_npm_bootstrap(path: Path) -> list[Dependency]:
                     continue
                 name, spec = split_npm_package(token)
                 dependencies.append(Dependency("npm unpinned devDependencies", name, spec, path.name, latest_version.REGISTRY_NPM, name))
+
+    return dependencies
+
+
+def parse_npm_manifest(path: Path) -> list[Dependency]:
+    try:
+        manifest = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        print(f"Error: invalid npm manifest {path}: {error}", file=sys.stderr)
+        raise SystemExit(1) from error
+
+    dependencies: list[Dependency] = []
+    dependency_groups = (
+        ("dependencies", "npm dependencies"),
+        ("devDependencies", "npm devDependencies"),
+    )
+    for manifest_key, group_name in dependency_groups:
+        entries = manifest.get(manifest_key)
+        if entries is None:
+            continue
+        if not isinstance(entries, dict):
+            print(f"Error: {manifest_key} must be an object in {path}", file=sys.stderr)
+            raise SystemExit(1)
+        for name, spec in entries.items():
+            if not isinstance(name, str) or not isinstance(spec, str):
+                print(f"Error: invalid {manifest_key} entry in {path}", file=sys.stderr)
+                raise SystemExit(1)
+            dependencies.append(
+                Dependency(group_name, name, spec, path.name, latest_version.REGISTRY_NPM, name)
+            )
 
     return dependencies
 

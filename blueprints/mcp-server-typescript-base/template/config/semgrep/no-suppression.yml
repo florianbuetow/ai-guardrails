@@ -1,0 +1,36 @@
+rules:
+  - id: typescript.no-lint-disable
+    languages: [generic]
+    message: Fix lint findings instead of suppressing them.
+    severity: ERROR
+    pattern-regex: '(eslint|oxlint)-disable'
+    paths:
+      include:
+        - "*.ts"
+
+  - id: typescript.no-ts-suppression-comments
+    languages: [generic]
+    message: Fix type errors instead of suppressing them.
+    severity: ERROR
+    pattern-regex: '@ts-(ignore|expect-error|nocheck)'
+    paths:
+      include:
+        - "*.ts"
+
+  - id: typescript.no-prettier-ignore
+    languages: [generic]
+    message: Keep formatting consistent instead of ignoring Prettier.
+    severity: ERROR
+    pattern-regex: 'prettier-ignore'
+    paths:
+      include:
+        - "*.ts"
+
+  - id: typescript.no-coverage-ignore
+    languages: [generic]
+    message: Write a test instead of suppressing coverage.
+    severity: ERROR
+    pattern-regex: '(istanbul|c8|v8) ignore'
+    paths:
+      include:
+        - "*.ts"

@@ -61,7 +61,10 @@ help:
 	@printf "    %-36s %s\n" "cpp-3dgame-base" "C++ 3D game application"
 	@printf "    %-36s %s\n" "rust-cli-base" "Rust CLI application"
 	@printf "    %-36s %s\n" "kotlin-cli-base" "Kotlin CLI application"
+	@printf "    %-36s %s\n" "scala-cli-base" "Scala CLI application"
+	@printf "    %-36s %s\n" "clojure-cli-base" "Clojure CLI application"
 	@printf "    %-36s %s\n" "react-vite-typescript-base" "React + Vite + TypeScript application"
+	@printf "    %-36s %s\n" "mcp-server-typescript-base" "TypeScript MCP server"
 	@echo ""
 	@printf "\033[0;33mCode Quality:\033[0m\n"
 	@printf "  %-40s %s\n" "code-spell" "Check spelling across the repository"
@@ -78,7 +81,10 @@ help:
 	@printf "  %-40s %s\n" "baseline-cpp-3dgame" "Generate C++ 3D game template and run just ci"
 	@printf "  %-40s %s\n" "baseline-rust" "Generate Rust template and run just ci"
 	@printf "  %-40s %s\n" "baseline-kotlin" "Generate Kotlin template and run just ci"
+	@printf "  %-40s %s\n" "baseline-scala" "Generate Scala template and run just ci"
+	@printf "  %-40s %s\n" "baseline-clojure" "Generate Clojure template and run just ci"
 	@printf "  %-40s %s\n" "baseline-typescript" "Generate TypeScript template and run just ci"
+	@printf "  %-40s %s\n" "baseline-mcp-typescript" "Generate TypeScript MCP server template and run just ci"
 	@echo ""
 	@printf "\033[0;33mCI & Testing:\033[0m\n"
 	@printf "  %-40s %s\n" "test-info" "Test direct dependency inventory output"
@@ -92,7 +98,10 @@ help:
 	@printf "  %-40s %s\n" "test-cpp-3dgame-linux" "Run C++ 3D game full CI in a Linux (amd64) container"
 	@printf "  %-40s %s\n" "test-rust" "Run Rust baseline + violation tests"
 	@printf "  %-40s %s\n" "test-kotlin" "Run Kotlin baseline + violation tests"
+	@printf "  %-40s %s\n" "test-scala" "Run Scala baseline + violation tests"
+	@printf "  %-40s %s\n" "test-clojure" "Run Clojure baseline + violation tests"
 	@printf "  %-40s %s\n" "test-typescript" "Run TypeScript baseline + violation tests"
+	@printf "  %-40s %s\n" "test-mcp-typescript" "Run TypeScript MCP server baseline + violation tests"
 	@printf "  %-40s %s\n" "test-create" "Run just create for all templates"
 	@printf "  %-40s %s\n" "ci" "Run all checks + all template tests (quiet)"
 	@printf "  %-40s %s\n" "ci-verbose" "Run all checks + all template tests (verbose)"
@@ -306,10 +315,28 @@ baseline-kotlin:
 	@./tests/run-tests.sh kotlin baseline && printf "\033[32m✓ kotlin baseline passed\033[0m\n" || { printf "\033[31m✗ kotlin baseline failed\033[0m\n"; exit 1; }
 	@echo ""
 
+# Generate Scala template and run just ci
+baseline-scala:
+	@echo ""
+	@./tests/run-tests.sh scala baseline && printf "\033[32m✓ scala baseline passed\033[0m\n" || { printf "\033[31m✗ scala baseline failed\033[0m\n"; exit 1; }
+	@echo ""
+
+# Generate Clojure template and run just ci
+baseline-clojure:
+	@echo ""
+	@./tests/run-tests.sh clojure baseline && printf "\033[32m✓ clojure baseline passed\033[0m\n" || { printf "\033[31m✗ clojure baseline failed\033[0m\n"; exit 1; }
+	@echo ""
+
 # Generate TypeScript template and run just ci
 baseline-typescript:
 	@echo ""
 	@./tests/run-tests.sh typescript baseline && printf "\033[32m✓ typescript baseline passed\033[0m\n" || { printf "\033[31m✗ typescript baseline failed\033[0m\n"; exit 1; }
+	@echo ""
+
+# Generate TypeScript MCP server template and run just ci
+baseline-mcp-typescript:
+	@echo ""
+	@./tests/run-tests.sh mcp-typescript baseline && printf "\033[32m✓ typescript MCP server baseline passed\033[0m\n" || { printf "\033[31m✗ typescript MCP server baseline failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Test direct dependency inventory output
@@ -416,10 +443,28 @@ test-kotlin:
 	@./tests/run-tests.sh kotlin && printf "\033[32m✓ kotlin tests passed\033[0m\n" || { printf "\033[31m✗ kotlin tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
+# Test the Scala template (baseline + violations)
+test-scala:
+	@echo ""
+	@./tests/run-tests.sh scala && printf "\033[32m✓ scala tests passed\033[0m\n" || { printf "\033[31m✗ scala tests failed\033[0m\n"; exit 1; }
+	@echo ""
+
+# Test the Clojure template (baseline + violations)
+test-clojure:
+	@echo ""
+	@./tests/run-tests.sh clojure && printf "\033[32m✓ clojure tests passed\033[0m\n" || { printf "\033[31m✗ clojure tests failed\033[0m\n"; exit 1; }
+	@echo ""
+
 # Test the TypeScript template (baseline + violations)
 test-typescript:
 	@echo ""
 	@./tests/run-tests.sh typescript && printf "\033[32m✓ typescript tests passed\033[0m\n" || { printf "\033[31m✗ typescript tests failed\033[0m\n"; exit 1; }
+	@echo ""
+
+# Run TypeScript MCP server baseline + violation tests
+test-mcp-typescript:
+	@echo ""
+	@./tests/run-tests.sh mcp-typescript && printf "\033[32m✓ typescript MCP server tests passed\033[0m\n" || { printf "\033[31m✗ typescript MCP server tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Test just create for all templates

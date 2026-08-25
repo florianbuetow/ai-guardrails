@@ -1,0 +1,266 @@
+{
+  "lockVersion" : 1,
+  "timestamp" : "2026-08-24T14:59:37.561506Z",
+  "configurations" : [
+    "compile",
+    "optional",
+    "provided",
+    "runtime",
+    "scalafix",
+    "test"
+  ],
+  "dependencies" : [
+    {
+      "org" : "com.tngtech.archunit",
+      "name" : "archunit",
+      "version" : "1.5.0",
+      "artifacts" : [
+        {
+          "name" : "archunit.jar",
+          "hash" : "sha1:5076957a58007dd5c512facb5c179d3dd7c3c2b8"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "junit",
+      "name" : "junit",
+      "version" : "4.13.2",
+      "artifacts" : [
+        {
+          "name" : "junit.jar",
+          "hash" : "sha1:8ac9e16d933b6fb43bc7f576336b8f4d7eb5ba12"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.hamcrest",
+      "name" : "hamcrest-core",
+      "version" : "1.3",
+      "artifacts" : [
+        {
+          "name" : "hamcrest-core.jar",
+          "hash" : "sha1:42a25dc3219429f0e5d060061f71acb49bf010a0"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.ow2.asm",
+      "name" : "asm",
+      "version" : "9.5",
+      "artifacts" : [
+        {
+          "name" : "asm.jar",
+          "hash" : "sha1:dc6ea1875f4d64fbc85e1691c95b96a3d8569c90"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.ow2.asm",
+      "name" : "asm-analysis",
+      "version" : "9.5",
+      "artifacts" : [
+        {
+          "name" : "asm-analysis.jar",
+          "hash" : "sha1:490bacc77de7cbc0be1a30bb3471072d705be4a4"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.ow2.asm",
+      "name" : "asm-commons",
+      "version" : "9.5",
+      "artifacts" : [
+        {
+          "name" : "asm-commons.jar",
+          "hash" : "sha1:19ab5b5800a3910d30d3a3e64fdb00fd0cb42de0"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.ow2.asm",
+      "name" : "asm-tree",
+      "version" : "9.5",
+      "artifacts" : [
+        {
+          "name" : "asm-tree.jar",
+          "hash" : "sha1:fd33c8b6373abaa675be407082fdfda35021254a"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.ow2.asm",
+      "name" : "asm-util",
+      "version" : "9.5",
+      "artifacts" : [
+        {
+          "name" : "asm-util.jar",
+          "hash" : "sha1:64b5a1fc8c1b15ed2efd6a063e976bc8d3dc5ffe"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.portable-scala",
+      "name" : "portable-scala-reflect_2.13",
+      "version" : "1.1.3",
+      "artifacts" : [
+        {
+          "name" : "portable-scala-reflect_2.13.jar",
+          "hash" : "sha1:f9295253915f13387e1d4e5b54d531c95e6e2197"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scala-lang",
+      "name" : "scala-library",
+      "version" : "2.13.18",
+      "artifacts" : [
+        {
+          "name" : "scala-library.jar",
+          "hash" : "sha1:eb2086988c25b08705472cc750654570900362e5"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scala-lang",
+      "name" : "scala3-library_3",
+      "version" : "3.3.8",
+      "artifacts" : [
+        {
+          "name" : "scala3-library_3.jar",
+          "hash" : "sha1:1f390d7eb71670cac0411a39955918aadb9c0bdb"
+        }
+      ],
+      "configurations" : [
+        "compile",
+        "runtime",
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scala-sbt",
+      "name" : "test-interface",
+      "version" : "1.0",
+      "artifacts" : [
+        {
+          "name" : "test-interface.jar",
+          "hash" : "sha1:0a3f14d010c4cb32071f863d97291df31603b521"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scalameta",
+      "name" : "junit-interface",
+      "version" : "1.3.5",
+      "artifacts" : [
+        {
+          "name" : "junit-interface.jar",
+          "hash" : "sha1:f0e77f6b59bcf2e80aa81c3c72155149610b1c54"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scalameta",
+      "name" : "munit-diff_3",
+      "version" : "1.3.5",
+      "artifacts" : [
+        {
+          "name" : "munit-diff_3.jar",
+          "hash" : "sha1:2462fdf2eaff4721bab5f17c0302d77f5aa62393"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.scalameta",
+      "name" : "munit_3",
+      "version" : "1.3.5",
+      "artifacts" : [
+        {
+          "name" : "munit_3.jar",
+          "hash" : "sha1:0e4915a56f3b95a0ad1a3748d50038b9cf1b18eb"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.slf4j",
+      "name" : "slf4j-api",
+      "version" : "2.0.18",
+      "artifacts" : [
+        {
+          "name" : "slf4j-api.jar",
+          "hash" : "sha1:78a9e7a37cd6360e0b818e86341b24123d28d4df"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    },
+    {
+      "org" : "org.slf4j",
+      "name" : "slf4j-nop",
+      "version" : "2.0.18",
+      "artifacts" : [
+        {
+          "name" : "slf4j-nop.jar",
+          "hash" : "sha1:52e3ac646a4ebaa457bdf0c1180a6ed625bd1b02"
+        }
+      ],
+      "configurations" : [
+        "test"
+      ]
+    }
+  ]
+}

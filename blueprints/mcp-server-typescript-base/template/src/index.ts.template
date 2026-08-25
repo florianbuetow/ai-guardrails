@@ -1,0 +1,20 @@
+import { serveStdio } from '@modelcontextprotocol/server/stdio'
+
+import { SERVER_CONFIG } from './config.js'
+import { createServer } from './server.js'
+
+const handle = serveStdio(createServer)
+console.error(`${SERVER_CONFIG.name} MCP server running on stdio`)
+
+process.once('SIGINT', () => {
+  void handle
+    .close()
+    .then(() => {
+      process.exit(0)
+    })
+    .catch((error: unknown) => {
+      const message = error instanceof Error ? error.message : String(error)
+      console.error(`Failed to close MCP server: ${message}`)
+      process.exit(1)
+    })
+})

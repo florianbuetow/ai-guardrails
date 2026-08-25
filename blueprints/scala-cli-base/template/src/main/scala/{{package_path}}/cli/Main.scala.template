@@ -1,0 +1,16 @@
+package {{package_name}}.cli
+
+import {{package_name}}.application.GreetingService
+import {{package_name}}.domain.Greeting
+
+object Main:
+  def execute(arguments: List[String]): Either[String, Greeting] =
+    if arguments.nonEmpty then Left("this application does not accept command-line arguments")
+    else GreetingService.create("Scala")
+
+  def main(arguments: Array[String]): Unit =
+    execute(arguments.toList) match
+      case Left(message) =>
+        System.err.println(message)
+        System.exit(1)
+      case Right(greeting) => println(greeting.message)

@@ -1,0 +1,10 @@
+rules:
+  - id: scala-no-shellcheck-disable
+    languages: [generic]
+    severity: ERROR
+    message: Fix ShellCheck findings instead of suppressing them.
+    paths:
+      include:
+        - /scripts/*.sh
+        - /scripts/**/*.sh
+    pattern-regex: '#\s*shellcheck\s+disable='

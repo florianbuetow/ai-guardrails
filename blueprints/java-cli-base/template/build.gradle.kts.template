@@ -1,3 +1,5 @@
+import net.ltgt.gradle.errorprone.errorprone
+
 plugins {
     java
     application
@@ -8,6 +10,11 @@ plugins {
     id("net.ltgt.errorprone") version "4.1.0"
     id("com.github.ben-manes.versions") version "0.51.0"
     id("com.autonomousapps.dependency-analysis") version "2.7.0"
+}
+
+tasks.named<JavaCompile>("compileJava") {
+    // Infer 1.2 cannot replay Error Prone's empty compiler argument.
+    options.errorprone.isEnabled.set(!providers.gradleProperty("infer").isPresent)
 }
 
 group = "{{group_id}}"

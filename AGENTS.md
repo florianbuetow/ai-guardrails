@@ -5,7 +5,7 @@ This file provides guidance to AI agents and AI-assisted development tools when 
 
 ## Repository Overview
 
-This repository contains Copier templates for Python, Java, Go, Elixir, C++, Rust, Kotlin, and TypeScript (React) that enforce strict validation guardrails on AI-generated code — catching antipatterns, suppressing silent defaults, and providing immediate feedback so AI agents write better, more maintainable code from the start.
+This repository contains Copier templates for Python, Java, Go, Elixir, C++, Rust, Kotlin, Scala, Clojure, TypeScript (React), and TypeScript MCP servers that enforce strict validation guardrails on AI-generated code — catching antipatterns, suppressing silent defaults, and providing immediate feedback so AI agents write better, more maintainable code from the start.
 
 ## Core Coding Principles
 
@@ -48,7 +48,7 @@ The key principle is that we test the generated project's own CI justfile target
 2. **Baseline** — run the project's full CI (`just ci`) on the clean project. It must pass. This confirms the template itself is valid.
 3. **For each violation:**
    a. **Inject** — copy the violation's overlay files into the generated project (originals are backed up).
-   b. **Stage** — `git add -A` so tools like semgrep see the new/changed files.
+   b. **Expose to scanners** — established suites stage overlays for tools that require tracked files; the Scala suite deliberately scans explicit paths and performs no git staging or commits.
    c. **Run the project's targeted justfile recipe** — e.g. `just code-security`, `just code-semgrep`. The recipe name is read from a `check` file in the violation directory; if absent, defaults to `code-semgrep`.
    d. **Expect failure** — the justfile target **must exit non-zero**. If it passes, the project's guardrail failed to catch the violation and the test fails.
    e. **Restore** — put original files back and reset git state for the next test.
@@ -119,6 +119,21 @@ This is an inverted test pattern: a passing test means the project's own CI caug
 - Validation: ktlint, detekt, kotlinc allWarningsAsErrors, semgrep, codespell, dependency-analysis, trivy, Gradle Versions Plugin, Konsist, JUnit 5, Kover
 - Conventions: Justfile workflow, `./gradlew` exclusively, no `@Suppress`, no silent fallbacks, strict compiler warnings as errors
 
+### The Scala CLI Template (`blueprints/scala-cli-base`)
+
+- Scala 3.3 LTS on the JVM (toolchain 21) with a pinned sbt 1.13 launcher
+- Architecture: `cli -> application -> domain`, enforced with ArchUnit/MUnit dependency and cycle tests
+- Custom analysis: built-in Scalafix plus a project-local semantic rule tested with scalafix-testkit
+- Validation: Scalafmt, Scalafix, strict scalac warnings, WartRemover, Find Security Bugs, Semgrep, sbt-explicit-dependencies, dependency locking, codespell, Trivy, sbt-updates, MUnit, ArchUnit, and scoverage
+- Conventions: use `./sbtw` exclusively, no check suppressions, no silent fallbacks, statement and branch coverage enforced in `just ci`
+
+### The Clojure CLI Template (`blueprints/clojure-cli-base`)
+
+- Clojure 1.12+ on the JVM (toolchain 21+) with Clojure CLI, `deps.edn`, and tools.build
+- Architecture: `cli -> application -> domain`, enforced with clj-depend layer rules
+- Validation: cljfmt, clj-kondo, Eastwood, Malli runtime contracts, test.check generative checks, clj-holmes, Semgrep, unused-deps, Trivy, antq, codespell, Kaocha, and kaocha-cloverage
+- Conventions: explicit boundary validation, Malli contracts, pure domain functions, no checker suppressions, no silent fallbacks, no `core.typed` by default
+
 ### The React Vite TypeScript Template (`blueprints/react-vite-typescript-base`)
 
 - React + Vite + TypeScript, Node 22+/24+, npm-only tooling
@@ -126,6 +141,13 @@ This is an inverted test pattern: a passing test means the project's own CI caug
 - Project structure: src/, e2e/, scripts/, data/, config/
 - Validation: prettier, oxlint (react-hooks, jsx-a11y, correctness rules), tsc, semgrep, codespell, oxlint security pass (no-eval + correctness), knip, dependency-cruiser, vitest + Testing Library, Playwright, npm audit
 - Conventions: Justfile workflow, npm/npx exclusively, no eslint-disable/oxlint-disable, no @ts-ignore, no skipped tests
+
+### The TypeScript MCP Server Template (`blueprints/mcp-server-typescript-base`)
+
+- TypeScript MCP SDK v2, Node 22.19+, ES modules, npm-only tooling, stdio transport
+- Architecture: `index.ts` → `server.ts` → `tools/*` → `services/*`; business services never depend on MCP adapters
+- Validation: prettier, oxlint, tsc, semgrep, codespell, knip, dependency-cruiser, Vitest, real MCP client integration tests, npm audit
+- MCP guardrails: stdout is reserved for JSON-RPC, tool inputs have no silent defaults, recoverable failures return model-readable tool errors
 
 All templates emphasize creating immediately runnable projects with no placeholders, comprehensive CI pipelines, and AGENTS.md/CLAUDE.md files for AI agent guidance.
 
@@ -143,8 +165,8 @@ These rules apply to all justfiles — in this repository and in all generated t
 ## Repository Commands
 
 - `just ci` — Run all repo-level checks (codespell, semgrep, shellcheck) + all template tests
-- `just test` — Run baseline + violation tests for all 8 languages
-- `just test-<language>` — Run tests for one language (python, java, go, elixir, cpp, rust, kotlin, typescript)
+- `just test` — Run baseline + violation tests for all templates
+- `just test-<language>` — Run tests for one template family (python, java, go, elixir, cpp, cpp-3dgame, rust, kotlin, scala, clojure, typescript, mcp-typescript)
 - `just check` — Verify required tools are installed
 - `just create <template> <target-dir>` — Scaffold a new project from a blueprint
 
@@ -176,4 +198,3 @@ For large implementation tasks, long debugging sessions, or any work that benefi
 - NEVER stop before pushing - that leaves work stranded locally
 - NEVER say "ready to push when you are" - YOU must push
 - If push fails, resolve and retry until it succeeds
-

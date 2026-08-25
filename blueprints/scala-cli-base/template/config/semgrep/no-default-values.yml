@@ -1,0 +1,6 @@
+rules:
+  - id: scala-no-default-parameter-values
+    languages: [scala]
+    severity: ERROR
+    message: Default parameter values hide missing inputs; require callers to provide every value.
+    pattern-regex: '(?m)^\s*def\s+[A-Za-z_][A-Za-z0-9_]*\s*\([^\n)]*:[^\n,)=]+=[^\n,)]+'

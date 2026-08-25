@@ -1,0 +1,6 @@
+mcp
+stdio
+tsx
+vitest
+xdescribe
+zod

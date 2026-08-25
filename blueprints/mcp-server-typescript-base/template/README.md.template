@@ -1,0 +1,89 @@
+# {{project_name}}
+
+{{project_description}}
+
+This is a local stdio Model Context Protocol server built with the stable TypeScript SDK v2. The protocol layer is deliberately thin: tool modules own MCP schemas and adaptation, while reusable behavior lives in ordinary TypeScript services.
+
+## Requirements
+
+- Node.js {{node_version}}+
+- npm
+- [just](https://github.com/casey/just)
+- [Semgrep](https://semgrep.dev/)
+- [codespell](https://github.com/codespell-project/codespell)
+
+## Start
+
+```bash
+just init
+just test
+just run
+```
+
+`just run` starts a stdio server and waits for an MCP client. stdout is reserved for JSON-RPC protocol messages; application diagnostics are written to stderr.
+
+To exercise tools interactively:
+
+```bash
+just inspect
+```
+
+## Architecture
+
+```text
+MCP stdio transport
+        │
+        ▼
+src/server.ts
+        │
+        ▼
+src/tools/*
+        │
+        ▼
+src/services/*
+```
+
+- `src/index.ts` owns process startup and stdio lifecycle only.
+- `src/server.ts` creates an `McpServer` and wires dependencies.
+- `src/tools/` owns MCP input/output schemas and model-readable errors.
+- `src/services/` owns transport-independent business behavior.
+- `test/tools/` drives the server through a real MCP client, including the built stdio entrypoint.
+- `test/services/` tests business behavior without MCP infrastructure.
+
+One tool file should contain one MCP schema and adapter. Add resources, prompts, HTTP, or authentication only when the server actually needs them.
+
+## Available tools
+
+- `search` searches the example catalog. Both `query` and `limit` are required; omitted inputs are rejected instead of silently defaulted.
+- `get-item` returns one item by exact identifier or a model-readable tool error.
+
+Replace the example item service and tools with your domain behavior while preserving the protocol/service boundary.
+
+## Host configuration
+
+Build the server first:
+
+```bash
+just build
+```
+
+Then configure an MCP host to launch:
+
+```json
+{
+  "mcpServers": {
+    "{{project_name}}": {
+      "command": "node",
+      "args": ["/absolute/path/to/{{project_name}}/dist/index.js"]
+    }
+  }
+}
+```
+
+Use an absolute path in host configuration so launch behavior does not depend on the host's working directory.
+
+## Validation
+
+`just ci` runs initialization, formatting, linting, spelling, Semgrep guardrails, strict TypeScript checks, security linting, dependency hygiene, architecture checks, production build, real-client protocol tests, coverage thresholds, and dependency auditing. `just ci-quiet` runs the same checks with compact fail-fast output and is installed as the repository pre-commit hook.
+
+Run `just help` for every available command.

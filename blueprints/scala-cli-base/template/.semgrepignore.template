@@ -1,0 +1,5 @@
+:include .gitignore
+
+target/
+project/
+scalafix/target/

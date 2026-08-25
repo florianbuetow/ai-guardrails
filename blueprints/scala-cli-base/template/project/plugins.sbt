@@ -1,0 +1,8 @@
+addSbtPlugin("org.scalameta"         % "sbt-scalafmt"              % "2.6.2")
+addSbtPlugin("ch.epfl.scala"         % "sbt-scalafix"              % "0.14.7")
+addSbtPlugin("org.wartremover"       % "sbt-wartremover"           % "3.6.1")
+addSbtPlugin("org.scoverage"         % "sbt-scoverage"             % "2.4.4")
+addSbtPlugin("com.github.cb372"      % "sbt-explicit-dependencies" % "0.3.1")
+addSbtPlugin("software.purpledragon" % "sbt-dependency-lock"       % "1.5.1")
+addSbtPlugin("com.timushev.sbt"      % "sbt-updates"               % "0.7.0")
+addSbtPlugin("nl.codestar"           % "sbt-findsecbugs"           % "0.20")

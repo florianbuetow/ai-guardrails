@@ -1,0 +1,30 @@
+package {{package_name}}
+
+import java.io.ByteArrayOutputStream
+import java.nio.charset.StandardCharsets
+
+import {{package_name}}.application.GreetingService
+import {{package_name}}.cli.Main
+
+class MainSuite extends munit.FunSuite:
+  test("creates a greeting for a valid recipient"):
+    val result = GreetingService.create("Scala")
+
+    assertEquals(result.map(_.message), Right("Hello, Scala!"))
+
+  test("rejects a blank recipient"):
+    val result = GreetingService.create("   ")
+
+    assertEquals(result, Left("recipient must not be blank"))
+
+  test("rejects command-line arguments"):
+    val result = Main.execute(List("unexpected"))
+
+    assertEquals(result, Left("this application does not accept command-line arguments"))
+
+  test("runs the application without arguments"):
+    val output = new ByteArrayOutputStream()
+
+    Console.withOut(output)(Main.main(Array.empty))
+
+    assertEquals(output.toString(StandardCharsets.UTF_8).trim, "Hello, Scala!")

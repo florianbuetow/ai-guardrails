@@ -1,0 +1,21 @@
+rules:
+  - id: mcp-typescript.no-console-log
+    languages: [generic]
+    message: >
+      stdout is the stdio MCP protocol channel. Log with console.error so JSON-RPC messages are not corrupted.
+    severity: ERROR
+    pattern-regex: '\bconsole\.(log|info|debug)\s*\('
+    paths:
+      include:
+        - "/src/*.ts"
+        - "/src/**/*.ts"
+
+  - id: mcp-typescript.no-process-stdout-write
+    languages: [generic]
+    message: stdout is reserved for MCP JSON-RPC messages.
+    severity: ERROR
+    pattern-regex: '\bprocess\.stdout\.write\s*\('
+    paths:
+      include:
+        - "/src/*.ts"
+        - "/src/**/*.ts"

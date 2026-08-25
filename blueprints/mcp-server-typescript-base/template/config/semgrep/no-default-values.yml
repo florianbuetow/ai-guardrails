@@ -1,0 +1,26 @@
+rules:
+  - id: typescript.no-env-fallback-default
+    languages: [generic]
+    message: >
+      Falling back to a default when an environment variable is absent hides
+      missing configuration. Read the value and fail explicitly when missing.
+    severity: ERROR
+    pattern-regex: 'process\.env\.[A-Za-z_][A-Za-z0-9_]*\s*(\?\?|\|\|)'
+    paths:
+      include:
+        - "*.ts"
+      exclude:
+        - "*.test.ts"
+
+  - id: typescript.no-zod-default
+    languages: [generic]
+    message: >
+      Zod defaults hide omitted MCP arguments. Make the field required or
+      model the optional state explicitly in the service boundary.
+    severity: ERROR
+    pattern-regex: '\.default\s*\('
+    paths:
+      include:
+        - "*.ts"
+      exclude:
+        - "*.test.ts"

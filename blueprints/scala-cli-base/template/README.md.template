@@ -1,0 +1,76 @@
+# {{project_name}}
+
+{{project_description}}
+
+## Requirements
+
+- JDK {{jvm_target}}+
+- [just](https://github.com/casey/just)
+- [codespell](https://github.com/codespell-project/codespell)
+- [Semgrep](https://semgrep.dev/)
+- [Trivy](https://trivy.dev/)
+- GNU `timeout`
+
+The pinned sbt launcher, Scala compiler, build plugins, and test libraries are supplied by the project.
+
+## Start
+
+```bash
+just init
+just run
+```
+
+The dummy application prints `Hello, Scala!` after compiling successfully.
+
+## Validation
+
+```bash
+just ci
+```
+
+`just ci` runs Scalafmt, built-in and project-local Scalafix rules, strict scalac checks, WartRemover, Find Security Bugs, dependency declaration and lock checks, codespell, Semgrep, MUnit, Scalafix testkit, ArchUnit, scoverage, Trivy, and sbt-updates. A failure from any tool stops the pipeline.
+
+Useful focused commands:
+
+- `just code-style`
+- `just code-scalafix`
+- `just code-typecheck`
+- `just code-warts`
+- `just code-security`
+- `just code-deptry`
+- `just code-semgrep`
+- `just code-architecture`
+- `just code-audit`
+- `just test`
+- `just test-coverage`
+
+## Architecture
+
+Production code is split into three packages:
+
+```text
+cli -> application -> domain
+```
+
+ArchUnit enforces dependency direction and cycle freedom. The local Scalafix build under `scalafix/` implements and tests semantic source rules before those rules analyze the application.
+
+## Project layout
+
+```text
+src/main/scala/{{package_path}}/
+├── cli/Main.scala
+├── application/GreetingService.scala
+└── domain/Greeting.scala
+
+src/test/scala/{{package_path}}/
+├── MainSuite.scala
+└── architecture/ArchitectureSuite.scala
+
+scalafix/
+├── rules/
+├── input/
+├── output/
+└── tests/
+```
+
+See [AGENTS.md](AGENTS.md) for the mandatory development rules.

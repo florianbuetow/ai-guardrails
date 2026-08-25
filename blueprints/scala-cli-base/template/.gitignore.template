@@ -1,0 +1,34 @@
+# sbt / Scala
+target/
+project/target/
+project/project/
+scalafix/target/
+scalafix/project/target/
+scalafix/project/project/
+.bsp/
+.bloop/
+.metals/
+.scala-build/
+*.class
+*.jar
+!project/sbt-launch.jar
+
+# IDEs
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+
+# Reports and local caches
+reports/
+.trivycache/
+
+# Operating systems
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Copier
+.copier-answers.yml

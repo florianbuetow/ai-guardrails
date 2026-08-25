@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Switched cpp-3dgame shaders to HLSL and DXC only, with Vulkan validation layers.
 - Raised the mypy floor to 1.11 in the Python template.
 - Semgrep recipe now also scans `tests/` and `pyproject.toml`.
+- Shortened the Python template uv exclude-newer window from 30 days to 7 days.
 
 ### Removed
 
@@ -56,12 +57,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed violation test isolation and retargeted two undetectable LSP fixtures.
 - Restored the no-or-true shell rule in the Python template.
 - Raised Python template cryptography/pip floors so generated-project pip-audit accepts current advisories.
+- Raised the Python template GitPython floor to 3.1.58 so generated-project pip-audit accepts current advisories.
 - Parse `ruff format --check` via JSON in the Python scorer (ruff's default `full` text is no longer `Would reformat:` lines).
 
 ### Security
 
 - Pinned pyjwt floor to 2.13.0 in Python template to satisfy pip-audit.
 - Raised cryptography to 50.0.0 and pip to 26.2.1 in the Python template (PYSEC-2026-3552, PYSEC-2026-3721).
+- Raised GitPython to 3.1.58 in the Python template (CVE-2026-76217 and related GHSA advisories).
 
 ## 2026-03-30
 

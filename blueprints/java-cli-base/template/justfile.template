@@ -198,8 +198,8 @@ code-security:
 code-infer:
     @echo ""
     @printf "\033[34m=== Running Infer Static Analysis ===\033[0m\n"
-    @./gradlew clean --quiet
-    @infer run --fail-on-issue -- ./gradlew build --quiet
+    @# Do not pass Gradle --quiet: Infer injects --debug and parses its compiler arguments.
+    @infer run --fail-on-issue --biabduction -- ./gradlew clean compileJava -Pinfer --no-build-cache --rerun-tasks
     @printf "\033[32m✓ code-infer completed successfully\033[0m\n"
     @echo ""
 
@@ -223,7 +223,7 @@ code-spell:
 code-semgrep:
     @echo ""
     @printf "\033[34m=== Running Semgrep Static Analysis ===\033[0m\n"
-    @semgrep --config config/semgrep/ --error src/main/ scripts/
+    @semgrep --config config/semgrep/ --error src/ scripts/
     @printf "\033[32m✓ code-semgrep completed successfully\033[0m\n"
     @echo ""
 

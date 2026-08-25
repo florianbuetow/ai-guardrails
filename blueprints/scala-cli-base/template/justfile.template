@@ -1,0 +1,263 @@
+# Default recipe: show available commands
+_default:
+    @just help
+
+# Check prerequisites
+check:
+    @echo ""
+    @if ! java -version >/dev/null 2>&1; then \
+        printf "\033[31m✗ Error: JDK {{jvm_target}}+ is required\033[0m\n"; \
+        printf "  Install a JDK from https://adoptium.net/\n"; \
+        exit 1; \
+    fi
+    @printf "\033[32m✓ java is installed\033[0m\n"
+    @java_major="$(java -XshowSettings:properties -version 2>&1 | sed -n 's/^[[:space:]]*java\.specification\.version = //p')"; \
+    case "$java_major" in \
+        ''|*[!0-9]*) \
+            printf "\033[31m✗ Error: unable to determine a numeric JDK version\033[0m\n"; \
+            exit 1; \
+            ;; \
+    esac; \
+    if [ "$java_major" -lt "{{jvm_target}}" ]; then \
+        printf "\033[31m✗ Error: JDK {{jvm_target}}+ is required, found JDK %s\033[0m\n" "$java_major"; \
+        exit 1; \
+    fi; \
+    printf "\033[32m✓ JDK %s satisfies the required version\033[0m\n" "$java_major"
+    @if [ ! -x "./sbtw" ]; then \
+        printf "\033[31m✗ Error: executable sbt wrapper ./sbtw is missing\033[0m\n"; \
+        exit 1; \
+    fi
+    @if [ ! -f "project/sbt-launch.jar" ]; then \
+        printf "\033[31m✗ Error: project/sbt-launch.jar is missing\033[0m\n"; \
+        exit 1; \
+    fi
+    @for tool in codespell semgrep trivy timeout; do \
+        if ! command -v "$tool" >/dev/null 2>&1; then \
+            printf "\033[31m✗ Error: %s is not installed\033[0m\n" "$tool"; \
+            exit 1; \
+        fi; \
+        printf "\033[32m✓ %s is installed\033[0m\n" "$tool"; \
+    done
+    @printf "\033[32m✓ check completed successfully\033[0m\n"
+    @echo ""
+
+# Show help information
+help:
+    @clear
+    @echo ""
+    @printf "\033[0;34m=== {{project_name}} ===\033[0m\n"
+    @echo ""
+    @printf "\033[0;33mSetup & Lifecycle:\033[0m\n"
+    @printf "  %-40s %s\n" "init" "Initialize and compile the project"
+    @printf "  %-40s %s\n" "run" "Compile and run the application"
+    @printf "  %-40s %s\n" "destroy" "Clean build artifacts"
+    @printf "  %-40s %s\n" "check" "Check prerequisites"
+    @printf "  %-40s %s\n" "help" "Show this help message"
+    @echo ""
+    @printf "\033[0;33mCode Quality:\033[0m\n"
+    @printf "  %-40s %s\n" "code-format" "Format Scala and sbt files (Scalafmt)"
+    @printf "  %-40s %s\n" "code-style" "Check Scala and sbt formatting (Scalafmt)"
+    @printf "  %-40s %s\n" "code-scalafix" "Run built-in and project-local Scalafix rules"
+    @printf "  %-40s %s\n" "code-typecheck" "Compile with strict scalac warnings"
+    @printf "  %-40s %s\n" "code-warts" "Run WartRemover correctness rules"
+    @printf "  %-40s %s\n" "code-security" "Run SpotBugs + Find Security Bugs"
+    @printf "  %-40s %s\n" "code-deptry" "Check undeclared, unused, and unlocked dependencies"
+    @printf "  %-40s %s\n" "code-spell" "Check spelling (codespell)"
+    @printf "  %-40s %s\n" "code-semgrep" "Run project-specific Semgrep rules"
+    @printf "  %-40s %s\n" "code-architecture" "Run ArchUnit architecture tests"
+    @printf "  %-40s %s\n" "code-audit" "Scan locked dependencies and report updates"
+    @echo ""
+    @printf "\033[0;33mCI & Testing:\033[0m\n"
+    @printf "  %-40s %s\n" "test" "Run application and Scalafix rule test suites"
+    @printf "  %-40s %s\n" "test-coverage" "Run tests with enforced coverage"
+    @printf "  %-40s %s\n" "ci" "Run every validation tool and test suite"
+    @printf "  %-40s %s\n" "ci-quiet" "Run every validation check quietly"
+    @echo ""
+
+# Initialize and compile all project components
+init: check
+    @echo ""
+    @printf "\033[34m=== Initializing Scala Project ===\033[0m\n"
+    @(cd scalafix && ../sbtw "rules / publishLocal")
+    @./sbtw "app / Compile / compile" "app / Test / compile"
+    @if [ ! -f ".git/hooks/pre-commit" ]; then \
+        printf "\033[31m✗ Error: generated pre-commit hook is missing\033[0m\n"; \
+        exit 1; \
+    fi
+    @chmod +x .git/hooks/pre-commit
+    @printf "\033[32m✓ init completed successfully\033[0m\n"
+    @echo ""
+
+# Compile and run the main application
+run:
+    @echo ""
+    @printf "\033[34m=== Running Scala Application ===\033[0m\n"
+    @./sbtw "app / run"
+    @printf "\033[32m✓ run completed successfully\033[0m\n"
+    @echo ""
+
+# Clean build artifacts
+destroy:
+    @echo ""
+    @printf "\033[34m=== Cleaning Build Artifacts ===\033[0m\n"
+    @./sbtw clean
+    @(cd scalafix && ../sbtw clean)
+    @printf "\033[32m✓ destroy completed successfully\033[0m\n"
+    @echo ""
+
+# Format Scala and sbt files
+code-format:
+    @echo ""
+    @printf "\033[34m=== Formatting Scala Code ===\033[0m\n"
+    @./sbtw scalafmtAll scalafmtSbt
+    @(cd scalafix && ../sbtw scalafmtAll scalafmtSbt)
+    @printf "\033[32m✓ code-format completed successfully\033[0m\n"
+    @echo ""
+
+# Check Scala and sbt formatting without modifying files
+code-style:
+    @echo ""
+    @printf "\033[34m=== Checking Scala Formatting ===\033[0m\n"
+    @./sbtw scalafmtCheckAll scalafmtSbtCheck
+    @(cd scalafix && ../sbtw scalafmtCheckAll scalafmtSbtCheck)
+    @printf "\033[32m✓ code-style completed successfully\033[0m\n"
+    @echo ""
+
+# Run built-in and project-local semantic Scalafix rules
+code-scalafix:
+    @echo ""
+    @printf "\033[34m=== Running Scalafix Rules ===\033[0m\n"
+    @(cd scalafix && ../sbtw "rules / publishLocal")
+    @./sbtw "app / scalafixAll --check"
+    @printf "\033[32m✓ code-scalafix completed successfully\033[0m\n"
+    @echo ""
+
+# Compile with strict warnings promoted to errors
+code-typecheck:
+    @echo ""
+    @printf "\033[34m=== Running Strict Compiler Checks ===\033[0m\n"
+    @./sbtw "app / Compile / compile" "app / Test / compile"
+    @printf "\033[32m✓ code-typecheck completed successfully\033[0m\n"
+    @echo ""
+
+# Compile production code with WartRemover enabled
+code-warts:
+    @echo ""
+    @printf "\033[34m=== Running WartRemover ===\033[0m\n"
+    @./sbtw "app / Compile / clean" "app / Compile / compile"
+    @printf "\033[32m✓ code-warts completed successfully\033[0m\n"
+    @echo ""
+
+# Analyze JVM bytecode with SpotBugs and Find Security Bugs
+code-security:
+    @echo ""
+    @printf "\033[34m=== Running Bytecode Security Analysis ===\033[0m\n"
+    @./sbtw "app / findSecBugs"
+    @printf "\033[32m✓ code-security completed successfully\033[0m\n"
+    @echo ""
+
+# Check dependency declarations and the committed dependency lock
+code-deptry:
+    @echo ""
+    @printf "\033[34m=== Checking Dependency Hygiene ===\033[0m\n"
+    @./sbtw "app / undeclaredCompileDependenciesTest" "app / unusedCompileDependenciesTest" "app / dependencyLockCheck"
+    @printf "\033[32m✓ code-deptry completed successfully\033[0m\n"
+    @echo ""
+
+# Check spelling in source, configuration, scripts, and documentation
+code-spell:
+    @echo ""
+    @printf "\033[34m=== Checking Spelling ===\033[0m\n"
+    @codespell src scalafix config scripts *.md *.sbt *.conf \
+        --skip='*/target/*,*/project/target/*,*/project/project/*' \
+        --ignore-words=config/codespell/ignore.txt
+    @printf "\033[32m✓ code-spell completed successfully\033[0m\n"
+    @echo ""
+
+# Run project-specific source guardrails
+code-semgrep:
+    @echo ""
+    @printf "\033[34m=== Running Semgrep Guardrails ===\033[0m\n"
+    @semgrep --config config/semgrep/ --error src/ scalafix/ scripts/
+    @printf "\033[32m✓ code-semgrep completed successfully\033[0m\n"
+    @echo ""
+
+# Run architecture dependency and cycle tests
+code-architecture:
+    @echo ""
+    @printf "\033[34m=== Running Architecture Tests ===\033[0m\n"
+    @./sbtw "app / Test / testOnly *ArchitectureSuite"
+    @printf "\033[32m✓ code-architecture completed successfully\033[0m\n"
+    @echo ""
+
+# Check locked dependencies for vulnerabilities and report available updates
+code-audit:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo ""
+    printf "\033[34m=== Auditing Dependencies ===\033[0m\n"
+    trivy_docker_config="$(mktemp -d)"
+    trap 'rm -rf "$trivy_docker_config"' EXIT
+    DOCKER_CONFIG="$trivy_docker_config" timeout -k 10 600 \
+        trivy fs --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --quiet .
+    ./sbtw "app / dependencyLockCheck"
+    ./sbtw "app / dependencyUpdates"
+    printf "\033[32m✓ code-audit completed successfully\033[0m\n"
+    echo ""
+
+# Run application tests and the custom Scalafix rule testkit
+test:
+    @echo ""
+    @printf "\033[34m=== Running All Test Suites ===\033[0m\n"
+    @./sbtw "app / Test / test"
+    @(cd scalafix && ../sbtw "tests / Test / test")
+    @printf "\033[32m✓ test completed successfully\033[0m\n"
+    @echo ""
+
+# Run application tests with statement and branch coverage enforcement
+test-coverage:
+    @echo ""
+    @printf "\033[34m=== Running Coverage Verification ===\033[0m\n"
+    @./sbtw clean coverage "app / Test / test" "app / coverageReport" coverageOff
+    @printf "\033[32m✓ test-coverage completed successfully\033[0m\n"
+    @echo ""
+
+# Run every validation tool and test suite
+ci:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo ""
+    printf "\033[34m=== Running All Scala CI Checks ===\033[0m\n"
+    just check
+    just init
+    just code-style
+    just code-scalafix
+    just code-typecheck
+    just code-warts
+    just code-security
+    just code-deptry
+    just code-spell
+    just code-semgrep
+    just test
+    just code-architecture
+    just test-coverage
+    just code-audit
+    echo ""
+    printf "\033[32m✓ ci completed successfully\033[0m\n"
+    echo ""
+
+# Run every validation check quietly and print output only on failure
+ci-quiet:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo ""
+    printf "\033[34m=== Running CI Checks (Quiet Mode) ===\033[0m\n"
+    output_file="$(mktemp)"
+    trap 'rm -f "$output_file"' EXIT
+    if ! just ci >"$output_file" 2>&1; then
+        printf "\033[31m✗ ci-quiet failed\033[0m\n"
+        cat "$output_file"
+        exit 1
+    fi
+    printf "\033[32m✓ ci-quiet completed successfully\033[0m\n"
+    echo ""

@@ -1,0 +1,242 @@
+# =============================================================================
+# Justfile Rules:
+# 1. Use printf for colored or formatted output.
+# 2. Add an empty @echo "" before and after every command block.
+# 3. Keep help ordered by lifecycle, run/build, quality, then tests.
+# 4. Composite recipes fail fast.
+# 5. Every recipe ends with a clear success or failure status.
+# =============================================================================
+
+_default:
+    @just help
+
+check:
+    @echo ""
+    @if ! command -v node >/dev/null 2>&1; then \
+        printf "\033[31m✗ Error: node is not installed\033[0m\n"; \
+        printf "  Install Node.js {{node_version}}+: https://nodejs.org/\n"; \
+        echo ""; \
+        exit 1; \
+    fi
+    @node -e 'const required = "{{node_version}}".split(".").map(Number); const actual = process.versions.node.split(".").map(Number); for (let index = 0; index < required.length; index += 1) { if (actual[index] > required[index]) process.exit(0); if (actual[index] < required[index]) { console.error("\x1b[31m✗ Error: Node.js {{node_version}}+ required, found " + process.versions.node + "\x1b[0m"); process.exit(1); } }'
+    @printf "\033[32m✓ node is installed\033[0m\n"
+    @node --version | sed 's/^/  /'
+    @if ! command -v npm >/dev/null 2>&1; then \
+        printf "\033[31m✗ Error: npm is not installed\033[0m\n"; \
+        printf "  npm ships with Node.js: https://nodejs.org/\n"; \
+        echo ""; \
+        exit 1; \
+    fi
+    @printf "\033[32m✓ npm is installed\033[0m\n"
+    @if ! command -v codespell >/dev/null 2>&1; then \
+        printf "\033[31m✗ Error: codespell is not installed\033[0m\n"; \
+        printf "  Install with: brew install codespell\n"; \
+        echo ""; \
+        exit 1; \
+    fi
+    @printf "\033[32m✓ codespell is installed\033[0m\n"
+    @if ! command -v semgrep >/dev/null 2>&1; then \
+        printf "\033[31m✗ Error: semgrep is not installed\033[0m\n"; \
+        printf "  Install with: brew install semgrep\n"; \
+        echo ""; \
+        exit 1; \
+    fi
+    @printf "\033[32m✓ semgrep is installed\033[0m\n"
+    @echo ""
+
+help:
+    @clear
+    @echo ""
+    @printf "\033[0;34m=== {{project_name}} ===\033[0m\n"
+    @echo ""
+    @printf "\033[0;33mSetup & Lifecycle:\033[0m\n"
+    @printf "  %-40s %s\n" "init" "Install dependencies and activate the pre-commit hook"
+    @printf "  %-40s %s\n" "destroy" "Remove dependencies and generated artifacts"
+    @printf "  %-40s %s\n" "check" "Check prerequisites"
+    @printf "  %-40s %s\n" "help" "Show this help message"
+    @echo ""
+    @printf "\033[0;33mRun & Build:\033[0m\n"
+    @printf "  %-40s %s\n" "run" "Run the MCP server over stdio"
+    @printf "  %-40s %s\n" "inspect" "Build and open the official MCP Inspector"
+    @printf "  %-40s %s\n" "build" "Compile production JavaScript"
+    @echo ""
+    @printf "\033[0;33mCode Quality:\033[0m\n"
+    @printf "  %-40s %s\n" "code-format" "Auto-format code with Prettier"
+    @printf "  %-40s %s\n" "code-style" "Check formatting and lint with Prettier + oxlint"
+    @printf "  %-40s %s\n" "code-spell" "Check spelling with codespell"
+    @printf "  %-40s %s\n" "code-semgrep" "Run custom guardrails with Semgrep"
+    @printf "  %-40s %s\n" "code-lspchecks" "Run strict TypeScript checks"
+    @printf "  %-40s %s\n" "code-security" "Run the dedicated security lint pass"
+    @printf "  %-40s %s\n" "code-deptry" "Check dependency hygiene with knip"
+    @printf "  %-40s %s\n" "code-architecture" "Check protocol/service boundaries"
+    @printf "  %-40s %s\n" "code-audit" "Scan dependencies for vulnerabilities and updates"
+    @echo ""
+    @printf "\033[0;33mCI & Testing:\033[0m\n"
+    @printf "  %-40s %s\n" "test" "Run service and MCP protocol integration tests"
+    @printf "  %-40s %s\n" "test-coverage" "Run tests with {{coverage_threshold}}%% coverage thresholds"
+    @printf "  %-40s %s\n" "ci" "Run every validation check verbosely"
+    @printf "  %-40s %s\n" "ci-quiet" "Run every validation check fail-fast with compact output"
+    @echo ""
+
+init: check
+    @echo ""
+    @printf "\033[34m=== Initializing Development Environment ===\033[0m\n"
+    @if ! git rev-parse --git-dir >/dev/null 2>&1; then git init -q; fi
+    @npm install
+    @if [ ! -f ".git/hooks/pre-commit" ]; then \
+        printf "\033[31m✗ Error: .git/hooks/pre-commit is missing\033[0m\n"; \
+        printf "  Re-apply the template or restore the generated hook.\n"; \
+        echo ""; \
+        exit 1; \
+    fi
+    @chmod +x .git/hooks/pre-commit
+    @printf "\033[32m✓ init completed successfully\033[0m\n"
+    @echo ""
+
+run:
+    @echo ""
+    @printf "\033[34m=== Starting MCP Server on stdio ===\033[0m\n"
+    @npm run dev
+    @printf "\033[32m✓ run completed successfully\033[0m\n"
+    @echo ""
+
+inspect: build
+    @echo ""
+    @printf "\033[34m=== Starting MCP Inspector ===\033[0m\n"
+    @npx --yes @modelcontextprotocol/inspector node dist/index.js
+    @printf "\033[32m✓ inspect completed successfully\033[0m\n"
+    @echo ""
+
+build:
+    @echo ""
+    @printf "\033[34m=== Building for Production ===\033[0m\n"
+    @npm run build
+    @printf "\033[32m✓ build completed successfully\033[0m\n"
+    @echo ""
+
+destroy:
+    @echo ""
+    @printf "\033[34m=== Cleaning Generated Artifacts ===\033[0m\n"
+    @rm -rf node_modules dist coverage
+    @printf "\033[32m✓ destroy completed successfully\033[0m\n"
+    @echo ""
+
+code-format:
+    @echo ""
+    @printf "\033[34m=== Formatting Code ===\033[0m\n"
+    @npx prettier --log-level warn --write .
+    @printf "\033[32m✓ code-format completed successfully\033[0m\n"
+    @echo ""
+
+code-style:
+    @echo ""
+    @printf "\033[34m=== Checking Code Style ===\033[0m\n"
+    @npx prettier --log-level warn --check .
+    @npx oxlint --deny-warnings
+    @printf "\033[32m✓ code-style completed successfully\033[0m\n"
+    @echo ""
+
+code-spell:
+    @echo ""
+    @printf "\033[34m=== Checking Spelling ===\033[0m\n"
+    @codespell src test config scripts *.md --ignore-words=config/codespell/ignore.txt
+    @printf "\033[32m✓ code-spell completed successfully\033[0m\n"
+    @echo ""
+
+code-semgrep:
+    @echo ""
+    @printf "\033[34m=== Running Semgrep Guardrails ===\033[0m\n"
+    @semgrep --config config/semgrep/ --error src test scripts
+    @printf "\033[32m✓ code-semgrep completed successfully\033[0m\n"
+    @echo ""
+
+code-lspchecks:
+    @echo ""
+    @printf "\033[34m=== Running Type Checks ===\033[0m\n"
+    @npx tsc -p tsconfig.json
+    @printf "\033[32m✓ code-lspchecks completed successfully\033[0m\n"
+    @echo ""
+
+code-security:
+    @echo ""
+    @printf "\033[34m=== Running Security Lint Pass ===\033[0m\n"
+    @npx oxlint --deny-warnings -c config/oxlint/security.oxlintrc.json src
+    @printf "\033[32m✓ code-security completed successfully\033[0m\n"
+    @echo ""
+
+code-deptry:
+    @echo ""
+    @printf "\033[34m=== Checking Dependency Hygiene ===\033[0m\n"
+    @npx knip
+    @printf "\033[32m✓ code-deptry completed successfully\033[0m\n"
+    @echo ""
+
+code-architecture:
+    @echo ""
+    @printf "\033[34m=== Checking MCP Architecture Boundaries ===\033[0m\n"
+    @npx depcruise src test --config .dependency-cruiser.cjs
+    @printf "\033[32m✓ code-architecture completed successfully\033[0m\n"
+    @echo ""
+
+code-audit:
+    @echo ""
+    @printf "\033[34m=== Auditing Dependencies ===\033[0m\n"
+    @npm audit --audit-level=high
+    @npx npm-check-updates
+    @printf "\033[32m✓ code-audit completed successfully\033[0m\n"
+    @echo ""
+
+test: build
+    @echo ""
+    @printf "\033[34m=== Running Tests ===\033[0m\n"
+    @npm run test
+    @printf "\033[32m✓ test completed successfully\033[0m\n"
+    @echo ""
+
+test-coverage: build
+    @echo ""
+    @printf "\033[34m=== Running Tests with Coverage ===\033[0m\n"
+    @npm run test:coverage
+    @printf "\033[32m✓ test-coverage completed successfully\033[0m\n"
+    @echo ""
+
+ci:
+    #!/usr/bin/env bash
+    set -e
+    echo ""
+    printf "\033[34m=== Running CI Checks ===\033[0m\n"
+    echo ""
+    just check
+    just init
+    just code-format
+    just code-style
+    just code-spell
+    just code-semgrep
+    just code-lspchecks
+    just code-security
+    just code-deptry
+    just code-architecture
+    just test
+    just test-coverage
+    just code-audit
+    echo ""
+    printf "\033[32m✓ ci completed successfully\033[0m\n"
+    echo ""
+
+ci-quiet:
+    #!/usr/bin/env bash
+    set -e
+    printf "\033[34m=== Running CI Checks (Quiet Mode) ===\033[0m\n"
+    TMPFILE=$(mktemp)
+    trap "rm -f $TMPFILE" EXIT
+
+    for target in check init code-format code-style code-spell code-semgrep \
+        code-lspchecks code-security code-deptry code-architecture test \
+        test-coverage code-audit; do
+        just "$target" > "$TMPFILE" 2>&1 || { printf "\033[31m✗ %s failed\033[0m\n" "$target"; cat "$TMPFILE"; exit 1; }
+        printf "\033[32m✓ %s passed\033[0m\n" "$target"
+    done
+
+    echo ""
+    printf "\033[32m✓ ci-quiet completed successfully\033[0m\n"
+    echo ""

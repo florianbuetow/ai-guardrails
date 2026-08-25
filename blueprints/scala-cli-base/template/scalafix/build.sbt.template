@@ -1,0 +1,39 @@
+ThisBuild / organization   := "{{group_id}}"
+ThisBuild / version        := "0.1.0-SNAPSHOT"
+ThisBuild / scalaVersion   := "2.13.18"
+ThisBuild / scalafmtConfig := file("../.scalafmt.conf")
+
+lazy val rules = (project in file("rules"))
+  .settings(
+    name                                   := "{{project_slug}}-scalafix-rules",
+    scalaVersion                           := "2.13.18",
+    libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % "0.14.7"
+  )
+
+lazy val input = (project in file("input"))
+  .settings(
+    publish / skip    := true,
+    scalaVersion      := "3.3.8",
+    semanticdbEnabled := true
+  )
+
+lazy val output = (project in file("output"))
+  .settings(
+    publish / skip := true,
+    scalaVersion   := "3.3.8"
+  )
+
+lazy val tests = (project in file("tests"))
+  .dependsOn(rules)
+  .enablePlugins(ScalafixTestkitPlugin)
+  .settings(
+    publish / skip                         := true,
+    scalaVersion                           := "2.13.18",
+    scalafixTestkitOutputSourceDirectories :=
+      (output / Compile / unmanagedSourceDirectories).value,
+    scalafixTestkitInputSourceDirectories :=
+      (input / Compile / unmanagedSourceDirectories).value,
+    scalafixTestkitInputClasspath     := (input / Compile / fullClasspath).value,
+    scalafixTestkitInputScalacOptions := (input / Compile / scalacOptions).value,
+    scalafixTestkitInputScalaVersion  := (input / Compile / scalaVersion).value
+  )

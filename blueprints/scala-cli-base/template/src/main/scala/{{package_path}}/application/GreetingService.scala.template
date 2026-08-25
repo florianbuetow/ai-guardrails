@@ -1,0 +1,8 @@
+package {{package_name}}.application
+
+import {{package_name}}.domain.Greeting
+
+object GreetingService:
+  def create(recipient: String): Either[String, Greeting] =
+    if recipient.isBlank then Left("recipient must not be blank")
+    else Right(Greeting(s"Hello, $recipient!"))

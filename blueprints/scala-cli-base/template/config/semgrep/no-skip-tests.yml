@@ -1,0 +1,6 @@
+rules:
+  - id: scala-no-skipped-tests
+    languages: [scala]
+    severity: ERROR
+    message: Tests must pass or fail; skipped and ignored tests are forbidden.
+    pattern-regex: '(?m)(\.ignore\b|munitIgnore\b|@Ignore\b|@Disabled\b)'

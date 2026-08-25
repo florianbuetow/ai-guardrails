@@ -1,0 +1,9 @@
+rules:
+  - id: scala-security-predictable-random
+    languages: [scala]
+    severity: ERROR
+    message: Use java.security.SecureRandom for security-sensitive randomness.
+    patterns:
+      - pattern-either:
+          - pattern: new java.util.Random(...)
+          - pattern: scala.util.Random.$METHOD(...)

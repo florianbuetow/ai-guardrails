@@ -1,0 +1,10 @@
+{
+  "entry": ["src/index.ts", "test/**/*.test.ts", "vitest.config.ts"],
+  "project": ["src/**/*.ts", "test/**/*.ts", "vitest.config.ts"],
+  "ignoreDependencies": [
+    "dependency-cruiser",
+    "npm-check-updates",
+    "oxlint",
+    "prettier"
+  ]
+}

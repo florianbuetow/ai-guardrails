@@ -1,0 +1,12 @@
+rules:
+  - id: mcp-typescript.no-shellcheck-disable
+    languages: [generic]
+    severity: ERROR
+    message: Fix ShellCheck findings instead of suppressing them.
+    pattern-regex: '#\s*shellcheck\s+disable='
+    paths:
+      include:
+        - "*.sh"
+        - "*.bash"
+      exclude:
+        - test/

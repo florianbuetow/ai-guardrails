@@ -1,0 +1,51 @@
+# AGENTS.md
+
+Guidance for AI coding agents working on this TypeScript MCP server.
+
+## Core rules
+
+1. Fail fast. Propagate errors or return explicit MCP tool errors with actionable text.
+2. Never add silent defaults for missing configuration or tool inputs. Required values stay required.
+3. Never suppress checks with `@ts-ignore`, `@ts-expect-error`, lint-disable comments, coverage ignores, or skipped tests.
+4. Never write application logs to stdout. stdio MCP reserves stdout for JSON-RPC; use stderr through `console.error`.
+5. Use npm and the checked-in scripts exclusively. Do not introduce another package manager.
+6. Preserve ES modules and `.js` extensions in relative TypeScript imports.
+7. Add no dependency when the current SDK, platform, or an existing dependency already solves the problem.
+
+## Architecture
+
+The dependency direction is:
+
+```text
+index.ts -> server.ts -> tools/* -> services/*
+```
+
+- `index.ts` owns process and transport lifecycle only.
+- `server.ts` is the composition root.
+- Each tool file owns one MCP schema and its adapter.
+- Services contain ordinary TypeScript behavior and must not import MCP server, transport, or tool modules.
+- Do not add base-tool classes, controller layers, metadata registries, decorators, repositories, or dependency-injection frameworks without a demonstrated need.
+- Add `resources/` or `prompts/` only when the server exposes those MCP capabilities.
+- Add HTTP and authentication only for an explicitly remote, multi-client deployment.
+
+## Tool behavior
+
+- Validate tool inputs with Zod v4 schemas.
+- Describe every input so hosts can present useful tool documentation.
+- Return `structuredContent` for successful structured results and keep text content useful to a model.
+- Return `isError: true` for recoverable, model-readable tool failures.
+- Keep domain behavior in services so it can be tested without MCP.
+
+## Verification
+
+- Test services directly.
+- Test tools through a real `@modelcontextprotocol/client` client, not by invoking handler functions.
+- Keep a spawned-process test for the built stdio entrypoint.
+- Run `just ci` before committing. Fix every finding instead of suppressing it.
+
+## Justfile conventions
+
+- Use `printf` for colored or formatted output.
+- Keep a blank output line before and after command blocks.
+- Keep the dedicated, manually grouped `help` recipe current.
+- Every recipe must fail fast and end with a clear status message.

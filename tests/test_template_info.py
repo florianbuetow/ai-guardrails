@@ -77,6 +77,41 @@ class TemplateInfoTests(unittest.TestCase):
         self.assertEqual("maven", assertj.latest_registry)
         self.assertEqual("org.assertj:assertj-core", assertj.latest_identifier)
 
+    def test_sbt_parser_reports_scala_application_dependencies_only(self) -> None:
+        manifest = REPO_ROOT / "blueprints/scala-cli-base/template/build.sbt.template"
+
+        dependencies = template_info.parse_sbt_manifest(manifest)
+
+        dependency_names = names(dependencies)
+        self.assertIn("org.scalameta:munit_3", dependency_names)
+        self.assertIn("com.tngtech.archunit:archunit", dependency_names)
+        self.assertIn("org.slf4j:slf4j-nop", dependency_names)
+        self.assertNotIn("org.scalameta:sbt-scalafmt", dependency_names)
+        self.assertNotIn("com.example:scalafix-rules_2.13", dependency_names)
+        munit = dependency_by_name(dependencies, "org.scalameta:munit_3")
+        self.assertEqual("1.3.5", munit.spec)
+        self.assertEqual("maven", munit.latest_registry)
+        self.assertEqual("org.scalameta:munit_3", munit.latest_identifier)
+
+    def test_clojure_parser_reports_deps_edn_dependencies(self) -> None:
+        manifest = REPO_ROOT / "blueprints/clojure-cli-base/template/deps.edn.template"
+
+        dependencies = template_info.parse_clojure_manifest(manifest)
+
+        dependency_names = names(dependencies)
+        self.assertIn("org.clojure/clojure", dependency_names)
+        self.assertIn("metosin/malli", dependency_names)
+        self.assertIn("lambdaisland/kaocha", dependency_names)
+        self.assertIn("com.fabiodomingues/clj-depend", dependency_names)
+        clojure = dependency_by_name(dependencies, "org.clojure/clojure")
+        self.assertEqual("1.12.5", clojure.spec)
+        self.assertEqual("maven", clojure.latest_registry)
+        self.assertEqual("org.clojure:clojure", clojure.latest_identifier)
+        malli = dependency_by_name(dependencies, "metosin/malli")
+        self.assertEqual("clojars", malli.latest_registry)
+        kaocha = dependency_by_name(dependencies, "lambdaisland/kaocha")
+        self.assertEqual("clojars", kaocha.latest_registry)
+
     def test_cmake_parser_uses_fetchcontent_repository_for_latest_lookup(self) -> None:
         manifest = REPO_ROOT / "blueprints/cpp-cli-base/template/CMakeLists.txt.template"
 
@@ -85,6 +120,14 @@ class TemplateInfoTests(unittest.TestCase):
         googletest = dependency_by_name(dependencies, "googletest")
         self.assertEqual("github-tags", googletest.latest_registry)
         self.assertEqual("https://github.com/google/googletest.git", googletest.latest_identifier)
+
+    def test_clojars_coordinate_parser_requires_group_and_artifact(self) -> None:
+        self.assertEqual(
+            ("metosin", "malli"),
+            template_info.latest_version.split_clojars_coordinate("metosin/malli"),
+        )
+        with self.assertRaises(template_info.latest_version.LatestVersionError):
+            template_info.latest_version.split_clojars_coordinate("malli")
 
     def test_npm_parser_excludes_scaffold_package(self) -> None:
         manifest = REPO_ROOT / "blueprints/react-vite-typescript-base/template/scripts/bootstrap-vite.sh.template"
@@ -97,6 +140,20 @@ class TemplateInfoTests(unittest.TestCase):
         self.assertIn("@playwright/test", dependency_names)
         self.assertNotIn("vite", dependency_names)
         self.assertNotIn("npm scaffold packages", groups(dependencies))
+
+    def test_npm_manifest_parser_reports_runtime_and_development_dependencies(self) -> None:
+        manifest = REPO_ROOT / "blueprints/mcp-server-typescript-base/template/package.json.template"
+
+        dependencies = template_info.parse_npm_manifest(manifest)
+
+        dependency_names = names(dependencies)
+        self.assertIn("@modelcontextprotocol/server", dependency_names)
+        self.assertIn("zod", dependency_names)
+        self.assertIn("typescript", dependency_names)
+        server = dependency_by_name(dependencies, "@modelcontextprotocol/server")
+        self.assertEqual("npm", server.latest_registry)
+        self.assertEqual("@modelcontextprotocol/server", server.latest_identifier)
+        self.assertEqual("npm dependencies", server.group)
 
     def test_dependency_output_uses_box_table_with_requested_columns(self) -> None:
         dependency = template_info.Dependency(

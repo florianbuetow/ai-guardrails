@@ -1,0 +1,37 @@
+package {{package_name}}.architecture
+
+import com.tngtech.archunit.core.importer.ClassFileImporter
+import com.tngtech.archunit.core.importer.ImportOption
+import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses
+import com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices
+
+class ArchitectureSuite extends munit.FunSuite:
+  private val productionClasses =
+    new ClassFileImporter()
+      .withImportOption(new ImportOption.DoNotIncludeTests())
+      .importPackages("{{package_name}}")
+
+  test("domain does not depend on application or CLI packages"):
+    noClasses()
+      .that()
+      .resideInAPackage("..domain..")
+      .should()
+      .dependOnClassesThat()
+      .resideInAnyPackage("..application..", "..cli..")
+      .check(productionClasses)
+
+  test("application does not depend on the CLI package"):
+    noClasses()
+      .that()
+      .resideInAPackage("..application..")
+      .should()
+      .dependOnClassesThat()
+      .resideInAPackage("..cli..")
+      .check(productionClasses)
+
+  test("production package slices are free of cycles"):
+    slices()
+      .matching("{{package_name}}.(*)..")
+      .should()
+      .beFreeOfCycles()
+      .check(productionClasses)

@@ -1,0 +1,6 @@
+rules:
+  - id: scala-no-check-suppression
+    languages: [scala]
+    severity: ERROR
+    message: Fix the finding instead of suppressing a checker.
+    pattern-regex: '(?m)(@(?:nowarn|unchecked|SuppressWarnings)|scalafix:(?:off|ok)|wartremover:|semgrep:ignore|noinspection|NOSONAR)'

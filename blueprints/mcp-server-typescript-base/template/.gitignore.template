@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+*.iml
+.DS_Store
+npm-debug.log*
+.copier-answers.yml

@@ -1,0 +1,11 @@
+rules:
+  - id: scala-no-get-or-else
+    languages: [scala]
+    severity: ERROR
+    message: Handle missing values explicitly instead of silently substituting a fallback.
+    pattern: $VALUE.getOrElse($DEFAULT)
+  - id: scala-no-or-else
+    languages: [scala]
+    severity: ERROR
+    message: Handle the unsuccessful branch explicitly instead of silently selecting an alternative.
+    pattern: $VALUE.orElse($ALTERNATIVE)

@@ -64,11 +64,19 @@ test_pre_commit_hook() {
         return 1
     fi
 
-    output="$(cd "$project_dir" && UV_EXCLUDE_NEWER="2099-01-01" git commit --allow-empty -m "hook smoke" 2>&1)" || {
-        log_fail "Pre-commit hook smoke commit failed"
-        printf "%s\n" "$output"
-        return 1
-    }
+    if [ "${NO_GIT_MUTATIONS:-false}" = "true" ]; then
+        output="$(cd "$project_dir" && .git/hooks/pre-commit 2>&1)" || {
+            log_fail "Pre-commit hook direct invocation failed"
+            printf "%s\n" "$output"
+            return 1
+        }
+    else
+        output="$(cd "$project_dir" && UV_EXCLUDE_NEWER="2099-01-01" git commit --allow-empty -m "hook smoke" 2>&1)" || {
+            log_fail "Pre-commit hook smoke commit failed"
+            printf "%s\n" "$output"
+            return 1
+        }
+    fi
 
     if ! printf "%s\n" "$output" | grep -F "Running CI Checks (Quiet Mode)" >/dev/null; then
         log_fail "Pre-commit hook did not run just ci-quiet"
@@ -195,10 +203,13 @@ run_language_tests() {
 
         log_section "$LANG_NAME violation: $violation_name (just $check_recipe)"
 
-        # Inject violation files (with backup) and stage for semgrep
+        # Inject violation files with backups. Established language suites stage
+        # for Semgrep; Scala intentionally avoids all git mutations.
         backup_dir="$(mktemp -d)"
         inject_violation "$violation_dir" "$project_dir" "$backup_dir"
-        (cd "$project_dir" && git add -A)
+        if [ "${NO_GIT_MUTATIONS:-false}" != "true" ]; then
+            (cd "$project_dir" && git add -A)
+        fi
 
         # Run the targeted check — it must fail
         local check_output
@@ -213,12 +224,13 @@ run_language_tests() {
         log_pass "Violation '$violation_name' correctly detected"
         passed_tests=$((passed_tests + 1))
 
-        # Restore original files and git state for the next test. git reset
-        # --hard is required (not git checkout): the violation files were
-        # staged above, so checkout would restore the violation from the
-        # index and leak it into every subsequent test.
+        # Restore original files and git state for the next test.
         restore_violation "$violation_dir" "$project_dir" "$backup_dir"
-        (cd "$project_dir" && git reset -q --hard HEAD && git clean -qfd)
+        if [ "${NO_GIT_MUTATIONS:-false}" != "true" ]; then
+            # git reset --hard is required (not git checkout): the violation
+            # files were staged above, so checkout would restore the violation.
+            (cd "$project_dir" && git reset -q --hard HEAD && git clean -qfd)
+        fi
     done
 
     # --- Cleanup ---

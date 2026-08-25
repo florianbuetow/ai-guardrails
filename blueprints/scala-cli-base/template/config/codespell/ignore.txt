@@ -1,0 +1,7 @@
+archunit
+munit
+sbt
+scalafix
+scalafmt
+semgrep
+wartremover
