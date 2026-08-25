@@ -1,0 +1,262 @@
+_default:
+    @just help
+
+check:
+    @echo ""
+    @if ! java -version >/dev/null 2>&1; then \
+        printf "\033[31m✗ Error: JDK {{jvm_target}}+ is required\033[0m\n"; \
+        exit 1; \
+    fi
+    @java_major="$(java -XshowSettings:properties -version 2>&1 | sed -n 's/^[[:space:]]*java\.specification\.version = //p')"; \
+    case "$java_major" in \
+        ''|*[!0-9]*) printf "\033[31m✗ Error: unable to determine a numeric JDK version\033[0m\n"; exit 1 ;; \
+    esac; \
+    if [ "$java_major" -lt "{{jvm_target}}" ]; then \
+        printf "\033[31m✗ Error: JDK {{jvm_target}}+ is required, found JDK %s\033[0m\n" "$java_major"; \
+        exit 1; \
+    fi
+    @for tool in git clojure just codespell semgrep clj-holmes trivy timeout; do \
+        if ! command -v "$tool" >/dev/null 2>&1; then \
+            printf "\033[31m✗ Error: %s is not installed\033[0m\n" "$tool"; \
+            exit 1; \
+        fi; \
+        printf "\033[32m✓ %s is installed\033[0m\n" "$tool"; \
+    done
+    @printf "\033[32m✓ check completed successfully\033[0m\n"
+    @echo ""
+
+help:
+    @clear
+    @echo ""
+    @printf "\033[0;34m=== {{project_name}} ===\033[0m\n"
+    @echo ""
+    @printf "\033[0;33mSetup & Lifecycle:\033[0m\n"
+    @printf "  %-40s %s\n" "init" "Resolve dependencies and compile the project"
+    @printf "  %-40s %s\n" "run" "Run the CLI application"
+    @printf "  %-40s %s\n" "destroy" "Clean build artifacts"
+    @printf "  %-40s %s\n" "check" "Check prerequisites"
+    @printf "  %-40s %s\n" "help" "Show this help message"
+    @echo ""
+    @printf "\033[0;33mCode Quality:\033[0m\n"
+    @printf "  %-40s %s\n" "code-format" "Format Clojure and EDN files (cljfmt)"
+    @printf "  %-40s %s\n" "code-style" "Check formatting (cljfmt)"
+    @printf "  %-40s %s\n" "code-kondo" "Run clj-kondo static analysis"
+    @printf "  %-40s %s\n" "code-eastwood" "Run Eastwood compiler-like bug analysis"
+    @printf "  %-40s %s\n" "code-compile" "Compile all namespaces with strict warnings"
+    @printf "  %-40s %s\n" "code-deptry" "Reject unused direct dependencies"
+    @printf "  %-40s %s\n" "code-security" "Run clj-holmes with pinned rules"
+    @printf "  %-40s %s\n" "code-semgrep" "Run project-specific Semgrep guardrails"
+    @printf "  %-40s %s\n" "code-architecture" "Check layers and namespace cycles (clj-depend)"
+    @printf "  %-40s %s\n" "code-spell" "Check spelling (codespell)"
+    @printf "  %-40s %s\n" "code-audit" "Scan resolved Maven dependencies (Trivy)"
+    @printf "  %-40s %s\n" "code-outdated" "Reject outdated dependencies (antq)"
+    @echo ""
+    @printf "\033[0;33mCI & Testing:\033[0m\n"
+    @printf "  %-40s %s\n" "test" "Run all Kaocha tests"
+    @printf "  %-40s %s\n" "test-contracts" "Run Malli function and generative contracts"
+    @printf "  %-40s %s\n" "test-properties" "Run property tests"
+    @printf "  %-40s %s\n" "test-coverage" "Run tests with enforced coverage"
+    @printf "  %-40s %s\n" "ci" "Run every validation tool and test suite"
+    @printf "  %-40s %s\n" "ci-quiet" "Run every validation check quietly"
+    @echo ""
+
+init: check
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo ""
+    printf "\033[34m=== Initializing Clojure Project ===\033[0m\n"
+    clojure -P
+    clojure -P -M:test
+    clojure -P -T:build
+    clojure -P -M:cljfmt
+    clojure -P -M:clj-kondo
+    clojure -P -M:eastwood
+    clojure -P -M:clj-depend
+    clojure -P -M:depcheck
+    clojure -P -M:antq
+    clojure -T:build compile-project
+    if [ ! -f ".git/hooks/pre-commit" ]; then
+        printf "\033[31m✗ Error: generated pre-commit hook is missing\033[0m\n"
+        exit 1
+    fi
+    chmod +x .git/hooks/pre-commit
+    printf "\033[32m✓ init completed successfully\033[0m\n"
+    echo ""
+
+run:
+    @echo ""
+    @printf "\033[34m=== Running Clojure Application ===\033[0m\n"
+    @clojure -M:run
+    @printf "\033[32m✓ run completed successfully\033[0m\n"
+    @echo ""
+
+destroy:
+    @echo ""
+    @printf "\033[34m=== Cleaning Build Artifacts ===\033[0m\n"
+    @clojure -T:build clean
+    @printf "\033[32m✓ destroy completed successfully\033[0m\n"
+    @echo ""
+
+code-format:
+    @echo ""
+    @printf "\033[34m=== Formatting Clojure Code ===\033[0m\n"
+    @clojure -M:cljfmt fix
+    @printf "\033[32m✓ code-format completed successfully\033[0m\n"
+    @echo ""
+
+code-style:
+    @echo ""
+    @printf "\033[34m=== Checking Clojure Formatting ===\033[0m\n"
+    @clojure -M:cljfmt check
+    @printf "\033[32m✓ code-style completed successfully\033[0m\n"
+    @echo ""
+
+code-kondo:
+    @echo ""
+    @printf "\033[34m=== Running clj-kondo ===\033[0m\n"
+    @clojure -M:clj-kondo --lint deps.edn build.clj tests.edn src/main/clojure test/clojure scripts --parallel --fail-level warning
+    @printf "\033[32m✓ code-kondo completed successfully\033[0m\n"
+    @echo ""
+
+code-eastwood:
+    @echo ""
+    @printf "\033[34m=== Running Eastwood ===\033[0m\n"
+    @clojure -M:eastwood
+    @printf "\033[32m✓ code-eastwood completed successfully\033[0m\n"
+    @echo ""
+
+code-compile:
+    @echo ""
+    @printf "\033[34m=== Compiling All Clojure Namespaces ===\033[0m\n"
+    @clojure -T:build compile-project
+    @printf "\033[32m✓ code-compile completed successfully\033[0m\n"
+    @echo ""
+
+code-deptry:
+    @echo ""
+    @printf "\033[34m=== Checking Dependency Hygiene ===\033[0m\n"
+    @clojure -Sdeps '{:aliases {:guardrails-depcheck {:extra-paths ["scripts"] :extra-deps {io.github.borkdude/unused-deps {:git/url "https://github.com/borkdude/unused-deps.git" :git/sha "c6673b5549d02fa131d21b61695e283b18124b59"} clj-kondo/clj-kondo {:mvn/version "2026.08.04"} org.clojure/tools.deps {:mvn/version "0.31.1642"}} :main-opts ["-m" "check-deps"]}}}' -M:guardrails-depcheck
+    @printf "\033[32m✓ code-deptry completed successfully\033[0m\n"
+    @echo ""
+
+code-security:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo ""
+    printf "\033[34m=== Running clj-holmes Security Analysis ===\033[0m\n"
+    rules_root="$(mktemp -d)"
+    trap 'rm -rf "$rules_root"' EXIT
+    git clone --quiet --filter=blob:none --no-checkout https://github.com/clj-holmes/clj-holmes-rules.git "$rules_root/repository"
+    git -C "$rules_root/repository" checkout --quiet --detach fbf5e2eeebe9a85e2dc568c04b482a50fc482a02
+    clj-holmes scan --scan-path src/main/clojure --rules-directory "$rules_root/repository/security" --fail-on-result
+    printf "\033[32m✓ code-security completed successfully\033[0m\n"
+    echo ""
+
+code-semgrep:
+    @echo ""
+    @printf "\033[34m=== Running Semgrep Guardrails ===\033[0m\n"
+    @semgrep --config config/semgrep/ --error --no-git-ignore src/ test/ scripts/
+    @printf "\033[32m✓ code-semgrep completed successfully\033[0m\n"
+    @echo ""
+
+code-architecture:
+    @echo ""
+    @printf "\033[34m=== Running Architecture Checks ===\033[0m\n"
+    @clojure -M:clj-depend
+    @printf "\033[32m✓ code-architecture completed successfully\033[0m\n"
+    @echo ""
+
+code-spell:
+    @echo ""
+    @printf "\033[34m=== Checking Spelling ===\033[0m\n"
+    @codespell src test config scripts *.md *.edn *.clj \
+        --skip='.clj-kondo/.cache,.cpcache,target' \
+        --ignore-words=config/codespell/ignore.txt
+    @printf "\033[32m✓ code-spell completed successfully\033[0m\n"
+    @echo ""
+
+code-audit:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo ""
+    printf "\033[34m=== Auditing Dependencies ===\033[0m\n"
+    clojure -Sdeps '{:aliases {:guardrails-build {:deps {io.github.clojure/tools.build {:mvn/version "0.10.14"}} :ns-default build}}}' -T:guardrails-build audit-pom
+    timeout -k 10 600 trivy fs --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --quiet target/audit/pom.xml
+    printf "\033[32m✓ code-audit completed successfully\033[0m\n"
+    echo ""
+
+code-outdated:
+    @echo ""
+    @printf "\033[34m=== Checking Outdated Dependencies ===\033[0m\n"
+    @clojure -Sdeps '{:deps {com.github.liquidz/antq {:mvn/version "2.11.1276"} org.slf4j/slf4j-nop {:mvn/version "1.7.36"}}}' -M -m antq.core --no-changes
+    @printf "\033[32m✓ code-outdated completed successfully\033[0m\n"
+    @echo ""
+
+test:
+    @echo ""
+    @printf "\033[34m=== Running Clojure Tests ===\033[0m\n"
+    @clojure -M:test --fail-fast
+    @printf "\033[32m✓ test completed successfully\033[0m\n"
+    @echo ""
+
+test-contracts:
+    @echo ""
+    @printf "\033[34m=== Running Malli Contract Checks ===\033[0m\n"
+    @clojure -M:contracts
+    @clojure -M:test --fail-fast
+    @printf "\033[32m✓ test-contracts completed successfully\033[0m\n"
+    @echo ""
+
+test-properties:
+    @echo ""
+    @printf "\033[34m=== Running Property Tests ===\033[0m\n"
+    @clojure -M:test --fail-fast
+    @printf "\033[32m✓ test-properties completed successfully\033[0m\n"
+    @echo ""
+
+test-coverage:
+    @echo ""
+    @printf "\033[34m=== Running Coverage Verification ===\033[0m\n"
+    @clojure -M:test --fail-fast --plugin cloverage
+    @printf "\033[32m✓ test-coverage completed successfully\033[0m\n"
+    @echo ""
+
+ci:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo ""
+    printf "\033[34m=== Running All Clojure CI Checks ===\033[0m\n"
+    just check
+    just init
+    just code-style
+    just code-kondo
+    just code-eastwood
+    just code-compile
+    just code-deptry
+    just code-security
+    just code-semgrep
+    just code-architecture
+    just code-spell
+    just test
+    just test-contracts
+    just test-properties
+    just test-coverage
+    just code-audit
+    just code-outdated
+    printf "\033[32m✓ ci completed successfully\033[0m\n"
+    echo ""
+
+ci-quiet:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo ""
+    printf "\033[34m=== Running CI Checks (Quiet Mode) ===\033[0m\n"
+    output_file="$(mktemp)"
+    trap 'rm -f "$output_file"' EXIT
+    if ! just ci >"$output_file" 2>&1; then
+        printf "\033[31m✗ ci-quiet failed\033[0m\n"
+        cat "$output_file"
+        exit 1
+    fi
+    printf "\033[32m✓ ci-quiet completed successfully\033[0m\n"
+    echo ""

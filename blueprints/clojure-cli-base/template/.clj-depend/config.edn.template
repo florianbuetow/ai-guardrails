@@ -1,0 +1,7 @@
+{:source-paths #{"src/main/clojure"}
+ :layers {:cli {:defined-by ".*\\.cli\\..*"
+                :accesses-layers #{:application :domain}}
+          :application {:defined-by ".*\\.application\\..*"
+                        :accesses-layers #{:domain}}
+          :domain {:defined-by ".*\\.domain\\..*"
+                   :accesses-layers #{}}}}

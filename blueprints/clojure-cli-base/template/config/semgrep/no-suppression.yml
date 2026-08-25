@@ -1,0 +1,6 @@
+rules:
+  - id: clojure-no-checker-suppression
+    languages: [generic]
+    severity: ERROR
+    message: Do not suppress guardrails; fix the underlying issue.
+    pattern-regex: '(clj-kondo/ignore|clj-kondo:ignore|semgrep:ignore|NOSONAR|eastwood.*disable|#_\s*\{)'

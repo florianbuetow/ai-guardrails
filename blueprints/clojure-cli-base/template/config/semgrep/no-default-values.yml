@@ -1,0 +1,6 @@
+rules:
+  - id: clojure-no-destructuring-defaults
+    languages: [generic]
+    severity: ERROR
+    message: Destructuring defaults hide missing inputs; validate required values explicitly.
+    pattern-regex: ':or\s*\{'

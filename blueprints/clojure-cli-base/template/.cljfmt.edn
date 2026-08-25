@@ -1,0 +1,2 @@
+{:remove-consecutive-blank-lines? true
+ :sort-ns-references? true}

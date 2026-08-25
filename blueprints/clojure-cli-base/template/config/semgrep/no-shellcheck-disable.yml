@@ -1,0 +1,9 @@
+rules:
+  - id: shell-no-shellcheck-disable
+    languages: [generic]
+    severity: ERROR
+    message: Do not suppress ShellCheck findings; fix the script.
+    paths:
+      include:
+        - "/scripts/*.sh"
+    pattern-regex: 'shellcheck\s+disable'

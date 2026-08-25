@@ -1,0 +1,6 @@
+rules:
+  - id: clojure-no-predictable-random
+    languages: [generic]
+    severity: ERROR
+    message: Use java.security.SecureRandom for security-sensitive randomness.
+    pattern-regex: '(java\.util\.Random|\(\s*rand-int\b|\(\s*rand\b)'

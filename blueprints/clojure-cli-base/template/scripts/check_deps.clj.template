@@ -1,0 +1,101 @@
+(ns check-deps
+  (:require [borkdude.unused-deps :as unused-deps]
+            [clj-kondo.core :as kondo]
+            [clojure.edn :as edn]
+            [clojure.tools.deps :as deps]))
+
+(def platform-libraries
+  '#{org.clojure/clojure})
+
+(def source-paths
+  ["src/main/clojure"])
+
+(defn project-dependencies
+  []
+  (let [project-data (edn/read-string (slurp "deps.edn"))
+        declared (:deps project-data)]
+    (when-not (map? declared)
+      (throw (ex-info "deps.edn must contain a :deps map"
+                      {:deps-file "deps.edn"})))
+    declared))
+
+(defn project-unused-dependencies
+  []
+  (let [result (unused-deps/unused-deps
+                {:root-dir "."
+                 :deps-file "deps.edn"
+                 :source-paths source-paths})]
+    (when-not (map? result)
+      (throw (ex-info "unused dependency analysis returned invalid data"
+                      {:result result})))
+    (->> (:unused-deps result)
+         (remove (fn [[library _coordinate]]
+                   (contains? platform-libraries library)))
+         vec)))
+
+(defn kondo-analysis
+  [lint-targets dependencies?]
+  (let [result (kondo/run!
+                {:lint (vec lint-targets)
+                 :dependencies dependencies?
+                 :cache false
+                 :config {:output {:analysis true}}})
+        analysis (:analysis result)]
+    (when-not (map? analysis)
+      (throw (ex-info "clj-kondo analysis is missing"
+                      {:lint-targets lint-targets})))
+    analysis))
+
+(defn dependency-namespace-owners
+  []
+  (let [basis (deps/create-basis {:project "deps.edn" :user nil})
+        libraries (:libs basis)]
+    (when-not (map? libraries)
+      (throw (ex-info "resolved dependency basis is missing libraries"
+                      {:basis-keys (keys basis)})))
+    (reduce-kv
+     (fn [owners library coordinate]
+       (let [paths (:paths coordinate)]
+         (when-not (seq paths)
+           (throw (ex-info "resolved library is missing classpath entries"
+                           {:library library :coordinate coordinate})))
+         (reduce
+          (fn [result namespace-definition]
+            (update result (:name namespace-definition) (fnil conj #{}) library))
+          owners
+          (:namespace-definitions (kondo-analysis paths true)))))
+     {}
+     libraries)))
+
+(defn transitive-usage-violations
+  [direct-libraries]
+  (let [owners (dependency-namespace-owners)
+        usages (:namespace-usages (kondo-analysis source-paths false))]
+    (->> usages
+         (keep (fn [{:keys [filename from row to]}]
+                 (let [namespace-owners (get owners to)]
+                   (when (and (seq namespace-owners)
+                              (empty? (filter direct-libraries namespace-owners)))
+                     {:filename filename
+                      :row row
+                      :from from
+                      :namespace to
+                      :owning-libraries namespace-owners}))))
+         vec)))
+
+(defn -main
+  [& args]
+  (when-not (empty? args)
+    (throw (ex-info "dependency check accepts no command-line arguments"
+                    {:args args})))
+  (let [direct-libraries (set (keys (project-dependencies)))
+        unused (project-unused-dependencies)
+        transitive-usages (transitive-usage-violations direct-libraries)]
+    (when (seq unused)
+      (throw (ex-info "unused direct dependencies found"
+                      {:dependencies unused})))
+    (when (seq transitive-usages)
+      (throw (ex-info "source uses transitively available libraries that must be declared directly"
+                      {:usages transitive-usages})))
+    (println "direct dependency declarations are complete and used")
+    (shutdown-agents)))

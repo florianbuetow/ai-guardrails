@@ -1,0 +1,6 @@
+rules:
+  - id: clojure-no-skipped-tests
+    languages: [generic]
+    severity: ERROR
+    message: Do not skip or mark tests pending; keep the test executable.
+    pattern-regex: '(:kaocha/skip|:kaocha/pending|:skip)'

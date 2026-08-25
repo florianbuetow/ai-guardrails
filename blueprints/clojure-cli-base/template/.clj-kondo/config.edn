@@ -1,0 +1,14 @@
+{:linters {:unresolved-symbol {:level :error}
+           :unresolved-namespace {:level :error}
+           :invalid-arity {:level :error}
+           :missing-test-assertion {:level :error}
+           :shadowed-var {:level :error}
+           :type-mismatch {:level :error}
+           :unused-binding {:level :warning}
+           :unused-namespace {:level :warning}
+           :unused-private-var {:level :warning}
+           :unused-referred-var {:level :warning}
+           :refer-all {:level :error}
+           :redundant-do {:level :warning}
+           :discouraged-var {clojure.core/rand {:message "Use java.security.SecureRandom for security-sensitive randomness."}
+                             clojure.core/rand-int {:message "Use java.security.SecureRandom for security-sensitive randomness."}}}}

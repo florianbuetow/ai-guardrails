@@ -1,0 +1,6 @@
+rules:
+  - id: clojure-no-or-fallback
+    languages: [generic]
+    severity: ERROR
+    message: Handle missing values explicitly instead of silently substituting a fallback.
+    pattern-regex: '\(\s*or\s+[^\n)]+\s+["'':{[0-9]'
