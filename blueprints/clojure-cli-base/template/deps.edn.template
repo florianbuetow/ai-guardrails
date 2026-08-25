@@ -1,0 +1,35 @@
+{:paths ["src/main/clojure" "resources"]
+ :deps {org.clojure/clojure {:mvn/version "1.12.5"}
+        metosin/malli {:mvn/version "0.20.1"}}
+ :aliases
+ {:run {:main-opts ["-m" "{{namespace_name}}.cli.main"]}
+  :test {:extra-paths ["test/clojure"]
+         :extra-deps {lambdaisland/kaocha {:mvn/version "1.91.1392"}
+                      lambdaisland/kaocha-cloverage {:mvn/version "1.1.89"}
+                      org.clojure/test.check {:mvn/version "1.1.3"}}
+         :main-opts ["-m" "kaocha.runner"]}
+  :contracts {:extra-paths ["test/clojure"]
+              :extra-deps {org.clojure/test.check {:mvn/version "1.1.3"}}
+              :main-opts ["-m" "{{namespace_name}}.contracts.contract-check"]}
+  :build {:deps {io.github.clojure/tools.build {:mvn/version "0.10.14"}}
+          :ns-default build}
+  :cljfmt {:replace-deps {dev.weavejester/cljfmt {:mvn/version "0.16.5"}}
+           :main-opts ["-m" "cljfmt.main"]}
+  :clj-kondo {:replace-deps {clj-kondo/clj-kondo {:mvn/version "2026.08.04"}}
+              :main-opts ["-m" "clj-kondo.main"]}
+  :eastwood {:extra-paths ["test/clojure"]
+             :extra-deps {jonase/eastwood {:mvn/version "1.4.3"}
+                          org.clojure/test.check {:mvn/version "1.1.3"}}
+             :main-opts ["-m" "eastwood.lint"
+                         "{:source-paths [\"src/main/clojure\"] :test-paths [\"test/clojure\"] :namespaces [:source-paths :test-paths]}"]}
+  :clj-depend {:replace-deps {com.fabiodomingues/clj-depend {:mvn/version "0.11.1"}}
+               :main-opts ["-m" "clj-depend.main"]}
+  :depcheck {:extra-paths ["scripts"]
+             :extra-deps {io.github.borkdude/unused-deps
+                          {:git/url "https://github.com/borkdude/unused-deps.git"
+                           :git/sha "c6673b5549d02fa131d21b61695e283b18124b59"}
+                          clj-kondo/clj-kondo {:mvn/version "2026.08.04"}
+                          org.clojure/tools.deps {:mvn/version "0.31.1642"}}
+             :main-opts ["-m" "check-deps"]}
+  :antq {:replace-deps {com.github.liquidz/antq {:mvn/version "2.11.1276"}}
+         :main-opts ["-m" "antq.core" "--no-changes"]}}}

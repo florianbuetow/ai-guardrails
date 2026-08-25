@@ -1,0 +1,75 @@
+(ns build
+  (:require [clojure.string :as str]
+            [clojure.tools.build.api :as b]))
+
+(def lib '{{group_id}}/{{project_slug}})
+(def version "0.1.0")
+(def class-dir "target/classes")
+(def audit-pom-file "target/audit/pom.xml")
+(def uber-file (format "target/%s-%s-standalone.jar" (name lib) version))
+(def main-ns '{{namespace_name}}.cli.main)
+
+(defn clean
+  [_]
+  (b/delete {:path "target"}))
+
+(defn fail-on-compiler-output!
+  [result]
+  (when-not (or (nil? result) (map? result))
+    (throw (ex-info "compiler output capture failed" {:result result})))
+  (when (map? result)
+    (let [compiler-error-output (:err result)]
+      (when-not (string? compiler-error-output)
+        (throw (ex-info "compiler error output is missing" {:result result})))
+      (when-not (str/blank? compiler-error-output)
+        (binding [*out* *err*]
+          (print compiler-error-output))
+        (throw (ex-info "compiler warnings are forbidden"
+                        {:compiler-output compiler-error-output}))))))
+
+(defn compile-project
+  [_]
+  (b/delete {:path class-dir})
+  (let [result (b/compile-clj
+                {:basis (b/create-basis {:project "deps.edn"})
+                 :src-dirs ["src/main/clojure"]
+                 :class-dir class-dir
+                 :sort :topo
+                 :bindings (hash-map
+                            #'clojure.core/*warn-on-reflection* true)
+                 :err :capture})]
+    (fail-on-compiler-output! result)))
+
+(defn pom-data
+  []
+  [[:description "{{project_description}}"]
+   [:licenses
+    [:license
+     [:name "EPL-2.0"]
+     [:url "https://www.eclipse.org/legal/epl-2.0/"]]]])
+
+(defn audit-pom
+  [_]
+  (b/delete {:path "target/audit"})
+  (b/write-pom {:target audit-pom-file
+                :lib lib
+                :version version
+                :basis (b/create-basis {:project "deps.edn"})
+                :src-dirs ["src/main/clojure"]
+                :pom-data (pom-data)}))
+
+(defn uber
+  [_]
+  (compile-project {})
+  (b/copy-dir {:src-dirs ["src/main/clojure" "resources"]
+               :target-dir class-dir})
+  (b/write-pom {:class-dir class-dir
+                :lib lib
+                :version version
+                :basis (b/create-basis {:project "deps.edn"})
+                :src-dirs ["src/main/clojure"]
+                :pom-data (pom-data)})
+  (b/uber {:class-dir class-dir
+           :uber-file uber-file
+           :basis (b/create-basis {:project "deps.edn"})
+           :main main-ns}))

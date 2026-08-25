@@ -1,0 +1,40 @@
+# {{project_name}}
+
+{{project_description}}
+
+## Requirements
+
+- JDK {{jvm_target}}+
+- Clojure CLI
+- just
+- codespell
+- semgrep
+- clj-holmes
+- trivy
+- GNU `timeout`
+
+## Commands
+
+```bash
+just init
+just run
+just ci
+```
+
+The CI pipeline is intentionally Clojure-native: static analysis catches shape and namespace mistakes, Malli validates runtime boundaries, and test.check exercises contracts generatively.
+
+Dependency hygiene rejects both unused direct libraries and source namespaces imported only through transitive dependencies.
+
+## Validation
+
+`just ci` runs cljfmt, clj-kondo, tools.build compile checks with compiler warnings promoted to failure, Eastwood, Malli contract checks, clj-holmes with a pinned rules revision, dependency hygiene checks, codespell, Semgrep, Kaocha, test.check properties, clj-depend architecture checks, coverage enforcement, Trivy, and antq.
+
+## Architecture
+
+Production code is split into three namespace layers:
+
+```text
+{{namespace_name}}.cli -> {{namespace_name}}.application -> {{namespace_name}}.domain
+```
+
+clj-depend enforces layer direction and cycle freedom.

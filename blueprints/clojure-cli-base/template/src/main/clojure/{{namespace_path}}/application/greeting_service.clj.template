@@ -1,0 +1,6 @@
+(ns {{namespace_name}}.application.greeting-service
+  (:require [{{namespace_name}}.domain.greeting :as greeting]))
+
+(defn create-greeting
+  [recipient]
+  (greeting/create recipient))

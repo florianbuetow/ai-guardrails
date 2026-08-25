@@ -1,0 +1,9 @@
+.clj-kondo/.cache/
+.cpcache/
+.eastwood
+target/
+.calva/
+.lsp/
+.nrepl-port
+*.class
+*.jar

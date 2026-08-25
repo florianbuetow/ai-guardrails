@@ -1,0 +1,61 @@
+# Development Rules for {{project_name}}
+
+## Core principles
+
+- Fail fast and propagate every error.
+- Never silently substitute a default for missing input.
+- Never suppress a compiler, linter, security, architecture, or test finding.
+- Do not preserve backward compatibility.
+- Choose the simplest implementation that fully satisfies current requirements.
+- Prefer established libraries over custom implementations.
+
+## Clojure execution
+
+- Run Clojure tasks only through `clojure` or the corresponding `just` recipe.
+- Use Clojure CLI, `deps.edn`, and `tools.build`; do not introduce Leiningen, Boot, or shadow build tooling unless the project explicitly changes shape.
+- Keep production namespaces aligned with `cli -> application -> domain`.
+- Domain code must not depend on application or CLI namespaces. Application code must not depend on CLI namespaces.
+- Validate untrusted data at boundaries with Malli before handing it to domain functions.
+- Prefer explicit constructors and pure domain functions.
+
+## Forbidden patterns
+
+- Destructuring defaults through `:or`.
+- Silent fallback forms such as `(or value fallback)`.
+- Checker suppressions such as `#_{:clj-kondo/ignore ...}`, `semgrep:ignore`, `NOSONAR`, or similar ignore mechanisms.
+- Ignored, skipped, or pending tests.
+- Predictable random-number generators for security-sensitive values.
+
+## Required verification
+
+- Run `just test` after code changes.
+- Run `just test-properties` after changing contracts or boundary validation.
+- Run `just code-architecture` after namespace dependency changes.
+- Run `just test-coverage` after behavioral changes.
+- Run `just run` to prove the executable still starts.
+- Run `just ci` before completing work; every configured tool must execute successfully.
+
+## Guardrail ownership
+
+- cljfmt owns formatting.
+- clj-kondo owns fast static analysis and namespace correctness.
+- Eastwood owns slower compiler-like bug analysis.
+- Malli owns boundary and function contracts.
+- Kaocha, clojure.test, and test.check own behavioral and generative verification.
+- clj-holmes and Semgrep own source security and custom policy.
+- Trivy and antq own dependency audit and update visibility.
+- clj-depend owns layer direction and namespace cycles.
+
+## Justfile conventions
+
+- Use `printf` for colored or formatted output.
+- Keep blank output lines before and after every recipe command block.
+- Every recipe must end with a green success message or a red failure with exit code 1.
+- Composite recipes must fail on the first error.
+- Keep `help` manually ordered by setup, execution, validation, and tests.
+
+## Git commits
+
+- Never add AI attribution.
+- Never use `git add .` or `git add -A`; stage explicit paths.
+- Keep commit messages professional and focused on intent.

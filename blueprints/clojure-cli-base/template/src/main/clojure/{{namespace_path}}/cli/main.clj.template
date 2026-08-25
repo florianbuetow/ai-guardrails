@@ -1,0 +1,13 @@
+(ns {{namespace_name}}.cli.main
+  (:gen-class)
+  (:require [{{namespace_name}}.application.greeting-service :as greeting-service]))
+
+(defn execute
+  [args]
+  (when-not (empty? args)
+    (throw (ex-info "this application does not accept command-line arguments" {:args args})))
+  (:message (greeting-service/create-greeting "Clojure")))
+
+(defn -main
+  [& args]
+  (println (execute args)))
