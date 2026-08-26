@@ -105,7 +105,6 @@ just
 - `just code-deptry` - Check dependency hygiene
 - `just code-spell` - Check spelling (codespell)
 - `just code-semgrep` - Run custom static analysis (Semgrep)
-- `just code-audit` - Check for outdated dependencies (Gradle Versions Plugin)
 - `just code-architecture` - Run ArchUnit architecture tests
 - `just code-lspchecks` - Run strict compiler checks (javac -Xlint:all -Werror)
 
@@ -128,10 +127,9 @@ The CI pipeline runs the following steps in order:
 6. `code-deptry` - Dependency hygiene
 7. `code-spell` - Spell checking
 8. `code-semgrep` - Custom static analysis
-9. `code-audit` - Dependency version checks (Gradle Versions Plugin)
-10. `test` - Unit tests
-11. `code-architecture` - Architecture tests (ArchUnit)
-12. `code-lspchecks` - Strict compiler checks (javac -Xlint:all -Werror)
+9. `test` - Unit tests
+10. `code-architecture` - Architecture tests (ArchUnit)
+11. `code-lspchecks` - Strict compiler checks (javac -Xlint:all -Werror)
 
 ## Project Rules
 

@@ -44,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - Removed the beads issue tracker and its `.beads` directory from the repo.
+- Removed Java dependency freshness and vulnerability auditing from generated projects.
 
 ### Fixed
 

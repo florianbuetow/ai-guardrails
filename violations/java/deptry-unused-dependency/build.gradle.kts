@@ -6,7 +6,6 @@ plugins {
     id("com.diffplug.spotless") version "7.0.2"
     id("com.github.spotbugs") version "6.1.2"
     id("net.ltgt.errorprone") version "4.1.0"
-    id("com.github.ben-manes.versions") version "0.51.0"
     id("com.autonomousapps.dependency-analysis") version "2.7.0"
 }
 
@@ -114,28 +113,6 @@ dependencyAnalysis {
             onAny {
                 severity("fail")
             }
-        }
-    }
-}
-
-tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask>().configureEach {
-    outputFormatter = "json"
-    doLast {
-        val reportFile = file("build/dependencyUpdates/report.json")
-        if (!reportFile.exists()) {
-            return@doLast
-        }
-
-        val report = groovy.json.JsonSlurper().parse(reportFile) as? Map<*, *> ?: return@doLast
-        val outdated = report["outdated"] as? Map<*, *> ?: return@doLast
-        val outdatedCount = when (val count = outdated["count"]) {
-            is Number -> count.toInt()
-            is String -> count.toIntOrNull() ?: 0
-            else -> 0
-        }
-
-        if (outdatedCount > 0) {
-            throw GradleException("Outdated dependencies found. Run './gradlew dependencyUpdates' to see details.")
         }
     }
 }
