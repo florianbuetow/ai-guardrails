@@ -5,7 +5,7 @@
             [clojure.test.check.properties :as prop]
             [{{namespace_name}}.application.greeting-service :as greeting-service]))
 
-(def non-blank-recipient
+(def ^:private non-blank-recipient
   (gen/such-that
    (fn [value]
      (not (str/blank? value)))

@@ -103,6 +103,8 @@ class TemplateInfoTests(unittest.TestCase):
         self.assertIn("metosin/malli", dependency_names)
         self.assertIn("lambdaisland/kaocha", dependency_names)
         self.assertIn("com.fabiodomingues/clj-depend", dependency_names)
+        self.assertIn("com.github.clojure-lsp/clojure-lsp-standalone", dependency_names)
+        self.assertIn("com.github.clojure-lsp/clojure-lsp-test-helper", dependency_names)
         clojure = dependency_by_name(dependencies, "org.clojure/clojure")
         self.assertEqual("1.12.5", clojure.spec)
         self.assertEqual("maven", clojure.latest_registry)
@@ -111,6 +113,9 @@ class TemplateInfoTests(unittest.TestCase):
         self.assertEqual("clojars", malli.latest_registry)
         kaocha = dependency_by_name(dependencies, "lambdaisland/kaocha")
         self.assertEqual("clojars", kaocha.latest_registry)
+        clojure_lsp = dependency_by_name(dependencies, "com.github.clojure-lsp/clojure-lsp-standalone")
+        self.assertEqual("2026.07.06-14.34.19", clojure_lsp.spec)
+        self.assertEqual("clojars", clojure_lsp.latest_registry)
 
     def test_cmake_parser_uses_fetchcontent_repository_for_latest_lookup(self) -> None:
         manifest = REPO_ROOT / "blueprints/cpp-cli-base/template/CMakeLists.txt.template"

@@ -3,11 +3,13 @@
   (:require [{{namespace_name}}.application.greeting-service :as greeting-service]))
 
 (defn execute
+  "Validate command-line arguments and return the greeting message."
   [args]
   (when-not (empty? args)
     (throw (ex-info "this application does not accept command-line arguments" {:args args})))
   (:message (greeting-service/create-greeting "Clojure")))
 
 (defn -main
+  "Run the command-line application."
   [& args]
   (println (execute args)))

@@ -1,4 +1,5 @@
-{:linters {:unresolved-symbol {:level :error}
+{:lint-as {clojure.test.check.clojure-test/defspec clojure.test/deftest}
+ :linters {:unresolved-symbol {:level :error}
            :unresolved-namespace {:level :error}
            :invalid-arity {:level :error}
            :missing-test-assertion {:level :error}
@@ -8,6 +9,7 @@
            :unused-namespace {:level :warning}
            :unused-private-var {:level :warning}
            :unused-referred-var {:level :warning}
+           :missing-docstring {:level :error}
            :refer-all {:level :error}
            :redundant-do {:level :warning}
            :discouraged-var {clojure.core/rand {:message "Use java.security.SecureRandom for security-sensitive randomness."}

@@ -1,0 +1,9 @@
+{:source-aliases #{:test}
+ :linters {:clj-kondo {:level :on
+                        :report-duplicates true}
+           :clojure-lsp/unused-public-var {:level :error
+                                           :ignore-test-references? true}
+           :clojure-lsp/different-aliases {:level :error
+                                           :exclude-aliases #{sut}}
+           :clojure-lsp/cyclic-dependencies {:level :error}
+           :custom {guardrails.require-test-reference/lint {:level :error}}}}

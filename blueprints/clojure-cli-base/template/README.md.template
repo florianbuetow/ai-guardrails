@@ -20,13 +20,15 @@ just run
 just ci
 ```
 
-The CI pipeline is intentionally Clojure-native: static analysis catches shape and namespace mistakes, Malli validates runtime boundaries, and test.check exercises contracts generatively. Clojure-specific tools, including clj-holmes, are pinned in `deps.edn` and resolved by `just init`.
+The CI pipeline is intentionally Clojure-native: static analysis catches shape and namespace mistakes, project-aware clojure-lsp diagnostics enforce cross-file rules, Malli validates runtime boundaries, and test.check exercises contracts generatively. Clojure-specific tools, including clj-holmes and clojure-lsp, are pinned in `deps.edn` and resolved by `just init`.
 
 Dependency hygiene rejects both unused direct libraries and source namespaces imported only through transitive dependencies.
 
 ## Validation
 
-`just ci` runs cljfmt, clj-kondo, tools.build compile checks with compiler warnings promoted to failure, Eastwood, Malli contract checks, clj-holmes with a pinned rules revision, dependency hygiene checks, codespell, Semgrep, Kaocha, test.check properties, clj-depend architecture checks, coverage enforcement, Trivy, and antq.
+`just ci` runs cljfmt, clj-kondo, headless clojure-lsp diagnostics, tools.build compile checks with compiler warnings promoted to failure, Eastwood, Malli contract checks, clj-holmes with a pinned rules revision, dependency hygiene checks, codespell, Semgrep, Kaocha, test.check properties, clj-depend architecture checks, coverage enforcement, Trivy, and antq.
+
+`just code-lsp` rejects unused public vars, inconsistent namespace aliases, cyclic namespace dependencies, and custom project-aware findings. Project-local custom linters live under `resources/clojure-lsp.exports/linters/`; every custom rule must have a test through the pinned clojure-lsp test helper and an inverted violation fixture.
 
 ## Architecture
 

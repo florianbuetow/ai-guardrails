@@ -2,5 +2,6 @@
   (:require [{{namespace_name}}.domain.greeting :as greeting]))
 
 (defn create-greeting
+  "Create a validated greeting for the recipient."
   [recipient]
   (greeting/create recipient))

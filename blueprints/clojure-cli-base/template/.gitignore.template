@@ -3,7 +3,7 @@
 .eastwood
 target/
 .calva/
-.lsp/
+.lsp/.cache/
 .nrepl-port
 *.class
 *.jar

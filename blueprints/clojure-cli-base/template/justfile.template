@@ -41,6 +41,7 @@ help:
     @printf "  %-40s %s\n" "code-format" "Format Clojure and EDN files (cljfmt)"
     @printf "  %-40s %s\n" "code-style" "Check formatting (cljfmt)"
     @printf "  %-40s %s\n" "code-kondo" "Run clj-kondo static analysis"
+    @printf "  %-40s %s\n" "code-lsp" "Run project-aware clojure-lsp diagnostics"
     @printf "  %-40s %s\n" "code-eastwood" "Run Eastwood compiler-like bug analysis"
     @printf "  %-40s %s\n" "code-compile" "Compile all namespaces with strict warnings"
     @printf "  %-40s %s\n" "code-deptry" "Reject unused direct dependencies"
@@ -70,6 +71,7 @@ init: check
     clojure -P -T:build
     clojure -P -M:cljfmt
     clojure -P -M:clj-kondo
+    clojure -P -M:clojure-lsp
     clojure -P -M:eastwood
     clojure -P -M:clj-depend
     clojure -P -M:clj-holmes
@@ -117,6 +119,13 @@ code-kondo:
     @printf "\033[34m=== Running clj-kondo ===\033[0m\n"
     @clojure -M:clj-kondo --lint deps.edn build.clj tests.edn src/main/clojure test/clojure scripts --parallel --fail-level warning
     @printf "\033[32m✓ code-kondo completed successfully\033[0m\n"
+    @echo ""
+
+code-lsp:
+    @echo ""
+    @printf "\033[34m=== Running Project-Aware Clojure Diagnostics ===\033[0m\n"
+    @clojure -M:clojure-lsp diagnostics --project-root .
+    @printf "\033[32m✓ code-lsp completed successfully\033[0m\n"
     @echo ""
 
 code-eastwood:
@@ -231,6 +240,7 @@ ci:
     just init
     just code-style
     just code-kondo
+    just code-lsp
     just code-eastwood
     just code-compile
     just code-deptry

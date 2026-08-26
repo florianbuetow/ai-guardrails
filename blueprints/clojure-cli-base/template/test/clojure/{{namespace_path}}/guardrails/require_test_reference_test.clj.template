@@ -1,0 +1,18 @@
+(ns {{namespace_name}}.guardrails.require-test-reference-test
+  (:require [clojure-lsp.test-helper :as h]
+            [clojure.test :refer [deftest is]]))
+
+(def ^:private linter-settings
+  {:classpath ["resources"]
+   :settings {:linters {:custom {'guardrails.require-test-reference/lint
+                                 {:level :error}}}}})
+
+(deftest reports-public-production-var-without-test-reference
+  (h/reset-components!)
+  (h/set-db! linter-settings)
+  (let [production-uri (h/file-uri "file:///project/src/main/clojure/example/orphan.clj")]
+    (h/load-code! {:uri production-uri
+                   :code (h/code "(ns example.orphan)"
+                                 "(defn untested [])")})
+    (is (= ["guardrails/missing-test-reference"]
+           (mapv :code (get-in (h/db) [:diagnostics :custom production-uri]))))))

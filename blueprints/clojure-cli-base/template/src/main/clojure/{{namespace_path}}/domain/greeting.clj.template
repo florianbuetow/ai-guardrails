@@ -2,14 +2,14 @@
   (:require [clojure.string :as str]
             [malli.core :as m]))
 
-(def recipient-schema
+(def ^{:doc "Malli schema for a non-blank greeting recipient."} recipient-schema
   [:and
    :string
    [:fn {:error/message "recipient must not be blank"}
     (fn [value]
       (not (str/blank? value)))]])
 
-(def greeting-schema
+(def ^{:doc "Malli schema for a validated greeting value."} greeting-schema
   [:map
    [:message
     [:and
@@ -19,6 +19,7 @@
         (not (str/blank? value)))]]]])
 
 (defn create
+  "Create a validated greeting value for the recipient."
   [recipient]
   (when-not (m/validate recipient-schema recipient)
     (throw (ex-info "recipient must not be blank" {:recipient recipient})))

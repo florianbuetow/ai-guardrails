@@ -31,6 +31,7 @@
 - Run `just test` after code changes.
 - Run `just test-properties` after changing contracts or boundary validation.
 - Run `just code-architecture` after namespace dependency changes.
+- Run `just code-lsp` after changing public vars, namespace aliases, dependencies, or custom project linters.
 - Run `just test-coverage` after behavioral changes.
 - Run `just run` to prove the executable still starts.
 - Run `just ci` before completing work; every configured tool must execute successfully.
@@ -39,12 +40,15 @@
 
 - cljfmt owns formatting.
 - clj-kondo owns fast static analysis and namespace correctness.
+- clojure-lsp owns project-aware diagnostics and custom cross-file rules.
 - Eastwood owns slower compiler-like bug analysis.
 - Malli owns boundary and function contracts.
 - Kaocha, clojure.test, and test.check own behavioral and generative verification.
 - clj-holmes and Semgrep own source security and custom policy.
 - Trivy and antq own dependency audit and update visibility.
 - clj-depend owns layer direction and namespace cycles.
+
+Every custom clojure-lsp rule must live under `resources/clojure-lsp.exports/linters/`, run headlessly through `just code-lsp`, have a focused test using `clojure-lsp-test-helper`, and have an inverted fixture under the template repository's `violations/clojure/` suite.
 
 ## Justfile conventions
 

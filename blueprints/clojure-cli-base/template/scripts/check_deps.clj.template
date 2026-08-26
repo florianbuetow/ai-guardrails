@@ -4,13 +4,13 @@
             [clojure.edn :as edn]
             [clojure.tools.deps :as deps]))
 
-(def platform-libraries
+(def ^:private platform-libraries
   '#{org.clojure/clojure})
 
-(def source-paths
+(def ^:private source-paths
   ["src/main/clojure"])
 
-(defn project-dependencies
+(defn- project-dependencies
   []
   (let [project-data (edn/read-string (slurp "deps.edn"))
         declared (:deps project-data)]
@@ -19,7 +19,7 @@
                       {:deps-file "deps.edn"})))
     declared))
 
-(defn project-unused-dependencies
+(defn- project-unused-dependencies
   []
   (let [result (unused-deps/unused-deps
                 {:root-dir "."
@@ -33,7 +33,7 @@
                    (contains? platform-libraries library)))
          vec)))
 
-(defn kondo-analysis
+(defn- kondo-analysis
   [lint-targets dependencies?]
   (let [result (kondo/run!
                 {:lint (vec lint-targets)
@@ -46,7 +46,7 @@
                       {:lint-targets lint-targets})))
     analysis))
 
-(defn dependency-namespace-owners
+(defn- dependency-namespace-owners
   []
   (let [basis (deps/create-basis {:project "deps.edn" :user nil})
         libraries (:libs basis)]
@@ -67,7 +67,7 @@
      {}
      libraries)))
 
-(defn transitive-usage-violations
+(defn- transitive-usage-violations
   [direct-libraries]
   (let [owners (dependency-namespace-owners)
         usages (:namespace-usages (kondo-analysis source-paths false))]
@@ -84,6 +84,7 @@
          vec)))
 
 (defn -main
+  "Fail when direct dependency declarations are unused or incomplete."
   [& args]
   (when-not (empty? args)
     (throw (ex-info "dependency check accepts no command-line arguments"

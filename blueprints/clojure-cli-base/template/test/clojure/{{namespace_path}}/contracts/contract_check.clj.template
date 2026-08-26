@@ -7,11 +7,11 @@
             [malli.generator :as mg]
             [malli.instrument :as mi]))
 
-(def success-contract
+(def ^:private success-contract
   (prop/for-all [recipient (mg/generator greeting/recipient-schema)]
                 (m/validate greeting/greeting-schema (greeting/create recipient))))
 
-(def failure-contract
+(def ^:private failure-contract
   (prop/for-all [blank-recipient (gen/elements ["" " " "\t" "\n"])]
                 (try
                   (greeting/create blank-recipient)
@@ -19,13 +19,14 @@
                   (catch clojure.lang.ExceptionInfo error
                     (= "recipient must not be blank" (ex-message error))))))
 
-(defn assert-contract
+(defn- assert-contract
   [contract-name property]
   (let [result (tc/quick-check 100 property)]
     (when-not (:pass? result)
       (throw (ex-info (str "contract failed: " contract-name) result)))))
 
 (defn -main
+  "Run generated Malli contracts and fail on any counterexample."
   [& args]
   (when-not (empty? args)
     (throw (ex-info "contract check accepts no command-line arguments" {:args args})))

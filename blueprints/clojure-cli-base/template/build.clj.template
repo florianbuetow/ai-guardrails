@@ -2,18 +2,19 @@
   (:require [clojure.string :as str]
             [clojure.tools.build.api :as b]))
 
-(def lib '{{group_id}}/{{project_slug}})
-(def version "0.1.0")
-(def class-dir "target/classes")
-(def audit-pom-file "target/audit/pom.xml")
-(def uber-file (format "target/%s-%s-standalone.jar" (name lib) version))
-(def main-ns '{{namespace_name}}.cli.main)
+(def ^:private lib '{{group_id}}/{{project_slug}})
+(def ^:private version "0.1.0")
+(def ^:private class-dir "target/classes")
+(def ^:private audit-pom-file "target/audit/pom.xml")
+(def ^:private uber-file (format "target/%s-%s-standalone.jar" (name lib) version))
+(def ^:private main-ns '{{namespace_name}}.cli.main)
 
 (defn clean
+  "Delete generated build output."
   [_]
   (b/delete {:path "target"}))
 
-(defn fail-on-compiler-output!
+(defn- fail-on-compiler-output!
   [result]
   (when-not (or (nil? result) (map? result))
     (throw (ex-info "compiler output capture failed" {:result result})))
@@ -28,6 +29,7 @@
                         {:compiler-output compiler-error-output}))))))
 
 (defn compile-project
+  "Compile production namespaces with reflection warnings enabled."
   [_]
   (b/delete {:path class-dir})
   (let [result (b/compile-clj
@@ -40,7 +42,7 @@
                  :err :capture})]
     (fail-on-compiler-output! result)))
 
-(defn pom-data
+(defn- pom-data
   []
   [[:description "{{project_description}}"]
    [:licenses
@@ -49,6 +51,7 @@
      [:url "https://www.eclipse.org/legal/epl-2.0/"]]]])
 
 (defn audit-pom
+  "Write the Maven dependency graph consumed by vulnerability scanning."
   [_]
   (b/delete {:path "target/audit"})
   (b/write-pom {:target audit-pom-file
@@ -59,6 +62,7 @@
                 :pom-data (pom-data)}))
 
 (defn uber
+  "Build the standalone executable JAR."
   [_]
   (compile-project {})
   (b/copy-dir {:src-dirs ["src/main/clojure" "resources"]

@@ -131,7 +131,7 @@ This is an inverted test pattern: a passing test means the project's own CI caug
 
 - Clojure 1.12+ on the JVM (toolchain 21+) with Clojure CLI, `deps.edn`, and tools.build
 - Architecture: `cli -> application -> domain`, enforced with clj-depend layer rules
-- Validation: cljfmt, clj-kondo, Eastwood, Malli runtime contracts, test.check generative checks, clj-holmes, Semgrep, unused-deps, Trivy, antq, codespell, Kaocha, and kaocha-cloverage
+- Validation: cljfmt, clj-kondo, project-aware clojure-lsp diagnostics and custom linters, Eastwood, Malli runtime contracts, test.check generative checks, clj-holmes, Semgrep, unused-deps, Trivy, antq, codespell, Kaocha, and kaocha-cloverage
 - Conventions: explicit boundary validation, Malli contracts, pure domain functions, no checker suppressions, no silent fallbacks, no `core.typed` by default
 
 ### The React Vite TypeScript Template (`blueprints/react-vite-typescript-base`)
