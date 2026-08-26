@@ -15,7 +15,7 @@ check:
         printf "\033[31m✗ Error: JDK {{jvm_target}}+ is required, found JDK %s\033[0m\n" "$java_major"; \
         exit 1; \
     fi
-    @for tool in git clojure just codespell semgrep clj-holmes trivy timeout; do \
+    @for tool in git clojure just codespell semgrep trivy timeout; do \
         if ! command -v "$tool" >/dev/null 2>&1; then \
             printf "\033[31m✗ Error: %s is not installed\033[0m\n" "$tool"; \
             exit 1; \
@@ -72,6 +72,7 @@ init: check
     clojure -P -M:clj-kondo
     clojure -P -M:eastwood
     clojure -P -M:clj-depend
+    clojure -P -M:clj-holmes
     clojure -P -M:depcheck
     clojure -P -M:antq
     clojure -T:build compile-project
@@ -148,7 +149,7 @@ code-security:
     trap 'rm -rf "$rules_root"' EXIT
     git clone --quiet --filter=blob:none --no-checkout https://github.com/clj-holmes/clj-holmes-rules.git "$rules_root/repository"
     git -C "$rules_root/repository" checkout --quiet --detach fbf5e2eeebe9a85e2dc568c04b482a50fc482a02
-    clj-holmes scan --scan-path src/main/clojure --rules-directory "$rules_root/repository/security" --fail-on-result
+    clojure -M:clj-holmes scan --scan-path src/main/clojure --rules-directory "$rules_root/repository/security" --fail-on-result
     printf "\033[32m✓ code-security completed successfully\033[0m\n"
     echo ""
 

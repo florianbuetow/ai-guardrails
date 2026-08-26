@@ -9,7 +9,6 @@
 - just
 - codespell
 - semgrep
-- clj-holmes
 - trivy
 - GNU `timeout`
 
@@ -21,7 +20,7 @@ just run
 just ci
 ```
 
-The CI pipeline is intentionally Clojure-native: static analysis catches shape and namespace mistakes, Malli validates runtime boundaries, and test.check exercises contracts generatively.
+The CI pipeline is intentionally Clojure-native: static analysis catches shape and namespace mistakes, Malli validates runtime boundaries, and test.check exercises contracts generatively. Clojure-specific tools, including clj-holmes, are pinned in `deps.edn` and resolved by `just init`.
 
 Dependency hygiene rejects both unused direct libraries and source namespaces imported only through transitive dependencies.
 

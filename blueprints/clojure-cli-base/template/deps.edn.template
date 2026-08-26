@@ -1,4 +1,6 @@
-{:paths ["src/main/clojure" "resources"]
+{:mvn/repos {"central" {:url "https://repo1.maven.org/maven2/"}
+             "clojars" {:url "https://repo.clojars.org/"}}
+ :paths ["src/main/clojure" "resources"]
  :deps {org.clojure/clojure {:mvn/version "1.12.5"}
         metosin/malli {:mvn/version "0.20.1"}}
  :aliases
@@ -24,6 +26,8 @@
                          "{:source-paths [\"src/main/clojure\"] :test-paths [\"test/clojure\"] :namespaces [:source-paths :test-paths]}"]}
   :clj-depend {:replace-deps {com.fabiodomingues/clj-depend {:mvn/version "0.11.1"}}
                :main-opts ["-m" "clj-depend.main"]}
+  :clj-holmes {:replace-deps {org.clojars.clj-holmes/clj-holmes {:mvn/version "1.4.0"}}
+               :main-opts ["-m" "clj-holmes.main"]}
   :depcheck {:extra-paths ["scripts"]
              :extra-deps {io.github.borkdude/unused-deps
                           {:git/url "https://github.com/borkdude/unused-deps.git"

@@ -45,6 +45,7 @@ help:
 	@printf "\033[0;33mSetup & Lifecycle:\033[0m\n"
 	@printf "  %-40s %s\n" "init" "Install templates and set up aliases"
 	@printf "  %-40s %s\n" "check" "Check if all required tools are installed"
+	@printf "  %-40s %s\n" "check-clojure" "Check Clojure template prerequisites"
 	@printf "  %-40s %s\n" "show-libs" "List direct library dependencies declared by all templates"
 	@printf "  %-40s %s\n" "help" "Show this help message"
 	@echo ""
@@ -88,6 +89,7 @@ help:
 	@echo ""
 	@printf "\033[0;33mCI & Testing:\033[0m\n"
 	@printf "  %-40s %s\n" "test-info" "Test direct dependency inventory output"
+	@printf "  %-40s %s\n" "test-prerequisites" "Verify every template checks prerequisites first"
 	@printf "  %-40s %s\n" "test" "Run all baseline + violation tests"
 	@printf "  %-40s %s\n" "test-python" "Run Python baseline + violation tests"
 	@printf "  %-40s %s\n" "test-java" "Run Java baseline + violation tests"
@@ -183,6 +185,33 @@ check:
 		exit 1; \
 	fi; \
 	printf "\033[32m✓ all required tools are installed\033[0m\n"
+	@echo ""
+
+# Check Clojure template prerequisites before generation or testing
+check-clojure:
+	@echo ""
+	@missing=0; \
+	for tool in git java clojure just copier codespell semgrep trivy timeout; do \
+		if command -v "$tool" >/dev/null 2>&1; then \
+			printf "\033[32m  ✓ %s\033[0m\n" "$tool"; \
+		else \
+			printf "\033[31m  ✗ %s not found\033[0m\n" "$tool"; \
+			missing=$((missing + 1)); \
+		fi; \
+	done; \
+	if [ "$missing" -gt 0 ]; then \
+		printf "\033[31m✗ %d Clojure prerequisite(s) missing\033[0m\n" "$missing"; \
+		exit 1; \
+	fi; \
+	java_major="$(java -XshowSettings:properties -version 2>&1 | sed -n 's/^[[:space:]]*java\.specification\.version = //p')"; \
+	case "$java_major" in \
+		''|*[!0-9]*) printf "\033[31m✗ unable to determine a numeric JDK version\033[0m\n"; exit 1 ;; \
+	esac; \
+	if [ "$java_major" -lt 21 ]; then \
+		printf "\033[31m✗ JDK 21+ is required, found JDK %s\033[0m\n" "$java_major"; \
+		exit 1; \
+	fi; \
+	printf "\033[32m✓ all Clojure prerequisites are installed\033[0m\n"
 	@echo ""
 
 # List direct library dependencies declared by all templates
@@ -322,7 +351,7 @@ baseline-scala:
 	@echo ""
 
 # Generate Clojure template and run just ci
-baseline-clojure:
+baseline-clojure: check-clojure
 	@echo ""
 	@./tests/run-tests.sh clojure baseline && printf "\033[32m✓ clojure baseline passed\033[0m\n" || { printf "\033[31m✗ clojure baseline failed\033[0m\n"; exit 1; }
 	@echo ""
@@ -355,6 +384,15 @@ test-info:
 	"$python_cmd" tests/test_template_info.py \
 		&& printf "\033[32m✓ template info tests passed\033[0m\n" \
 		|| { printf "\033[31m✗ template info tests failed\033[0m\n"; exit 1; }
+	@echo ""
+
+# Verify every template checks prerequisites before initialization and CI
+test-prerequisites:
+	@echo ""
+	@printf "\033[0;34m=== Testing Template Prerequisite Contracts ===\033[0m\n"
+	@python3 tests/test_template_prerequisites.py \
+		&& printf "\033[32m✓ template prerequisite contracts passed\033[0m\n" \
+		|| { printf "\033[31m✗ template prerequisite contracts failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Test all templates (baseline + violations)
@@ -450,7 +488,7 @@ test-scala:
 	@echo ""
 
 # Test the Clojure template (baseline + violations)
-test-clojure:
+test-clojure: check-clojure
 	@echo ""
 	@./tests/run-tests.sh clojure && printf "\033[32m✓ clojure tests passed\033[0m\n" || { printf "\033[31m✗ clojure tests failed\033[0m\n"; exit 1; }
 	@echo ""
@@ -511,7 +549,7 @@ test-create:
     echo ""
 
 # Run all checks and all template tests
-ci-verbose: check code-spell code-semgrep code-shellcheck test-info test test-create
+ci-verbose: check test-prerequisites code-spell code-semgrep code-shellcheck test-info test test-create
 	@echo ""
 	@printf "\033[32m✓ ci-verbose passed\033[0m\n"
 	@echo ""
@@ -526,7 +564,7 @@ ci:
     echo ""
     # Keep this list identical to ci-verbose's dependencies so both run the
     # exact same tests; only the output verbosity differs.
-    steps=(check code-spell code-semgrep code-shellcheck test-info test test-create)
+    steps=(check test-prerequisites code-spell code-semgrep code-shellcheck test-info test test-create)
     for step in "${steps[@]}"; do
         printf "\033[0;34m▶ starting %s\033[0m\n" "$step"
         if output="$(just "$step" 2>&1)"; then
