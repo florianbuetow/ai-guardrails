@@ -1,0 +1,5 @@
+config/
+reports/
+coverage/
+report/
+.tools/

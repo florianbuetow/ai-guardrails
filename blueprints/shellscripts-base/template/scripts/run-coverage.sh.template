@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -eu
+
+# Kcov derives its trace descriptor from this limit. macOS can report a limit
+# larger than dup2 accepts; constrain only this coverage subprocess.
+case "$(uname -s)" in
+  Darwin)
+    ulimit -n 1024
+    ;;
+  Linux)
+    :
+    ;;
+  *)
+    printf 'Coverage requires macOS or Linux.\n' >&2
+    exit 1
+    ;;
+esac
+
+mkdir -p reports/coverage
+# ShellSpec 0.28.1 uses color values internally to enforce the threshold.
+shellspec \
+  --color \
+  --fail-no-examples \
+  --kcov \
+  --fail-low-coverage \
+  --covdir reports/coverage \
+  --kcov-options '--clean --limits={{ coverage_threshold }},100 --include-path=src' \
+  -s bash \
+  spec

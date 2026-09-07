@@ -1,0 +1,91 @@
+# Linux CI image for shellscripts-base template verification.
+#
+# The Ubuntu base image is multi-architecture, so this image runs natively on
+# both linux/amd64 and linux/arm64 hosts, including Apple Silicon Linux VMs.
+# Build: docker build -f Dockerfile.linux-ci -t shellscripts-linux-ci .
+
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Shell interpreters and guardrail tools supplied by Ubuntu.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        bash \
+        bats \
+        binutils-dev \
+        build-essential \
+        busybox \
+        ca-certificates \
+        cmake \
+        codespell \
+        curl \
+        dash \
+        devscripts \
+        git \
+        ksh \
+        libcurl4-openssl-dev \
+        libdw-dev \
+        libelf-dev \
+        libiberty-dev \
+        libssl-dev \
+        ninja-build \
+        pkg-config \
+        python3 \
+        python3-pip \
+        python3-venv \
+        shellcheck \
+        shfmt \
+        xz-utils \
+        zlib1g-dev \
+        zsh \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copier and Semgrep are distributed as Python packages. An isolated virtual
+# environment keeps them independent of Ubuntu's externally managed Python.
+RUN python3 -m venv /opt/venv \
+    && /opt/venv/bin/pip install --no-cache-dir copier semgrep \
+    && /opt/venv/bin/copier --version \
+    && /opt/venv/bin/semgrep --version
+
+ENV PATH="/opt/venv/bin:${PATH}"
+
+# just has no suitable Ubuntu 24.04 package version for template validation.
+# Use the pinned official release binary for the container's native CPU.
+ARG JUST_VERSION=1.55.1
+RUN architecture="$(dpkg --print-architecture)" \
+    && case "$architecture" in \
+        amd64) just_target="x86_64-unknown-linux-musl" ;; \
+        arm64) just_target="aarch64-unknown-linux-musl" ;; \
+        *) printf 'unsupported architecture for just: %s\\n' "$architecture" >&2; exit 1 ;; \
+    esac \
+    && curl -fsSL -o /tmp/just.tar.gz \
+        "https://github.com/casey/just/releases/download/${JUST_VERSION}/just-${JUST_VERSION}-${just_target}.tar.gz" \
+    && tar -xzf /tmp/just.tar.gz -C /usr/local/bin just \
+    && rm /tmp/just.tar.gz \
+    && just --version
+
+# ShellSpec is not supplied by Ubuntu. Install a pinned upstream archive.
+ARG SHELLSPEC_VERSION=0.28.1
+RUN curl -fsSL -o /tmp/shellspec.tar.gz \
+        "https://github.com/shellspec/shellspec/archive/refs/tags/${SHELLSPEC_VERSION}.tar.gz" \
+    && mkdir -p /opt/shellspec \
+    && tar -xzf /tmp/shellspec.tar.gz -C /opt/shellspec --strip-components=1 \
+    && ln -s /opt/shellspec/shellspec /usr/local/bin/shellspec \
+    && rm /tmp/shellspec.tar.gz \
+    && shellspec --version
+
+# Kcov is not supplied at a suitable current version by Ubuntu. Build the
+# pinned upstream source release for the active architecture.
+ARG KCOV_VERSION=43
+RUN curl -fsSL -o /tmp/kcov.tar.gz \
+        "https://github.com/SimonKagstrom/kcov/archive/refs/tags/v${KCOV_VERSION}.tar.gz" \
+    && mkdir -p /tmp/kcov \
+    && tar -xzf /tmp/kcov.tar.gz -C /tmp/kcov --strip-components=1 \
+    && cmake -S /tmp/kcov -B /tmp/kcov/build -DCMAKE_BUILD_TYPE=Release -G Ninja \
+    && cmake --build /tmp/kcov/build \
+    && cmake --install /tmp/kcov/build \
+    && rm -rf /tmp/kcov /tmp/kcov.tar.gz \
+    && kcov --version
+
+WORKDIR /work

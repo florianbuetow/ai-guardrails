@@ -1,0 +1,203 @@
+# =============================================================================
+# Justfile Rules:
+# 1. Use printf for colored or formatted output.
+# 2. Add an empty @echo "" before and after every command block.
+# 3. Keep help ordered by lifecycle, run, quality, then tests.
+# 4. Composite recipes fail fast.
+# 5. Every recipe ends with a clear success or failure status.
+# =============================================================================
+
+_default:
+    @just help
+
+help:
+    @echo ""
+    @printf "\033[0;34m=== {{ project_name }} ===\033[0m\n"
+    @echo ""
+    @printf "\033[0;33mSetup & Lifecycle:\033[0m\n"
+    @printf "  %-40s %s\n" "init" "Initialize permissions and the Git hook"
+    @printf "  %-40s %s\n" "destroy" "Remove generated validation reports"
+    @printf "  %-40s %s\n" "check" "Check macOS or Linux prerequisites"
+    @printf "  %-40s %s\n" "help" "Show this help message"
+    @echo ""
+    @printf "\033[0;33mRun:\033[0m\n"
+    @printf "  %-40s %s\n" "run" "Run the example application"
+    @echo ""
+    @printf "\033[0;33mCode Quality:\033[0m\n"
+    @printf "  %-40s %s\n" "code-format" "Format shell files with shfmt"
+    @printf "  %-40s %s\n" "code-style" "Check formatting with shfmt"
+    @printf "  %-40s %s\n" "code-shellcheck" "Run ShellCheck at all severity levels"
+    @printf "  %-40s %s\n" "code-syntax" "Parse files with every supported shell"
+    @printf "  %-40s %s\n" "code-portability" "Check POSIX portability with checkbashisms"
+    @printf "  %-40s %s\n" "code-semgrep" "Run local Semgrep guardrails"
+    @printf "  %-40s %s\n" "code-spell" "Check spelling in code and documentation"
+    @echo ""
+    @printf "\033[0;33mCI & Testing:\033[0m\n"
+    @printf "  %-40s %s\n" "test" "Execute recursive test/test*.sh tests"
+    @printf "  %-40s %s\n" "test-matrix" "Execute script tests with every supported shell"
+    @printf "  %-40s %s\n" "test-spec" "Run ShellSpec with every supported shell"
+    @printf "  %-40s %s\n" "test-bats" "Run the Bats test suite"
+    @printf "  %-40s %s\n" "test-coverage" "Run ShellSpec with {{ coverage_threshold }}% coverage required"
+    @printf "  %-40s %s\n" "ci" "Run every validation check verbosely"
+    @printf "  %-40s %s\n" "ci-quiet" "Run the same CI checks with compact output"
+    @printf "\033[32m✓ help completed successfully\033[0m\n"
+    @echo ""
+
+check:
+    @echo ""
+    @sh scripts/check-prerequisites.sh || { printf "\033[31m✗ check failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32m✓ check completed successfully\033[0m\n"
+    @echo ""
+
+init: check
+    @echo ""
+    @printf "\033[34m=== Initializing Development Environment ===\033[0m\n"
+    @if ! git rev-parse --git-dir >/dev/null 2>&1; then git init -q; fi
+    @mkdir -p reports/coverage
+    @sh scripts/chmod-shell-files.sh
+    @if [ ! -f ".git/hooks/pre-commit" ]; then \
+        printf "\033[31m✗ Error: .git/hooks/pre-commit is missing\033[0m\n"; \
+        printf "  Re-apply the template or restore the generated hook.\n"; \
+        echo ""; \
+        exit 1; \
+    fi
+    @chmod +x .git/hooks/pre-commit
+    @printf "\033[32m✓ init completed successfully\033[0m\n"
+    @echo ""
+
+destroy:
+    @echo ""
+    @rm -rf reports/ coverage/ report/ || { printf "\033[31m✗ destroy failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32m✓ destroy completed successfully\033[0m\n"
+    @echo ""
+
+run:
+    @echo ""
+    @printf "\033[34m=== Running Application ===\033[0m\n"
+    @sh src/main.sh World || { printf "\033[31m✗ run failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32m✓ run completed successfully\033[0m\n"
+    @echo ""
+
+code-format:
+    @echo ""
+    @printf "\033[34m=== Formatting Shell Files ===\033[0m\n"
+    @SHFMT_MODE=write scripts/for-each-shell-file.sh scripts/shfmt-file.sh || { printf "\033[31m✗ code-format failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32m✓ code-format completed successfully\033[0m\n"
+    @echo ""
+
+code-style:
+    @echo ""
+    @printf "\033[34m=== Checking Shell Formatting ===\033[0m\n"
+    @SHFMT_MODE=check scripts/for-each-shell-file.sh scripts/shfmt-file.sh || { printf "\033[31m✗ code-style failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32m✓ code-style completed successfully\033[0m\n"
+    @echo ""
+
+code-shellcheck:
+    @echo ""
+    @printf "\033[34m=== Running ShellCheck ===\033[0m\n"
+    @scripts/for-each-shell-file.sh scripts/shellcheck-file.sh || { printf "\033[31m✗ code-shellcheck failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32m✓ code-shellcheck completed successfully\033[0m\n"
+    @echo ""
+
+code-syntax:
+    @echo ""
+    @printf "\033[34m=== Checking Syntax Across Shells ===\033[0m\n"
+    @scripts/for-each-shell-file.sh scripts/syntax-file.sh || { printf "\033[31m✗ code-syntax failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32m✓ code-syntax completed successfully\033[0m\n"
+    @echo ""
+
+code-portability:
+    @echo ""
+    @printf "\033[34m=== Checking POSIX Portability ===\033[0m\n"
+    @scripts/for-each-shell-file.sh scripts/checkbashisms-file.sh || { printf "\033[31m✗ code-portability failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32m✓ code-portability completed successfully\033[0m\n"
+    @echo ""
+
+code-semgrep:
+    @echo ""
+    @printf "\033[34m=== Running Semgrep Guardrails ===\033[0m\n"
+    @semgrep --config config/semgrep/ --error --metrics=off --disable-version-check --no-git-ignore --scan-unknown-extensions src scripts test spec || { printf "\033[31m✗ code-semgrep failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32m✓ code-semgrep completed successfully\033[0m\n"
+    @echo ""
+
+code-spell:
+    @echo ""
+    @printf "\033[34m=== Checking Spelling ===\033[0m\n"
+    @codespell *.md src scripts test spec --ignore-words=config/codespell/ignore.txt || { printf "\033[31m✗ code-spell failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32m✓ code-spell completed successfully\033[0m\n"
+    @echo ""
+
+test:
+    @echo ""
+    @printf "\033[34m=== Running Executable Script Tests ===\033[0m\n"
+    @scripts/run-tests.sh direct || { printf "\033[31m✗ test failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32m✓ test completed successfully\033[0m\n"
+    @echo ""
+
+test-matrix:
+    @echo ""
+    @printf "\033[34m=== Running Script Test Matrix ===\033[0m\n"
+    @scripts/run-tests.sh matrix || { printf "\033[31m✗ test-matrix failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32m✓ test-matrix completed successfully\033[0m\n"
+    @echo ""
+
+test-spec:
+    @echo ""
+    @printf "\033[34m=== Running ShellSpec Matrix ===\033[0m\n"
+    @scripts/run-shellspec-matrix.sh || { printf "\033[31m✗ test-spec failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32m✓ test-spec completed successfully\033[0m\n"
+    @echo ""
+
+test-bats:
+    @echo ""
+    @printf "\033[34m=== Running Bats Tests ===\033[0m\n"
+    @bats test/bats || { printf "\033[31m✗ test-bats failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32m✓ test-bats completed successfully\033[0m\n"
+    @echo ""
+
+test-coverage:
+    @echo ""
+    @printf "\033[34m=== Running ShellSpec Coverage ===\033[0m\n"
+    @scripts/run-coverage.sh || { printf "\033[31m✗ test-coverage failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32m✓ test-coverage completed successfully\033[0m\n"
+    @echo ""
+
+ci:
+    #!/bin/sh
+    set -eu
+    trap 'status=$?; if [ "$status" -ne 0 ]; then printf "\033[31m✗ ci failed\033[0m\n" >&2; fi' EXIT
+    echo ""
+    printf "\033[34m=== Running CI Checks ===\033[0m\n"
+    echo ""
+    just check
+    just init
+    just code-style
+    just code-shellcheck
+    just code-syntax
+    just code-portability
+    just code-semgrep
+    just code-spell
+    just test
+    just test-matrix
+    just test-spec
+    just test-bats
+    just test-coverage
+    echo ""
+    printf "\033[32m✓ ci completed successfully\033[0m\n"
+    echo ""
+
+ci-quiet:
+    #!/bin/sh
+    set -eu
+    echo ""
+    output_file=$(mktemp)
+    trap 'rm -f "$output_file"' EXIT HUP INT TERM
+    printf "\033[34m=== Running CI Checks (Quiet Mode) ===\033[0m\n"
+    if just ci >"$output_file" 2>&1; then
+        printf "\033[32m✓ ci-quiet completed successfully\033[0m\n"
+        echo ""
+        exit 0
+    fi
+    printf "\033[31m✗ ci-quiet failed\033[0m\n" >&2
+    cat "$output_file" >&2
+    exit 1

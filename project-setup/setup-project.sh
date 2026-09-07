@@ -126,6 +126,9 @@ case "$TEMPLATE_NAME" in
   mcp-server-typescript-base)
     PROJECT_DESCRIPTION="A TypeScript MCP server"
     ;;
+  shellscripts-base)
+    PROJECT_DESCRIPTION="A portable shell script project"
+    ;;
   *)
     printf "${RED}Error: no project description configured for template: %s${NC}\n" "$TEMPLATE_NAME"
     exit 1

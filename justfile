@@ -66,6 +66,7 @@ help:
 	@printf "    %-36s %s\n" "clojure-cli-base" "Clojure CLI application"
 	@printf "    %-36s %s\n" "react-vite-typescript-base" "React + Vite + TypeScript application"
 	@printf "    %-36s %s\n" "mcp-server-typescript-base" "TypeScript MCP server"
+	@printf "    %-36s %s\n" "shellscripts-base" "Portable shell script project"
 	@echo ""
 	@printf "\033[0;33mCode Quality:\033[0m\n"
 	@printf "  %-40s %s\n" "code-spell" "Check spelling across the repository"
@@ -86,10 +87,12 @@ help:
 	@printf "  %-40s %s\n" "baseline-clojure" "Generate Clojure template and run just ci"
 	@printf "  %-40s %s\n" "baseline-typescript" "Generate TypeScript template and run just ci"
 	@printf "  %-40s %s\n" "baseline-mcp-typescript" "Generate TypeScript MCP server template and run just ci"
+	@printf "  %-40s %s\n" "baseline-shellscripts" "Generate shell scripts template and run just ci"
 	@echo ""
 	@printf "\033[0;33mCI & Testing:\033[0m\n"
 	@printf "  %-40s %s\n" "test-info" "Test direct dependency inventory output"
 	@printf "  %-40s %s\n" "test-prerequisites" "Verify every template checks prerequisites first"
+	@printf "  %-40s %s\n" "test-shellscripts-contracts" "Test shell scripts blueprint contracts"
 	@printf "  %-40s %s\n" "test" "Run all baseline + violation tests"
 	@printf "  %-40s %s\n" "test-python" "Run Python baseline + violation tests"
 	@printf "  %-40s %s\n" "test-java" "Run Java baseline + violation tests"
@@ -104,6 +107,8 @@ help:
 	@printf "  %-40s %s\n" "test-clojure" "Run Clojure baseline + violation tests"
 	@printf "  %-40s %s\n" "test-typescript" "Run TypeScript baseline + violation tests"
 	@printf "  %-40s %s\n" "test-mcp-typescript" "Run TypeScript MCP server baseline + violation tests"
+	@printf "  %-40s %s\n" "test-shellscripts" "Run shell scripts baseline + violation tests"
+	@printf "  %-40s %s\n" "test-shellscripts-linux" "Run shell scripts tests in a Linux container"
 	@printf "  %-40s %s\n" "test-create" "Run just create for all templates"
 	@printf "  %-40s %s\n" "ci" "Run all checks + all template tests (quiet)"
 	@printf "  %-40s %s\n" "ci-verbose" "Run all checks + all template tests (verbose)"
@@ -368,6 +373,12 @@ baseline-mcp-typescript:
 	@./tests/run-tests.sh mcp-typescript baseline && printf "\033[32m✓ typescript MCP server baseline passed\033[0m\n" || { printf "\033[31m✗ typescript MCP server baseline failed\033[0m\n"; exit 1; }
 	@echo ""
 
+# Generate shell scripts template and run just ci
+baseline-shellscripts:
+	@echo ""
+	@./tests/run-tests.sh shellscripts baseline && printf "\033[32m✓ shell scripts baseline passed\033[0m\n" || { printf "\033[31m✗ shell scripts baseline failed\033[0m\n"; exit 1; }
+	@echo ""
+
 # Test direct dependency inventory output
 test-info:
 	@echo ""
@@ -393,6 +404,15 @@ test-prerequisites:
 	@python3 tests/test_template_prerequisites.py \
 		&& printf "\033[32m✓ template prerequisite contracts passed\033[0m\n" \
 		|| { printf "\033[31m✗ template prerequisite contracts failed\033[0m\n"; exit 1; }
+	@echo ""
+
+# Test shell scripts blueprint contracts
+test-shellscripts-contracts:
+	@echo ""
+	@printf "\033[0;34m=== Testing Shell Scripts Blueprint Contracts ===\033[0m\n"
+	@python3 tests/test_shellscripts.py \
+		&& printf "\033[32m✓ shell scripts blueprint contracts passed\033[0m\n" \
+		|| { printf "\033[31m✗ shell scripts blueprint contracts failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Test all templates (baseline + violations)
@@ -505,6 +525,38 @@ test-mcp-typescript:
 	@./tests/run-tests.sh mcp-typescript && printf "\033[32m✓ typescript MCP server tests passed\033[0m\n" || { printf "\033[31m✗ typescript MCP server tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
+# Run shell scripts baseline + violation tests
+test-shellscripts:
+	@echo ""
+	@./tests/run-tests.sh shellscripts && printf "\033[32m✓ shell scripts tests passed\033[0m\n" || { printf "\033[31m✗ shell scripts tests failed\033[0m\n"; exit 1; }
+	@echo ""
+
+# Run the shell scripts template's baseline and violation tests in Linux
+test-shellscripts-linux:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	echo ""
+	if ! command -v docker >/dev/null 2>&1; then
+		printf "\033[31m✗ docker is not installed\033[0m\n"
+		exit 1
+	fi
+	if ! docker info >/dev/null 2>&1; then
+		printf "\033[31m✗ docker daemon is not running\033[0m\n"
+		exit 1
+	fi
+	printf "\033[0;34m=== Building shell scripts Linux CI image ===\033[0m\n"
+	docker build \
+		-f blueprints/shellscripts-base/docker/Dockerfile.linux-ci \
+		-t shellscripts-linux-ci \
+		blueprints/shellscripts-base/docker
+	printf "\033[0;34m=== Running shell scripts tests in Linux ===\033[0m\n"
+	docker run --rm \
+		-v "$(pwd):/repo:ro" \
+		shellscripts-linux-ci /repo/tests/docker/shellscripts-linux-ci.sh \
+		&& printf "\033[32m✓ shell scripts Linux container tests passed\033[0m\n" \
+		|| { printf "\033[31m✗ shell scripts Linux container tests failed\033[0m\n"; exit 1; }
+	echo ""
+
 # Test just create for all templates
 test-create:
     #!/usr/bin/env bash
@@ -549,7 +601,7 @@ test-create:
     echo ""
 
 # Run all checks and all template tests
-ci-verbose: check test-prerequisites code-spell code-semgrep code-shellcheck test-info test test-create
+ci-verbose: check test-prerequisites test-shellscripts-contracts code-spell code-semgrep code-shellcheck test-info test test-create
 	@echo ""
 	@printf "\033[32m✓ ci-verbose passed\033[0m\n"
 	@echo ""
@@ -564,7 +616,7 @@ ci:
     echo ""
     # Keep this list identical to ci-verbose's dependencies so both run the
     # exact same tests; only the output verbosity differs.
-    steps=(check test-prerequisites code-spell code-semgrep code-shellcheck test-info test test-create)
+    steps=(check test-prerequisites test-shellscripts-contracts code-spell code-semgrep code-shellcheck test-info test test-create)
     for step in "${steps[@]}"; do
         printf "\033[0;34m▶ starting %s\033[0m\n" "$step"
         if output="$(just "$step" 2>&1)"; then

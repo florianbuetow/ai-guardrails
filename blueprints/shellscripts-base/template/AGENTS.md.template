@@ -1,0 +1,46 @@
+# {{project_name}}
+
+{{project_description}}
+
+## Layout and workflow
+
+- `src/`: portable POSIX shell application code, with `#!/bin/sh` and `set -eu`.
+- `scripts/`: project validation helpers; run them through Just recipes. The
+  coverage helper explicitly uses Bash for OS-specific resource limits.
+- `test/test*.sh`: executable tests, recursively discovered by `just test`.
+- `test/bats/`: Bats CLI integration tests.
+- `spec/`: ShellSpec behavior tests used for the interpreter matrix and coverage.
+- `config/`: Semgrep policies and spelling configuration.
+- `data/input/`, `data/output/`: application data.
+- `reports/`: generated validation reports, ignored by Git.
+
+Run `just init`, `just run`, and `just ci`. Run `just code-format` before CI.
+The generated pre-commit hook runs `just ci-quiet`, which runs the same checks
+as `just ci` and prints diagnostics on failure.
+
+## Required conventions
+
+1. Fail immediately on missing input, failed commands, and unsupported systems.
+   Validate arguments before reading them under `set -u`. Use explicit error
+   handling for commands used in conditions; `set -e` has conditional exceptions.
+2. Never supply silent configuration defaults or ignore command failures.
+3. Never suppress ShellCheck, Semgrep, formatting, spelling, or test checks.
+4. Quote expansions. Use `printf` for output. Avoid `eval`, downloaded code
+   piped into shells, predictable temporary files, and world-writable permissions.
+5. Keep product scripts POSIX compatible. Bash-only arrays, `[[ ... ]]`,
+   process substitution, and `pipefail` do not belong in `#!/bin/sh` files.
+6. Write portable macOS/Linux commands. Avoid GNU-only `find`, `sed -i`,
+   `readlink -f`, `stat`, and `date` flags without explicit OS handling.
+7. Use `mktemp` and cleanup traps. Do not split lists of filenames on whitespace.
+8. Tests must return zero only when all assertions pass. Do not skip tests.
+   The runner exports `TEST_SHELL`; invoke application scripts through that
+   interpreter so matrix tests actually exercise the requested shell. The value
+   `busybox` means `busybox ash` on Linux.
+9. ShellSpec and Bats files use their framework syntax. Keep each in its
+   dedicated directory; they do not replace ordinary executable tests.
+10. Keep dependency availability checks explicit. Adding an external runtime
+    command requires updating prerequisite checks and integration tests.
+
+macOS uses sh, Bash, dash, ksh, and zsh. Linux additionally requires BusyBox ash.
+Coverage uses Bash and Kcov through ShellSpec; no coverage is claimed for dash.
+Keep the configured coverage threshold and all CI gates enabled.

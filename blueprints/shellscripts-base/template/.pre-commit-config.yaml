@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ci
+        name: Full shell scripts CI
+        entry: just ci-quiet
+        language: system
+        pass_filenames: false
+        always_run: true

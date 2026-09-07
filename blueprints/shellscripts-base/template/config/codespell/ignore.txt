@@ -1,0 +1,1 @@
+# Add project-specific words only after reviewing a spelling finding.

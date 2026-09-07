@@ -2,7 +2,7 @@
 
 ![Made with AI](https://img.shields.io/badge/Made%20with-AI-333333?labelColor=f00) ![Verified by Humans](https://img.shields.io/badge/Verified%20by-Humans-333333?labelColor=brightgreen)
 
-Copier templates for Python, Java, Go, Elixir, C++, Rust, Kotlin, Scala, Clojure, React/Vite/TypeScript, and TypeScript MCP servers that enforce strict validation guardrails on AI-generated code — catching antipatterns, suppressing silent defaults, and providing immediate feedback so AI agents write better, more maintainable code from the start.
+Copier templates for Python, Java, Go, Elixir, C++, Rust, Kotlin, Scala, Clojure, React/Vite/TypeScript, TypeScript MCP servers, and portable shell scripts that enforce strict validation guardrails on AI-generated code — catching antipatterns, suppressing silent defaults, and providing immediate feedback so AI agents write better, more maintainable code from the start.
 
 ## Quick Start
 
@@ -114,6 +114,15 @@ just init
 just test
 ```
 
+**Portable shell scripts:**
+
+```bash
+copier copy https://github.com/florianbuetow/ai-guardrails/blueprints/shellscripts-base my-shell-project
+cd my-shell-project
+just init
+just run
+```
+
 ## Features
 
 - **Multi-step CI pipelines** with fail-fast behavior across all templates
@@ -139,27 +148,30 @@ just test
 | [**clojure-cli-base**](blueprints/clojure-cli-base/) | Clojure 1.12+ | CLI apps with Clojure CLI, `deps.edn`, [tools.build](https://clojure.org/guides/tools_build), [cljfmt](https://github.com/weavejester/cljfmt), [clj-kondo](https://github.com/clj-kondo/clj-kondo), [Eastwood](https://github.com/jonase/eastwood), [Malli](https://github.com/metosin/malli), [Kaocha](https://github.com/lambdaisland/kaocha), and [test.check](https://github.com/clojure/test.check) |
 | [**react-vite-typescript-base**](blueprints/react-vite-typescript-base/) | React + Vite + TypeScript | Vite apps with [Prettier](https://prettier.io/), [oxlint](https://oxc.rs/docs/guide/usage/linter.html), [TypeScript](https://www.typescriptlang.org/), [knip](https://knip.dev/), [Vitest](https://vitest.dev/), [Playwright](https://playwright.dev/) |
 | [**mcp-server-typescript-base**](blueprints/mcp-server-typescript-base/) | TypeScript + MCP SDK v2 | Stdio MCP servers with [`@modelcontextprotocol/server`](https://ts.sdk.modelcontextprotocol.io/v2/), Zod v4, [TypeScript](https://www.typescriptlang.org/), [oxlint](https://oxc.rs/docs/guide/usage/linter.html), [knip](https://knip.dev/), [dependency-cruiser](https://github.com/sverweij/dependency-cruiser), and [Vitest](https://vitest.dev/) |
+| [**shellscripts-base**](blueprints/shellscripts-base/) | POSIX shell | Portable shell projects with [ShellCheck](https://www.shellcheck.net/), [shfmt](https://github.com/mvdan/sh), [checkbashisms](https://tracker.debian.org/pkg/devscripts), Bash, dash, BusyBox ash, ksh, zsh, [Semgrep](https://semgrep.dev/), [codespell](https://github.com/codespell-project/codespell), [Bats](https://github.com/bats-core/bats-core), [ShellSpec](https://shellspec.info/), and [kcov](https://github.com/SimonKagstrom/kcov) |
 
 ## Validation Tools by Language
 
 Every template runs the same CI check categories via `just ci`. The table below shows which tool handles each check for each language.
 
-| Check | Python | Java | Go | Elixir | C++ | Rust | Kotlin | Scala | Clojure | React/Vite/TypeScript | TypeScript MCP |
-|-------|--------|------|----|--------|-----|------|--------|-------|---------|-----------------------|----------------|
-| Formatting | [ruff](https://github.com/astral-sh/ruff) | [Spotless](https://github.com/diffplug/spotless) | [gofumpt](https://github.com/mvdan/gofumpt) | mix format | [clang-format](https://clang.llvm.org/docs/ClangFormat.html) | [rustfmt](https://github.com/rust-lang/rustfmt) | [ktlint](https://pinterest.github.io/ktlint/) | [Scalafmt](https://scalameta.org/scalafmt/) | [cljfmt](https://github.com/weavejester/cljfmt) | [Prettier](https://prettier.io/) | [Prettier](https://prettier.io/) |
-| Style | [ruff](https://github.com/astral-sh/ruff) | [Checkstyle](https://github.com/checkstyle/checkstyle) | [gofumpt](https://github.com/mvdan/gofumpt) | mix format | [clang-tidy](https://clang.llvm.org/extra/clang-tidy/) | [rustfmt](https://github.com/rust-lang/rustfmt) | [ktlint](https://pinterest.github.io/ktlint/) | [Scalafix](https://scalacenter.github.io/scalafix/) | [clj-kondo](https://github.com/clj-kondo/clj-kondo) | [Prettier](https://prettier.io/) | [Prettier](https://prettier.io/) + [oxlint](https://oxc.rs/docs/guide/usage/linter.html) |
-| Type checking | [mypy](https://mypy-lang.org/) | [Error Prone](https://github.com/google/error-prone) | go vet | Dialyzer | [cppcheck](https://github.com/danmar/cppcheck) | cargo check + [clippy](https://github.com/rust-lang/rust-clippy) | kotlinc | scalac + [WartRemover](https://www.wartremover.org/) | clj-kondo + Malli contracts | [tsc](https://www.typescriptlang.org/) | [tsc](https://www.typescriptlang.org/) |
-| Semantic/project analysis | [pyright](https://github.com/microsoft/pyright) | javac -Xlint:all -Werror | [staticcheck](https://staticcheck.dev/) | mix compile --warnings-as-errors | — | — | kotlinc allWarningsAsErrors | scalac strict warnings + `-Werror` | [clojure-lsp](https://clojure-lsp.io/) + compile/load checks + Eastwood | tsc -b | tsc |
-| Security | [bandit](https://github.com/PyCQA/bandit) | [SpotBugs](https://github.com/spotbugs/spotbugs) | [gosec](https://github.com/securego/gosec) | [Sobelow](https://github.com/nccgroup/sobelow) | [flawfinder](https://github.com/david-a-wheeler/flawfinder) | [cargo-geiger](https://github.com/geiger-rs/cargo-geiger) | [detekt](https://detekt.dev/) | [Find Security Bugs](https://find-sec-bugs.github.io/) | [clj-holmes](https://github.com/clj-holmes/clj-holmes) | [oxlint](https://oxc.rs/docs/guide/usage/linter.html) (no-eval) | [oxlint](https://oxc.rs/docs/guide/usage/linter.html) (no-eval) |
-| Dependency hygiene | [deptry](https://deptry.com/) | [Gradle](https://gradle.org/) buildHealth | go mod tidy | mix deps.unlock --check-unused | [IWYU](https://github.com/include-what-you-use/include-what-you-use) | [cargo-machete](https://github.com/bnjbvr/cargo-machete) | [dependency-analysis](https://github.com/autonomousapps/dependency-analysis-gradle-plugin) | sbt-explicit-dependencies + dependency lock | [unused-deps](https://github.com/borkdude/unused-deps) + clj-kondo | [knip](https://knip.dev/) | [knip](https://knip.dev/) |
-| Spell checking | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) |
-| Custom rules | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) | Custom [Credo](https://github.com/rrrene/credo) checks | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) | Custom Scalafix + [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) + clj-kondo config | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) + stdio stdout protection |
-| Vulnerability scan | [pip-audit](https://github.com/pypa/pip-audit) | — | [govulncheck](https://golang.org/x/vuln/cmd/govulncheck) | mix deps.audit + hex.audit | — | [cargo-deny](https://github.com/EmbarkStudios/cargo-deny) | [trivy](https://github.com/aquasecurity/trivy) | [trivy](https://github.com/aquasecurity/trivy) | [trivy](https://github.com/aquasecurity/trivy) over generated POM | npm audit | npm audit |
-| Testing | [pytest](https://pytest.org/) | [JUnit 5](https://junit.org/) | go test | [ExUnit](https://hexdocs.pm/ex_unit/) | [GoogleTest](https://github.com/google/googletest) | [cargo-nextest](https://github.com/nextest-rs/nextest) | [JUnit 5](https://junit.org/) + [Kover](https://github.com/Kotlin/kotlinx-kover) | [MUnit](https://scalameta.org/munit/) + [scoverage](https://github.com/scoverage/sbt-scoverage) | clojure.test + [Kaocha](https://github.com/lambdaisland/kaocha) + [test.check](https://github.com/clojure/test.check) | [Vitest](https://vitest.dev/) + [Playwright](https://playwright.dev/) | [Vitest](https://vitest.dev/) + real MCP clients |
-| Meta-linter | — | — | [golangci-lint](https://golangci-lint.run/) | [Credo](https://github.com/rrrene/credo) | — | — | — | — | [Eastwood](https://github.com/jonase/eastwood) | [oxlint](https://oxc.rs/docs/guide/usage/linter.html) | [oxlint](https://oxc.rs/docs/guide/usage/linter.html) |
-| Architecture | [pytestarch](https://github.com/zyskarch/pytestarch) | [ArchUnit](https://www.archunit.org/) | [arch-go](https://github.com/arch-go/arch-go) | [ex_arch_unit](https://hex.pm/packages/ex_arch_unit) | — | — | [Konsist](https://docs.konsist.lemonappdev.com/) | [ArchUnit](https://www.archunit.org/) + semantic Scalafix | [clj-depend](https://cljdoc.org/d/com.fabiodomingues/clj-depend/0.11.1) | [dependency-cruiser](https://github.com/sverweij/dependency-cruiser) | [dependency-cruiser](https://github.com/sverweij/dependency-cruiser) |
+| Check | Python | Java | Go | Elixir | C++ | Rust | Kotlin | Scala | Clojure | React/Vite/TypeScript | TypeScript MCP | Shell scripts |
+|-------|--------|------|----|--------|-----|------|--------|-------|---------|-----------------------|----------------|---------------|
+| Formatting | [ruff](https://github.com/astral-sh/ruff) | [Spotless](https://github.com/diffplug/spotless) | [gofumpt](https://github.com/mvdan/gofumpt) | mix format | [clang-format](https://clang.llvm.org/docs/ClangFormat.html) | [rustfmt](https://github.com/rust-lang/rustfmt) | [ktlint](https://pinterest.github.io/ktlint/) | [Scalafmt](https://scalameta.org/scalafmt/) | [cljfmt](https://github.com/weavejester/cljfmt) | [Prettier](https://prettier.io/) | [Prettier](https://prettier.io/) | [shfmt](https://github.com/mvdan/sh) |
+| Style | [ruff](https://github.com/astral-sh/ruff) | [Checkstyle](https://github.com/checkstyle/checkstyle) | [gofumpt](https://github.com/mvdan/gofumpt) | mix format | [clang-tidy](https://clang.llvm.org/extra/clang-tidy/) | [rustfmt](https://github.com/rust-lang/rustfmt) | [ktlint](https://pinterest.github.io/ktlint/) | [Scalafix](https://scalacenter.github.io/scalafix/) | [clj-kondo](https://github.com/clj-kondo/clj-kondo) | [Prettier](https://prettier.io/) | [Prettier](https://prettier.io/) + [oxlint](https://oxc.rs/docs/guide/usage/linter.html) | [ShellCheck](https://www.shellcheck.net/) |
+| Type checking | [mypy](https://mypy-lang.org/) | [Error Prone](https://github.com/google/error-prone) | go vet | Dialyzer | [cppcheck](https://github.com/danmar/cppcheck) | cargo check + [clippy](https://github.com/rust-lang/rust-clippy) | kotlinc | scalac + [WartRemover](https://www.wartremover.org/) | clj-kondo + Malli contracts | [tsc](https://www.typescriptlang.org/) | [tsc](https://www.typescriptlang.org/) | — |
+| Semantic/project analysis | [pyright](https://github.com/microsoft/pyright) | javac -Xlint:all -Werror | [staticcheck](https://staticcheck.dev/) | mix compile --warnings-as-errors | — | — | kotlinc allWarningsAsErrors | scalac strict warnings + `-Werror` | [clojure-lsp](https://clojure-lsp.io/) + compile/load checks + Eastwood | tsc -b | tsc | ShellCheck + Bash/dash/BusyBox ash/ksh/zsh syntax checks + checkbashisms |
+| Security | [bandit](https://github.com/PyCQA/bandit) | [SpotBugs](https://github.com/spotbugs/spotbugs) | [gosec](https://github.com/securego/gosec) | [Sobelow](https://github.com/nccgroup/sobelow) | [flawfinder](https://github.com/david-a-wheeler/flawfinder) | [cargo-geiger](https://github.com/geiger-rs/cargo-geiger) | [detekt](https://detekt.dev/) | [Find Security Bugs](https://find-sec-bugs.github.io/) | [clj-holmes](https://github.com/clj-holmes/clj-holmes) | [oxlint](https://oxc.rs/docs/guide/usage/linter.html) (no-eval) | [oxlint](https://oxc.rs/docs/guide/usage/linter.html) (no-eval) | [Semgrep](https://semgrep.dev/) security rules |
+| Dependency hygiene | [deptry](https://deptry.com/) | [Gradle](https://gradle.org/) buildHealth | go mod tidy | mix deps.unlock --check-unused | [IWYU](https://github.com/include-what-you-use/include-what-you-use) | [cargo-machete](https://github.com/bnjbvr/cargo-machete) | [dependency-analysis](https://github.com/autonomousapps/dependency-analysis-gradle-plugin) | sbt-explicit-dependencies + dependency lock | [unused-deps](https://github.com/borkdude/unused-deps) + clj-kondo | [knip](https://knip.dev/) | [knip](https://knip.dev/) | — |
+| Spell checking | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) | [codespell](https://github.com/codespell-project/codespell) |
+| Custom rules | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) | Custom [Credo](https://github.com/rrrene/credo) checks | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) | Custom Scalafix + [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) + clj-kondo config | [semgrep](https://github.com/semgrep/semgrep) | [semgrep](https://github.com/semgrep/semgrep) + stdio stdout protection | [Semgrep](https://semgrep.dev/) |
+| Vulnerability scan | [pip-audit](https://github.com/pypa/pip-audit) | — | [govulncheck](https://golang.org/x/vuln/cmd/govulncheck) | mix deps.audit + hex.audit | — | [cargo-deny](https://github.com/EmbarkStudios/cargo-deny) | [trivy](https://github.com/aquasecurity/trivy) | [trivy](https://github.com/aquasecurity/trivy) | [trivy](https://github.com/aquasecurity/trivy) over generated POM | npm audit | npm audit | — |
+| Testing | [pytest](https://pytest.org/) | [JUnit 5](https://junit.org/) | go test | [ExUnit](https://hexdocs.pm/ex_unit/) | [GoogleTest](https://github.com/google/googletest) | [cargo-nextest](https://github.com/nextest-rs/nextest) | [JUnit 5](https://junit.org/) + [Kover](https://github.com/Kotlin/kotlinx-kover) | [MUnit](https://scalameta.org/munit/) + [scoverage](https://github.com/scoverage/sbt-scoverage) | clojure.test + [Kaocha](https://github.com/lambdaisland/kaocha) + [test.check](https://github.com/clojure/test.check) | [Vitest](https://vitest.dev/) + [Playwright](https://playwright.dev/) | [Vitest](https://vitest.dev/) + real MCP clients | Executable `test/test*.sh` + [Bats](https://github.com/bats-core/bats-core) + [ShellSpec](https://shellspec.info/) + [kcov](https://github.com/SimonKagstrom/kcov) coverage |
+| Meta-linter | — | — | [golangci-lint](https://golangci-lint.run/) | [Credo](https://github.com/rrrene/credo) | — | — | — | — | [Eastwood](https://github.com/jonase/eastwood) | [oxlint](https://oxc.rs/docs/guide/usage/linter.html) | [oxlint](https://oxc.rs/docs/guide/usage/linter.html) | — |
+| Architecture | [pytestarch](https://github.com/zyskarch/pytestarch) | [ArchUnit](https://www.archunit.org/) | [arch-go](https://github.com/arch-go/arch-go) | [ex_arch_unit](https://hex.pm/packages/ex_arch_unit) | — | — | [Konsist](https://docs.konsist.lemonappdev.com/) | [ArchUnit](https://www.archunit.org/) + semantic Scalafix | [clj-depend](https://cljdoc.org/d/com.fabiodomingues/clj-depend/0.11.1) | [dependency-cruiser](https://github.com/sverweij/dependency-cruiser) | [dependency-cruiser](https://github.com/sverweij/dependency-cruiser) | — |
 
 See each template's README for tool details and configuration.
+
+The shell scripts template targets both macOS and Linux. Its CI parses the POSIX source with Bash, dash, BusyBox ash, ksh, and zsh, while `checkbashisms` rejects shell-specific constructs that would break `/bin/sh` portability.
 
 ## Highly Recommended Companion Tools
 
@@ -194,7 +206,7 @@ Use these plugins after scaffolding a project with AI Guardrails to maintain cod
 - **copier** - Template engine ([installation guide](https://copier.readthedocs.io/))
 
 Each template has its own language-specific prerequisites. See the template READMEs for details:
-[Python](blueprints/python-cli-base/) | [Java](blueprints/java-cli-base/) | [Go](blueprints/go-cli-base/) | [Elixir](blueprints/elixir-otp-base/) | [C++](blueprints/cpp-cli-base/) | [C++ 3D Game](blueprints/cpp-3dgame-base/) | [Rust](blueprints/rust-cli-base/) | [Kotlin](blueprints/kotlin-cli-base/) | [Scala](blueprints/scala-cli-base/) | [Clojure](blueprints/clojure-cli-base/) | [React/Vite/TypeScript](blueprints/react-vite-typescript-base/) | [TypeScript MCP](blueprints/mcp-server-typescript-base/)
+[Python](blueprints/python-cli-base/) | [Java](blueprints/java-cli-base/) | [Go](blueprints/go-cli-base/) | [Elixir](blueprints/elixir-otp-base/) | [C++](blueprints/cpp-cli-base/) | [C++ 3D Game](blueprints/cpp-3dgame-base/) | [Rust](blueprints/rust-cli-base/) | [Kotlin](blueprints/kotlin-cli-base/) | [Scala](blueprints/scala-cli-base/) | [Clojure](blueprints/clojure-cli-base/) | [React/Vite/TypeScript](blueprints/react-vite-typescript-base/) | [TypeScript MCP](blueprints/mcp-server-typescript-base/) | [Shell scripts](blueprints/shellscripts-base/)
 
 ## Installation
 
@@ -220,7 +232,7 @@ just run
 ```
 
 The `just create` command takes two arguments:
-1. Template name (e.g., `python-cli-base`, `java-cli-base`, `go-cli-base`, `elixir-otp-base`, `cpp-cli-base`, `cpp-3dgame-base`, `rust-cli-base`, `kotlin-cli-base`, `scala-cli-base`, `clojure-cli-base`, `react-vite-typescript-base`, or `mcp-server-typescript-base`)
+1. Template name (e.g., `python-cli-base`, `java-cli-base`, `go-cli-base`, `elixir-otp-base`, `cpp-cli-base`, `cpp-3dgame-base`, `rust-cli-base`, `kotlin-cli-base`, `scala-cli-base`, `clojure-cli-base`, `react-vite-typescript-base`, `mcp-server-typescript-base`, or `shellscripts-base`)
 2. Target directory (absolute or relative path where the project will be created)
 
 **Method 2: Using Copier directly**
@@ -251,13 +263,16 @@ just test-scala    # Run Scala baseline + violation tests
 just test-clojure  # Run Clojure baseline + violation tests
 just test-typescript  # Run React/Vite/TypeScript baseline + violation tests
 just test-mcp-typescript  # Run TypeScript MCP server baseline + violation tests
+just test-shellscripts    # Run shell scripts baseline + violation tests
+just test-shellscripts-linux  # Run shell scripts tests in a Linux container
 just test-create      # Smoke-test `just create` for every template, then run its CI
 just ci               # Full repo CI suite, quiet: prints start/done per step, details only on failure
 just ci-verbose       # Full repo CI suite, verbose: streams the full output of every step
 ```
 
-`just ci` and `just ci-verbose` run the exact same steps (`check`, `code-spell`,
-`code-semgrep`, `code-shellcheck`, `test-info`, `test`, `test-create`) and only
+`just ci` and `just ci-verbose` run the exact same steps (`check`, `test-prerequisites`,
+`test-shellscripts-contracts`, `code-spell`, `code-semgrep`, `code-shellcheck`,
+`test-info`, `test`, `test-create`) and only
 differ in output verbosity. `ci` announces the start and completion of each step
 with a checkmark, suppressing per-step details unless a step fails (then it prints
 that step's full output and exits 1); `ci-verbose` streams every step's output.
@@ -306,7 +321,8 @@ ai-guardrails/
 │   ├── scala-cli-base/                        # Scala CLI template
 │   ├── clojure-cli-base/                      # Clojure CLI template
 │   ├── react-vite-typescript-base/            # React + Vite + TypeScript template
-│   └── mcp-server-typescript-base/             # TypeScript MCP server template
+│   ├── mcp-server-typescript-base/             # TypeScript MCP server template
+│   └── shellscripts-base/                      # Portable shell script template
 ├── tests/
 │   ├── run-tests.sh                           # Unified test entry point
 │   ├── lib/                                   # Shared test helpers and runner logic
@@ -324,7 +340,8 @@ ai-guardrails/
 │       ├── scala.sh
 │       ├── clojure.sh
 │       ├── typescript.sh
-│       └── mcp-typescript.sh
+│       ├── mcp-typescript.sh
+│       └── shellscripts.sh
 ├── violations/                                 # Violation overlays used to force CI failures
 │   ├── python/
 │   ├── java/
@@ -337,7 +354,8 @@ ai-guardrails/
 │   ├── scala/
 │   ├── clojure/
 │   ├── typescript/
-│   └── mcp-typescript/
+│   ├── mcp-typescript/
+│   └── shellscripts/
 ├── config/                                     # Shared validation configs (semgrep, codespell)
 ├── docs/                                       # Documentation
 ├── justfile                                    # Quick setup commands

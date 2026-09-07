@@ -1,0 +1,126 @@
+# {{project_name}}
+
+{{project_description}}
+
+## Setup
+
+Supported hosts: macOS and Linux. Application scripts use portable POSIX `sh`.
+Bash 4 or newer is required by the coverage tooling; on macOS put Homebrew's
+`bin` directory before `/bin` in `PATH` rather than using Apple's Bash 3.2.
+
+On macOS, install prerequisites with Homebrew:
+
+```sh
+brew install just bash dash ksh zsh shellcheck shfmt checkbashisms codespell semgrep bats-core shellspec kcov
+export PATH="$(brew --prefix)/bin:$PATH"
+```
+
+On Linux, install `just`, Bash 4+, dash, ksh, zsh, BusyBox, ShellCheck, shfmt,
+checkbashisms (from Debian's `devscripts` package), codespell, Semgrep,
+Bats-core, ShellSpec, and Kcov 38+. See the upstream installation links below.
+The template repository includes `docker/Dockerfile.linux-ci` with a complete
+Linux toolchain installation and a Linux baseline/violation test recipe.
+
+Then run:
+
+```sh
+just init
+just run
+just ci
+```
+
+`init` checks prerequisites, prepares report directories, makes project scripts
+executable (including extensionless scripts identified by their shebang), and
+activates the generated pre-commit hook. Missing prerequisites fail immediately;
+checks never silently disappear because a tool or shell is unavailable.
+
+## Project layout
+
+```text
+src/main.sh             Application entry point
+scripts/               Validation and test helpers
+test/test-main.sh      Plain executable tests
+test/bats/main.bats    Bats integration tests
+spec/main_spec.sh      ShellSpec behavior and coverage tests
+config/semgrep/        Local policy rules
+data/input/           Input data
+data/output/          Output data
+reports/              Generated reports
+justfile              Development and CI commands
+AGENTS.md             Coding conventions
+CLAUDE.md             Link to AGENTS.md
+```
+
+## Validation
+
+| Target | Tool and purpose |
+| --- | --- |
+| `code-format` | shfmt; explicitly apply formatting |
+| `code-style` | shfmt; reject formatting differences without changing files |
+| `code-shellcheck` | ShellCheck; quoting, expansion, command and shell correctness |
+| `code-syntax` | Native parsers; validate each script under its supported shells |
+| `code-portability` | checkbashisms; reject non-POSIX constructs in portable scripts |
+| `code-semgrep` | Semgrep; local security and coding policies |
+| `code-spell` | codespell; check code and documentation spelling |
+| `test` | Execute every plain `test*` shell script recursively; nonzero means failure |
+| `test-matrix` | Run plain tests under each supported interpreter |
+| `test-spec` | ShellSpec behavior tests under each supported interpreter |
+| `test-bats` | Bats CLI integration tests |
+| `test-coverage` | ShellSpec with Kcov; enforce {{coverage_threshold}}% source line coverage using Bash |
+| `ci` | All validation gates, failing immediately on error |
+| `ci-quiet` | The exact same CI pipeline, showing captured output when a check fails |
+
+Formatting changes are deliberate: run `just code-format` locally. CI only
+checks formatting. Both CI modes include all check and test tools above.
+
+The interpreter matrix is `sh`, `bash`, `dash`, `ksh`, and `zsh` on macOS;
+Linux adds `busybox ash`. Product scripts are portable by default. A Bash
+shebang explicitly selects Bash-specific syntax checks; changing a shebang does
+not make a script portable. Run application code through `TEST_SHELL` in plain
+tests or `When run script` in ShellSpec tests to exercise the selected interpreter.
+Interpreter tests do not emulate another operating system's external utilities:
+run CI on both macOS and Linux to verify BSD/GNU command behavior.
+
+## Adding tests
+
+Add a shell script whose filename starts with `test` under `test/`, normally
+`test/test-feature.sh`. Other extensions and extensionless shell scripts are
+also discovered by their shebang; `.bats` files run in `test-bats`. Include a
+supported shell shebang and `set -eu`, assert
+the expected behavior, and return a nonzero status on failure. Run `just init`
+after adding scripts to set execution permissions. The runner rejects an empty
+test suite and reports the failing filename. It preserves filenames containing
+spaces and newlines and does not execute unrelated files as shell scripts.
+
+For example:
+
+```sh
+#!/bin/sh
+set -eu
+output=$(sh src/main.sh 'Shell World')
+[ "$output" = 'Hello, Shell World!' ]
+```
+
+Use `test/test-main.sh` as the example for matrix-aware tests. Add `.bats` files
+under `test/bats/` for Bats and `_spec.sh` files under `spec/` for ShellSpec.
+Test missing/empty input, whitespace and special characters, subprocess failure,
+and cleanup behavior as features are added.
+
+## Tool references
+
+- [ShellCheck](https://github.com/koalaman/shellcheck#installing)
+- [shfmt](https://github.com/mvdan/sh)
+- [checkbashisms](https://manpages.debian.org/testing/devscripts/checkbashisms.1.en.html)
+- [Semgrep](https://semgrep.dev/docs/getting-started/)
+- [codespell](https://github.com/codespell-project/codespell)
+- [Bats-core](https://github.com/bats-core/bats-core)
+- [ShellSpec](https://github.com/shellspec/shellspec)
+- [Kcov](https://github.com/SimonKagstrom/kcov)
+
+Semgrep complements ShellCheck with repository-specific policy checks. CodeQL
+does not support shell code analysis, and execution wrappers such as
+`semantic-wrap` are not static analysis tools, so neither is a CI gate here.
+Coverage describes executed source lines, not type safety or proof of correctness.
+The coverage helper uses Bash for its macOS file-descriptor limit adjustment.
+It starts a fresh Kcov collection on every run, so previous results cannot mask
+a coverage regression. `just destroy` removes generated reports.

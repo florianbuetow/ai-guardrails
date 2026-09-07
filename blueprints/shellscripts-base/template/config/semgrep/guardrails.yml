@@ -1,0 +1,59 @@
+rules:
+  - id: shellscripts.no-eval
+    languages: [bash]
+    severity: ERROR
+    message: Do not evaluate assembled shell code. Pass arguments directly.
+    pattern: eval ...
+
+  - id: shellscripts.no-download-pipe-shell
+    languages: [bash]
+    severity: ERROR
+    message: Download to a file and verify its checksum or signature before execution.
+    pattern-either:
+      - pattern: curl ... | sh ...
+      - pattern: curl ... | bash ...
+      - pattern: wget ... | sh ...
+      - pattern: wget ... | bash ...
+      - pattern: curl ... | sudo ...
+      - pattern: wget ... | sudo ...
+
+  - id: shellscripts.no-world-writable
+    languages: [bash]
+    severity: ERROR
+    message: Grant only the permissions required; never make files world writable.
+    pattern-either:
+      - pattern: chmod ... 777 ...
+      - pattern: chmod ... 0777 ...
+      - pattern: chmod ... a+w ...
+
+  - id: shellscripts.no-default-values
+    languages: [generic]
+    severity: ERROR
+    message: Validate missing input explicitly instead of supplying a silent default.
+    pattern-regex: '\$\{[A-Za-z_][A-Za-z_0-9]*(?::[-=]|[-=])[^}\n]*\}'
+
+  - id: shellscripts.no-swallowed-errors
+    languages: [generic]
+    severity: ERROR
+    message: Handle or propagate failures; do not replace failure with success.
+    pattern-regex: '\|\|\s*(?:true|:)(?:\s|;|$)'
+
+  - id: shellscripts.no-check-suppression
+    languages: [generic]
+    severity: ERROR
+    message: Fix checker findings instead of suppressing them.
+    pattern-either:
+      - pattern-regex: '#[^\n]*(?:shellcheck\s+disable|nosemgrep|shfmt\s+off|codespell[ -]ignore)'
+      - pattern-regex: '(?m)^\s*(?:disable|exclude)\s*=\s*SC[0-9]+'
+
+  - id: shellscripts.no-skipped-tests
+    languages: [generic]
+    severity: ERROR
+    message: Fix failing tests instead of skipping or marking them pending.
+    pattern-regex: '(?m)^\s*(?:skip|Skip|Pending|Todo|xIt|xDescribe)(?:\s|$)'
+
+  - id: shellscripts.no-predictable-temp
+    languages: [generic]
+    severity: ERROR
+    message: Use mktemp and a cleanup trap instead of predictable temporary output paths.
+    pattern-regex: '>\s*["\x27]?/(?:var/)?tmp/[A-Za-z0-9_.-]+'

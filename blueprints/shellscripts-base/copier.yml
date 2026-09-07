@@ -1,0 +1,53 @@
+_min_copier_version: "9.0.0"
+_subdirectory: template
+_templates_suffix: ".template"
+_answers_file: .copier-answers.yml
+_exclude:
+  - ".git"
+  - "reports/"
+  - "CLAUDE.md"
+_skip_if_exists:
+  - "src/"
+  - "test/"
+  - "spec/"
+  - "data/input/"
+  - "data/output/"
+_message_before_copy: |
+  Creating a portable shell scripts project with full validation infrastructure.
+_message_after_copy: |
+  Project {{project_name}} created successfully!
+  Install the prerequisites listed in README.md, then run:
+    just init
+    just run
+    just ci
+_tasks:
+  - "ln -s AGENTS.md CLAUDE.md"
+  - "git init -q"
+  - "mkdir -p .git/hooks && printf '%s\n' '#!/bin/sh' 'set -eu' 'just ci-quiet' > .git/hooks/pre-commit"
+project_name:
+  type: str
+  help: Project name?
+  validator: >-
+    {% if not (project_name | regex_search('^[a-zA-Z0-9]([a-zA-Z0-9_.-]*[a-zA-Z0-9])?$')) %}
+    Use letters, digits, hyphens, underscores, and dots only.
+    {% endif %}
+project_description:
+  type: str
+  help: Short description?
+  default: "Portable shell scripts with strict validation"
+author_name:
+  type: str
+  help: Author name?
+  default: ""
+author_email:
+  type: str
+  help: Author email?
+  default: ""
+coverage_threshold:
+  type: int
+  help: Minimum source line coverage (%)?
+  default: 80
+  validator: >-
+    {% if coverage_threshold < 0 or coverage_threshold > 100 %}
+    Must be 0-100.
+    {% endif %}

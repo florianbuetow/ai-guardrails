@@ -1,0 +1,5 @@
+reports/
+coverage/
+report/
+.DS_Store
+.tools/

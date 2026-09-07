@@ -5,7 +5,7 @@ This file provides guidance to AI agents and AI-assisted development tools when 
 
 ## Repository Overview
 
-This repository contains Copier templates for Python, Java, Go, Elixir, C++, Rust, Kotlin, Scala, Clojure, TypeScript (React), and TypeScript MCP servers that enforce strict validation guardrails on AI-generated code — catching antipatterns, suppressing silent defaults, and providing immediate feedback so AI agents write better, more maintainable code from the start.
+This repository contains Copier templates for Python, Java, Go, Elixir, C++, Rust, Kotlin, Scala, Clojure, TypeScript (React), TypeScript MCP servers, and portable shell scripts that enforce strict validation guardrails on AI-generated code — catching antipatterns, suppressing silent defaults, and providing immediate feedback so AI agents write better, more maintainable code from the start.
 
 ## Core Coding Principles
 
@@ -149,6 +149,13 @@ This is an inverted test pattern: a passing test means the project's own CI caug
 - Validation: prettier, oxlint, tsc, semgrep, codespell, knip, dependency-cruiser, Vitest, real MCP client integration tests, npm audit
 - MCP guardrails: stdout is reserved for JSON-RPC, tool inputs have no silent defaults, recoverable failures return model-readable tool errors
 
+### The Portable Shell Scripts Template (`blueprints/shellscripts-base`)
+
+- POSIX shell source with macOS and Linux compatibility checks
+- Project structure: src/, test/, scripts/, data/, config/
+- Validation: shfmt, ShellCheck, Bash/dash/BusyBox ash/ksh/zsh syntax checks, checkbashisms, Semgrep, codespell, executable `test/test*.sh` tests, Bats, ShellSpec, and kcov coverage
+- Conventions: Justfile workflow, executable project scripts, no checker suppressions, no silent fallbacks
+
 All templates emphasize creating immediately runnable projects with no placeholders, comprehensive CI pipelines, and AGENTS.md/CLAUDE.md files for AI agent guidance.
 
 ## Justfile Conventions
@@ -166,7 +173,7 @@ These rules apply to all justfiles — in this repository and in all generated t
 
 - `just ci` — Run all repo-level checks (codespell, semgrep, shellcheck) + all template tests
 - `just test` — Run baseline + violation tests for all templates
-- `just test-<language>` — Run tests for one template family (python, java, go, elixir, cpp, cpp-3dgame, rust, kotlin, scala, clojure, typescript, mcp-typescript)
+- `just test-<language>` — Run tests for one template family (python, java, go, elixir, cpp, cpp-3dgame, rust, kotlin, scala, clojure, typescript, mcp-typescript, shellscripts)
 - `just check` — Verify required tools are installed
 - `just create <template> <target-dir>` — Scaffold a new project from a blueprint
 

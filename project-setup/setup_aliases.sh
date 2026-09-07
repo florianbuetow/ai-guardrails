@@ -24,6 +24,7 @@ ALIASES=(
   "newclojure:setup-project-clojure-claude.sh"
   "newreact:setup-project-typescript-claude.sh"
   "newmcp:setup-project-mcp-typescript-claude.sh"
+  "newshell:setup-project-shellscripts-claude.sh"
 )
 UPDATE_ALIAS="alias update-templates='cd ~/scripts/ai-guardrails && git pull && cd - > /dev/null'"
 
@@ -158,6 +159,7 @@ echo "     newscala my-project     # Scala"
 echo "     newclojure my-project   # Clojure"
 echo "     newreact my-project     # TypeScript + React"
 echo "     newmcp my-project       # TypeScript MCP server"
+printf "     newshell my-project     # Portable shell scripts\n"
 echo ""
 echo "  3. Update templates to latest version:"
 echo "     update-templates"
