@@ -20,7 +20,6 @@ Production-ready Copier template for Kotlin CLI applications with full validatio
 | **semgrep** | Custom static analysis | Pattern-based scanning — enforces project-specific rules |
 | **Dependency Analysis** | Dependency hygiene | Detects unused and undeclared dependencies |
 | **codespell** | Spell checking | Catches typos in code, comments, and documentation |
-| **trivy** | Vulnerability scanning | Flags HIGH/CRITICAL CVEs in resolved dependencies |
 | **Gradle Versions Plugin** | Dependency version audit | Detects outdated dependencies with available updates |
 | **Konsist** | Architecture constraints | Enforces package/import rules — prevents architectural erosion |
 | **JUnit 5 + Kover** | Testing and coverage | Unit testing with coverage thresholds |
@@ -108,7 +107,7 @@ The template will ask:
 Projects created from this template include:
 
 - **Strict Kotlin execution**: Only via Gradle wrapper (`./gradlew`), never system Gradle
-- **Complete validation suite**: ktlint, detekt, Kover, Konsist, semgrep, trivy — all wired into `just ci`
+- **Complete validation suite**: ktlint, detekt, Kover, Konsist, semgrep — all wired into `just ci`
 - **Just recipes**: init, run, destroy, code-*, test, ci, ci-quiet
 - **Pre-commit hooks**: Runs `just ci-quiet` on commit
 - **AI agent rules**: AGENTS.md with strict development guidelines
@@ -135,7 +134,6 @@ Projects created from this template include:
 - **git** - Version control
 - **codespell** - Spell checker (`brew install codespell`)
 - **semgrep** - Static analysis (`brew install semgrep`)
-- **trivy** - Vulnerability scanner (`brew install trivy`)
 
 ## Testing the Template
 

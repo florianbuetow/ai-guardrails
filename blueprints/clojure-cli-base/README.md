@@ -11,7 +11,6 @@ Copier blueprint for a Clojure CLI project using Clojure CLI, `deps.edn`, and `t
 - Property and generative tests: test.check through Kaocha
 - Source security: clj-holmes and Semgrep
 - Dependency hygiene: unused-deps plus tools.deps/clj-kondo ownership analysis
-- Dependency vulnerability scan: Trivy over the generated Maven dependency graph
 - Outdated dependencies: antq
 - Architecture: clj-depend
 - Coverage: kaocha-cloverage

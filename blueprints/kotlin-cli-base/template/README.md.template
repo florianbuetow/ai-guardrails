@@ -54,7 +54,6 @@
 - **just** - Command runner ([installation guide](https://github.com/casey/just#installation))
 - **codespell** - Spell checker (`brew install codespell`)
 - **semgrep** - Static analysis (`brew install semgrep`)
-- **trivy** - Dependency vulnerability scanner (`brew install trivy`)
 
 All Kotlin tooling (ktlint, detekt, Kover, Konsist) is provided by Gradle plugins — no separate installation required.
 
@@ -67,7 +66,7 @@ just init
 ```
 
 This will:
-- Verify prerequisites (java, gradlew, codespell, semgrep, trivy)
+- Verify prerequisites (java, gradlew, codespell, semgrep)
 - Download and cache all Gradle dependencies
 
 ## Usage
@@ -104,7 +103,7 @@ just help
 - `just code-security` - Run detekt static analysis (bugs, exceptions, complexity)
 - `just code-deptry` - Check dependency hygiene (dependency-analysis)
 - `just code-architecture` - Run Konsist architecture tests
-- `just code-audit` - Scan dependencies for vulnerabilities and outdated versions
+- `just code-audit` - Check for outdated dependencies
 
 ### Testing
 
@@ -128,7 +127,7 @@ The CI pipeline runs the following steps in order:
 9. `test` - Unit tests
 10. `code-architecture` - Architecture tests (Konsist)
 11. `test-coverage` - Coverage verification (Kover)
-12. `code-audit` - Vulnerability + version scan (trivy + Gradle Versions Plugin)
+12. `code-audit` - Dependency version check (Gradle Versions Plugin)
 
 ## Project Rules
 

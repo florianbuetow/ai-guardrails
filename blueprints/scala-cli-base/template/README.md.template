@@ -8,8 +8,6 @@
 - [just](https://github.com/casey/just)
 - [codespell](https://github.com/codespell-project/codespell)
 - [Semgrep](https://semgrep.dev/)
-- [Trivy](https://trivy.dev/)
-- GNU `timeout`
 
 The pinned sbt launcher, Scala compiler, build plugins, and test libraries are supplied by the project.
 
@@ -28,7 +26,7 @@ The dummy application prints `Hello, Scala!` after compiling successfully.
 just ci
 ```
 
-`just ci` runs Scalafmt, built-in and project-local Scalafix rules, strict scalac checks, WartRemover, Find Security Bugs, dependency declaration and lock checks, codespell, Semgrep, MUnit, Scalafix testkit, ArchUnit, scoverage, Trivy, and sbt-updates. A failure from any tool stops the pipeline.
+`just ci` runs Scalafmt, built-in and project-local Scalafix rules, strict scalac checks, WartRemover, Find Security Bugs, dependency declaration and lock checks, codespell, Semgrep, MUnit, Scalafix testkit, ArchUnit, scoverage, and sbt-updates. A failure from any tool stops the pipeline.
 
 Useful focused commands:
 

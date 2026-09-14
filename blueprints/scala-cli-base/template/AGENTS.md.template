@@ -42,7 +42,7 @@
 - Find Security Bugs and Semgrep own bytecode/source security patterns.
 - ArchUnit owns package dependency direction and cycles.
 - MUnit and scoverage own behavioral verification and coverage.
-- Dependency declarations, locks, vulnerabilities, and updates are enforced by their dedicated sbt tasks and Trivy.
+- Dependency declarations, locks, and updates are enforced by their dedicated sbt tasks.
 
 ## Justfile conventions
 

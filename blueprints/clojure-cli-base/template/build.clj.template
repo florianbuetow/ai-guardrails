@@ -5,7 +5,6 @@
 (def ^:private lib '{{group_id}}/{{project_slug}})
 (def ^:private version "0.1.0")
 (def ^:private class-dir "target/classes")
-(def ^:private audit-pom-file "target/audit/pom.xml")
 (def ^:private uber-file (format "target/%s-%s-standalone.jar" (name lib) version))
 (def ^:private main-ns '{{namespace_name}}.cli.main)
 
@@ -49,17 +48,6 @@
     [:license
      [:name "EPL-2.0"]
      [:url "https://www.eclipse.org/legal/epl-2.0/"]]]])
-
-(defn audit-pom
-  "Write the Maven dependency graph consumed by vulnerability scanning."
-  [_]
-  (b/delete {:path "target/audit"})
-  (b/write-pom {:target audit-pom-file
-                :lib lib
-                :version version
-                :basis (b/create-basis {:project "deps.edn"})
-                :src-dirs ["src/main/clojure"]
-                :pom-data (pom-data)}))
 
 (defn uber
   "Build the standalone executable JAR."

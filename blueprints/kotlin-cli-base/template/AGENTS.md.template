@@ -73,7 +73,6 @@ These tools enforce the rules:
 - **Strict compiler** — every compiler warning is a build error (`allWarningsAsErrors`)
 - **Konsist** — architecture constraints (`just code-architecture`)
 - **Kover** — code coverage threshold ({{coverage_threshold}}%)
-- **trivy** — dependency vulnerability scanning
 
 ## Project Structure
 - Main source code lives in `src/main/kotlin/{{package_path}}/`

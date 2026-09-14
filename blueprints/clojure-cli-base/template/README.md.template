@@ -9,8 +9,6 @@
 - just
 - codespell
 - semgrep
-- trivy
-- GNU `timeout`
 
 ## Commands
 
@@ -26,7 +24,7 @@ Dependency hygiene rejects both unused direct libraries and source namespaces im
 
 ## Validation
 
-`just ci` runs cljfmt, clj-kondo, headless clojure-lsp diagnostics, tools.build compile checks with compiler warnings promoted to failure, Eastwood, Malli contract checks, clj-holmes with a pinned rules revision, dependency hygiene checks, codespell, Semgrep, Kaocha, test.check properties, clj-depend architecture checks, coverage enforcement, Trivy, and antq.
+`just ci` runs cljfmt, clj-kondo, headless clojure-lsp diagnostics, tools.build compile checks with compiler warnings promoted to failure, Eastwood, Malli contract checks, clj-holmes with a pinned rules revision, dependency hygiene checks, codespell, Semgrep, Kaocha, test.check properties, clj-depend architecture checks, coverage enforcement, and antq.
 
 `just code-lsp` rejects unused public vars, inconsistent namespace aliases, cyclic namespace dependencies, and custom project-aware findings. Project-local custom linters live under `resources/clojure-lsp.exports/linters/`; every custom rule must have a test through the pinned clojure-lsp test helper and an inverted violation fixture.
 

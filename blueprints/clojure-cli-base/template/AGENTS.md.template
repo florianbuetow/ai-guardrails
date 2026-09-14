@@ -45,7 +45,7 @@
 - Malli owns boundary and function contracts.
 - Kaocha, clojure.test, and test.check own behavioral and generative verification.
 - clj-holmes and Semgrep own source security and custom policy.
-- Trivy and antq own dependency audit and update visibility.
+- antq owns dependency update visibility.
 - clj-depend owns layer direction and namespace cycles.
 
 Every custom clojure-lsp rule must live under `resources/clojure-lsp.exports/linters/`, run headlessly through `just code-lsp`, have a focused test using `clojure-lsp-test-helper`, and have an inverted fixture under the template repository's `violations/clojure/` suite.

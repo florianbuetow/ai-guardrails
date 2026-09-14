@@ -13,8 +13,7 @@ Production-ready Copier template for Scala 3 CLI applications with executable ar
 | Find Security Bugs | JVM bytecode security analysis |
 | Semgrep | Repository-specific forbidden patterns |
 | sbt-explicit-dependencies | Unused and undeclared compile dependencies |
-| sbt-dependency-lock | Reproducible dependency graph consumed by Trivy |
-| Trivy | HIGH/CRITICAL dependency vulnerabilities |
+| sbt-dependency-lock | Reproducible dependency graph |
 | sbt-updates | Available dependency updates |
 | MUnit | Application unit tests |
 | ArchUnit | Package dependencies and cycle rules |

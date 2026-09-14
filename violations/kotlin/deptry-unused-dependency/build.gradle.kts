@@ -82,14 +82,6 @@ kover {
     }
 }
 
-// --- Dependency locking (for vulnerability scanning with trivy) ---
-configurations {
-    compileClasspath { resolutionStrategy.activateDependencyLocking() }
-    runtimeClasspath { resolutionStrategy.activateDependencyLocking() }
-    testCompileClasspath { resolutionStrategy.activateDependencyLocking() }
-    testRuntimeClasspath { resolutionStrategy.activateDependencyLocking() }
-}
-
 // --- Dependency analysis (unused / undeclared dependency hygiene) ---
 dependencyAnalysis {
     issues {

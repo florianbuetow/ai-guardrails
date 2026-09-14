@@ -196,7 +196,7 @@ check:
 check-clojure:
 	@echo ""
 	@missing=0; \
-	for tool in git java clojure just copier codespell semgrep trivy timeout; do \
+	for tool in git java clojure just copier codespell semgrep; do \
 		if command -v "$tool" >/dev/null 2>&1; then \
 			printf "\033[32m  ✓ %s\033[0m\n" "$tool"; \
 		else \

@@ -31,7 +31,7 @@ check:
         printf "\033[31m✗ Error: project/sbt-launch.jar is missing\033[0m\n"; \
         exit 1; \
     fi
-    @for tool in codespell semgrep trivy timeout; do \
+    @for tool in codespell semgrep; do \
         if ! command -v "$tool" >/dev/null 2>&1; then \
             printf "\033[31m✗ Error: %s is not installed\033[0m\n" "$tool"; \
             exit 1; \
@@ -65,7 +65,7 @@ help:
     @printf "  %-40s %s\n" "code-spell" "Check spelling (codespell)"
     @printf "  %-40s %s\n" "code-semgrep" "Run project-specific Semgrep rules"
     @printf "  %-40s %s\n" "code-architecture" "Run ArchUnit architecture tests"
-    @printf "  %-40s %s\n" "code-audit" "Scan locked dependencies and report updates"
+    @printf "  %-40s %s\n" "code-audit" "Verify the dependency lock and report updates"
     @echo ""
     @printf "\033[0;33mCI & Testing:\033[0m\n"
     @printf "  %-40s %s\n" "test" "Run application and Scalafix rule test suites"
@@ -190,20 +190,13 @@ code-architecture:
     @printf "\033[32m✓ code-architecture completed successfully\033[0m\n"
     @echo ""
 
-# Check locked dependencies for vulnerabilities and report available updates
+# Verify the committed dependency lock and report available updates
 code-audit:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    echo ""
-    printf "\033[34m=== Auditing Dependencies ===\033[0m\n"
-    trivy_docker_config="$(mktemp -d)"
-    trap 'rm -rf "$trivy_docker_config"' EXIT
-    DOCKER_CONFIG="$trivy_docker_config" timeout -k 10 600 \
-        trivy fs --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --quiet .
-    ./sbtw "app / dependencyLockCheck"
-    ./sbtw "app / dependencyUpdates"
-    printf "\033[32m✓ code-audit completed successfully\033[0m\n"
-    echo ""
+    @echo ""
+    @printf "\033[34m=== Checking Dependency Lock and Updates ===\033[0m\n"
+    @./sbtw "app / dependencyLockCheck" "app / dependencyUpdates"
+    @printf "\033[32m✓ code-audit completed successfully\033[0m\n"
+    @echo ""
 
 # Run application tests and the custom Scalafix rule testkit
 test:

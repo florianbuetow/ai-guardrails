@@ -15,7 +15,7 @@ check:
         printf "\033[31m✗ Error: JDK {{jvm_target}}+ is required, found JDK %s\033[0m\n" "$java_major"; \
         exit 1; \
     fi
-    @for tool in git clojure just codespell semgrep trivy timeout; do \
+    @for tool in git clojure just codespell semgrep; do \
         if ! command -v "$tool" >/dev/null 2>&1; then \
             printf "\033[31m✗ Error: %s is not installed\033[0m\n" "$tool"; \
             exit 1; \
@@ -49,7 +49,6 @@ help:
     @printf "  %-40s %s\n" "code-semgrep" "Run project-specific Semgrep guardrails"
     @printf "  %-40s %s\n" "code-architecture" "Check layers and namespace cycles (clj-depend)"
     @printf "  %-40s %s\n" "code-spell" "Check spelling (codespell)"
-    @printf "  %-40s %s\n" "code-audit" "Scan resolved Maven dependencies (Trivy)"
     @printf "  %-40s %s\n" "code-outdated" "Reject outdated dependencies (antq)"
     @echo ""
     @printf "\033[0;33mCI & Testing:\033[0m\n"
@@ -185,16 +184,6 @@ code-spell:
     @printf "\033[32m✓ code-spell completed successfully\033[0m\n"
     @echo ""
 
-code-audit:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    echo ""
-    printf "\033[34m=== Auditing Dependencies ===\033[0m\n"
-    clojure -Sdeps '{:aliases {:guardrails-build {:deps {io.github.clojure/tools.build {:mvn/version "0.10.14"}} :ns-default build}}}' -T:guardrails-build audit-pom
-    timeout -k 10 600 trivy fs --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --quiet target/audit/pom.xml
-    printf "\033[32m✓ code-audit completed successfully\033[0m\n"
-    echo ""
-
 code-outdated:
     @echo ""
     @printf "\033[34m=== Checking Outdated Dependencies ===\033[0m\n"
@@ -252,7 +241,6 @@ ci:
     just test-contracts
     just test-properties
     just test-coverage
-    just code-audit
     just code-outdated
     printf "\033[32m✓ ci completed successfully\033[0m\n"
     echo ""

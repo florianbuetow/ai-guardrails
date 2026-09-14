@@ -116,7 +116,7 @@ This is an inverted test pattern: a passing test means the project's own CI caug
 
 - Kotlin 2.1+ on the JVM (toolchain 21+) with Gradle Kotlin DSL
 - Project structure: src/main/kotlin/, src/test/kotlin/, scripts/, data/
-- Validation: ktlint, detekt, kotlinc allWarningsAsErrors, semgrep, codespell, dependency-analysis, trivy, Gradle Versions Plugin, Konsist, JUnit 5, Kover
+- Validation: ktlint, detekt, kotlinc allWarningsAsErrors, semgrep, codespell, dependency-analysis, Gradle Versions Plugin, Konsist, JUnit 5, Kover
 - Conventions: Justfile workflow, `./gradlew` exclusively, no `@Suppress`, no silent fallbacks, strict compiler warnings as errors
 
 ### The Scala CLI Template (`blueprints/scala-cli-base`)
@@ -124,14 +124,14 @@ This is an inverted test pattern: a passing test means the project's own CI caug
 - Scala 3.3 LTS on the JVM (toolchain 21) with a pinned sbt 1.13 launcher
 - Architecture: `cli -> application -> domain`, enforced with ArchUnit/MUnit dependency and cycle tests
 - Custom analysis: built-in Scalafix plus a project-local semantic rule tested with scalafix-testkit
-- Validation: Scalafmt, Scalafix, strict scalac warnings, WartRemover, Find Security Bugs, Semgrep, sbt-explicit-dependencies, dependency locking, codespell, Trivy, sbt-updates, MUnit, ArchUnit, and scoverage
+- Validation: Scalafmt, Scalafix, strict scalac warnings, WartRemover, Find Security Bugs, Semgrep, sbt-explicit-dependencies, dependency locking, codespell, sbt-updates, MUnit, ArchUnit, and scoverage
 - Conventions: use `./sbtw` exclusively, no check suppressions, no silent fallbacks, statement and branch coverage enforced in `just ci`
 
 ### The Clojure CLI Template (`blueprints/clojure-cli-base`)
 
 - Clojure 1.12+ on the JVM (toolchain 21+) with Clojure CLI, `deps.edn`, and tools.build
 - Architecture: `cli -> application -> domain`, enforced with clj-depend layer rules
-- Validation: cljfmt, clj-kondo, project-aware clojure-lsp diagnostics and custom linters, Eastwood, Malli runtime contracts, test.check generative checks, clj-holmes, Semgrep, unused-deps, Trivy, antq, codespell, Kaocha, and kaocha-cloverage
+- Validation: cljfmt, clj-kondo, project-aware clojure-lsp diagnostics and custom linters, Eastwood, Malli runtime contracts, test.check generative checks, clj-holmes, Semgrep, unused-deps, antq, codespell, Kaocha, and kaocha-cloverage
 - Conventions: explicit boundary validation, Malli contracts, pure domain functions, no checker suppressions, no silent fallbacks, no `core.typed` by default
 
 ### The React Vite TypeScript Template (`blueprints/react-vite-typescript-base`)

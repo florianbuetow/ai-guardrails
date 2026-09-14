@@ -70,20 +70,6 @@ check:
         exit 1; \
     fi
     @printf "\033[32m✓ semgrep is installed\033[0m\n"
-    @if ! command -v trivy >/dev/null 2>&1; then \
-        printf "\033[31m✗ Error: trivy is not installed\033[0m\n"; \
-        printf "  Install with: brew install trivy\n"; \
-        echo ""; \
-        exit 1; \
-    fi
-    @printf "\033[32m✓ trivy is installed\033[0m\n"
-    @if ! command -v timeout >/dev/null 2>&1; then \
-        printf "\033[31m✗ Error: timeout is not installed\033[0m\n"; \
-        printf "  Install with: brew install coreutils\n"; \
-        echo ""; \
-        exit 1; \
-    fi
-    @printf "\033[32m✓ timeout is installed\033[0m\n"
     @echo ""
 
 # Show help information
@@ -110,7 +96,7 @@ help:
     @printf "  %-40s %s\n" "code-security" "Run static analysis (detekt: bugs, exceptions, complexity)"
     @printf "  %-40s %s\n" "code-deptry" "Check dependency hygiene (dependency-analysis)"
     @printf "  %-40s %s\n" "code-architecture" "Run Konsist architecture tests"
-    @printf "  %-40s %s\n" "code-audit" "Scan dependencies for vulnerabilities and outdated versions"
+    @printf "  %-40s %s\n" "code-audit" "Check for outdated dependencies"
     @echo ""
     @printf "\033[0;33mCI & Testing:\033[0m\n"
     @printf "  %-40s %s\n" "test" "Run unit tests"
@@ -217,16 +203,10 @@ code-architecture:
     @printf "\033[32m✓ code-architecture completed successfully\033[0m\n"
     @echo ""
 
-# Scan dependencies for vulnerabilities and outdated versions
-# Note: trivy's vulnerability-DB download has no internal timeout and Go's
-# HTTP/2 client can stall mid-transfer on some networks (flow-control freeze
-# a few MiB in). GODEBUG forces HTTP/1.1; timeout -k turns any remaining
-# stall into a loud failure (trivy traps SIGTERM, so -k SIGKILL is required).
+# Check for outdated dependencies
 code-audit:
     @echo ""
-    @printf "\033[34m=== Scanning Dependencies for Vulnerabilities ===\033[0m\n"
-    @./gradlew dependencies --write-locks --quiet
-    @GODEBUG=http2client=0 timeout -k 10 600 trivy fs --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --quiet .
+    @printf "\033[34m=== Checking Dependency Updates ===\033[0m\n"
     @./gradlew dependencyUpdates --quiet
     @printf "\033[32m✓ code-audit completed successfully\033[0m\n"
     @echo ""

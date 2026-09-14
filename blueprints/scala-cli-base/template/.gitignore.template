@@ -23,7 +23,6 @@ scalafix/project/project/
 
 # Reports and local caches
 reports/
-.trivycache/
 
 # Operating systems
 .DS_Store
