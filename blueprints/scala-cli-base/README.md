@@ -34,7 +34,7 @@ just run
 ## Template verification
 
 ```bash
-just test-scala
+just test-scala-cli-base
 ```
 
 The Scala suite generates a clean project, runs every tool through `just ci`, runs the application, fires the generated pre-commit hook, and injects each violation to prove the corresponding check fails.

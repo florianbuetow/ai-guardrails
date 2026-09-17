@@ -141,7 +141,7 @@ To verify the template generates correctly:
 
 ```bash
 cd /path/to/ai-guardrails
-just test-kotlin
+just test-kotlin-cli-base
 ```
 
 This will:

@@ -126,6 +126,9 @@ case "$TEMPLATE_NAME" in
   mcp-server-typescript-base)
     PROJECT_DESCRIPTION="A TypeScript MCP server"
     ;;
+  node-typescript-cli-base)
+    PROJECT_DESCRIPTION="A Node.js TypeScript CLI application"
+    ;;
   shellscripts-base)
     PROJECT_DESCRIPTION="A portable shell script project"
     ;;

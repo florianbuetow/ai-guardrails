@@ -106,7 +106,7 @@ class TemplateInfoTests(unittest.TestCase):
         self.assertIn("com.github.clojure-lsp/clojure-lsp-standalone", dependency_names)
         self.assertIn("com.github.clojure-lsp/clojure-lsp-test-helper", dependency_names)
         clojure = dependency_by_name(dependencies, "org.clojure/clojure")
-        self.assertEqual("1.12.5", clojure.spec)
+        self.assertEqual("1.12.6", clojure.spec)
         self.assertEqual("maven", clojure.latest_registry)
         self.assertEqual("org.clojure:clojure", clojure.latest_identifier)
         malli = dependency_by_name(dependencies, "metosin/malli")

@@ -142,7 +142,7 @@ To verify the template generates correctly:
 
 ```bash
 cd /path/to/ai-guardrails
-just test-cpp
+just test-cpp-cli-base
 ```
 
 This will:
@@ -166,7 +166,7 @@ copier update
 To modify this template:
 
 1. Edit files in `template/` directory
-2. Test with: `just test-cpp` (from repository root)
+2. Test with: `just test-cpp-cli-base` (from repository root)
 3. Verify generated project works
 4. Commit changes
 

@@ -19,6 +19,9 @@ kotlin {
         // Strict compilation: every compiler warning is a build error.
         // This is the LSP-equivalent guardrail (mirrors javac -Werror).
         allWarningsAsErrors = true
+        // K2 only reports extra diagnostics (unused variables, redundant !!,
+        // unused parameters) when explicitly asked to.
+        freeCompilerArgs.add("-Wextra")
     }
 }
 

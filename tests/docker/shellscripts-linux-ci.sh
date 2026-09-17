@@ -25,7 +25,7 @@ git config --global init.defaultBranch main
 cd "$WORK_REPO"
 
 printf '\033[0;34m=== Running shellscripts baseline and violation tests ===\033[0m\n'
-./tests/run-tests.sh shellscripts
-just test-shellscripts-contracts
+./tests/run-tests.sh shellscripts-base
+just test-shellscripts-base-contracts
 
 printf '\033[0;32m✓ Shell scripts Linux container CI passed\033[0m\n'

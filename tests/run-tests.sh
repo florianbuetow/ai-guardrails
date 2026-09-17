@@ -10,7 +10,7 @@ source "$SCRIPT_DIR/lib/helpers.sh"
 source "$SCRIPT_DIR/lib/runner.sh"
 
 usage() {
-    printf "Usage: %s <python|java|go|elixir|cpp|cpp-3dgame|rust|kotlin|scala|clojure|typescript|mcp-typescript|shellscripts|all> [baseline]\n" "$0"
+    printf "Usage: %s <python-cli-base|java-cli-base|go-cli-base|elixir-otp-base|cpp-cli-base|cpp-3dgame-base|rust-cli-base|kotlin-cli-base|scala-cli-base|clojure-cli-base|react-vite-typescript-base|mcp-server-typescript-base|node-typescript-cli-base|shellscripts-base|all> [baseline]\n" "$0"
     printf "  Add 'baseline' to run only project generation + just ci (skip violation tests)\n"
 }
 
@@ -28,11 +28,11 @@ if [ "$TEST_MODE" != "all" ] && [ "$TEST_MODE" != "baseline" ]; then
 fi
 
 case "$1" in
-    python|java|go|elixir|cpp|cpp-3dgame|rust|kotlin|scala|clojure|typescript|mcp-typescript|shellscripts)
+    python-cli-base|java-cli-base|go-cli-base|elixir-otp-base|cpp-cli-base|cpp-3dgame-base|rust-cli-base|kotlin-cli-base|scala-cli-base|clojure-cli-base|react-vite-typescript-base|mcp-server-typescript-base|node-typescript-cli-base|shellscripts-base)
         languages=("$1")
         ;;
     all)
-        languages=(python java go elixir cpp cpp-3dgame rust kotlin scala clojure typescript mcp-typescript shellscripts)
+        languages=(python-cli-base java-cli-base go-cli-base elixir-otp-base cpp-cli-base cpp-3dgame-base rust-cli-base kotlin-cli-base scala-cli-base clojure-cli-base react-vite-typescript-base mcp-server-typescript-base node-typescript-cli-base shellscripts-base)
         ;;
     *)
         usage

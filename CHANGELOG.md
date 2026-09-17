@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Node.js TypeScript CLI template (node-typescript-cli-base) with a fully local guardrail stack: oxlint, tsc, Semgrep, knip, dependency-cruiser, ts-archunit, CodeQL CLI, Gitleaks, publint, arethetypeswrong, Vitest (unit, fast-check, type, CLI black-box, packed-artifact tests), coverage and StrykerJS mutation thresholds, plus the `newnode` alias and violation tests.
 - Verified generated hooks against real template commits in the lifecycle workflow.
 - Exposed template dependency pins from the lifecycle workflow.
 - Kotlin CLI template (kotlin-cli-base) with ktlint, detekt, Kover, Konsist, and violation tests.

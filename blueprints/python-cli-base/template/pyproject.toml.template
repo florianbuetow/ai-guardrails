@@ -231,7 +231,7 @@ exclude-newer = "7 days"
 # still selects the newest compatible direct tools automatically.
 constraint-dependencies = [
     "cryptography>=50.0.0",
-    "gitpython>=3.1.58",
+    "gitpython>=3.1.60",
     "msgpack>=1.2.1",
     "pip>=26.2.1",
     "pydantic-settings>=2.14.2",
@@ -242,7 +242,7 @@ constraint-dependencies = [
 
 [tool.uv.exclude-newer-package]
 cryptography = "2026-08-01T00:00:00Z"
-gitpython = "2026-08-11T00:00:00Z"
+gitpython = "2026-08-26T00:00:00Z"
 msgpack = "2026-06-21T00:00:00Z"
 pip = "2026-08-05T00:00:00Z"
 pydantic-settings = "2026-06-21T00:00:00Z"

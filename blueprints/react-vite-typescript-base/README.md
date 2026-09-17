@@ -144,7 +144,7 @@ To verify the template generates correctly:
 
 ```bash
 cd /path/to/ai-guardrails
-just test-typescript
+just test-react-vite-typescript-base
 ```
 
 This will:

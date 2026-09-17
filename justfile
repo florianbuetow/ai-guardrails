@@ -45,7 +45,7 @@ help:
 	@printf "\033[0;33mSetup & Lifecycle:\033[0m\n"
 	@printf "  %-40s %s\n" "init" "Install templates and set up aliases"
 	@printf "  %-40s %s\n" "check" "Check if all required tools are installed"
-	@printf "  %-40s %s\n" "check-clojure" "Check Clojure template prerequisites"
+	@printf "  %-40s %s\n" "check-clojure-cli-base" "Check Clojure template prerequisites"
 	@printf "  %-40s %s\n" "show-libs" "List direct library dependencies declared by all templates"
 	@printf "  %-40s %s\n" "help" "Show this help message"
 	@echo ""
@@ -66,6 +66,7 @@ help:
 	@printf "    %-36s %s\n" "clojure-cli-base" "Clojure CLI application"
 	@printf "    %-36s %s\n" "react-vite-typescript-base" "React + Vite + TypeScript application"
 	@printf "    %-36s %s\n" "mcp-server-typescript-base" "TypeScript MCP server"
+	@printf "    %-36s %s\n" "node-typescript-cli-base" "Node.js TypeScript CLI application"
 	@printf "    %-36s %s\n" "shellscripts-base" "Portable shell script project"
 	@echo ""
 	@printf "\033[0;33mCode Quality:\033[0m\n"
@@ -75,40 +76,42 @@ help:
 	@echo ""
 	@printf "\033[0;33mBaseline Tests:\033[0m\n"
 	@printf "  %-40s %s\n" "baseline" "Generate all templates and run just ci"
-	@printf "  %-40s %s\n" "baseline-python" "Generate Python template and run just ci"
-	@printf "  %-40s %s\n" "baseline-java" "Generate Java template and run just ci"
-	@printf "  %-40s %s\n" "baseline-go" "Generate Go template and run just ci"
-	@printf "  %-40s %s\n" "baseline-elixir" "Generate Elixir template and run just ci"
-	@printf "  %-40s %s\n" "baseline-cpp" "Generate C++ template and run just ci"
-	@printf "  %-40s %s\n" "baseline-cpp-3dgame" "Generate C++ 3D game template and run just ci"
-	@printf "  %-40s %s\n" "baseline-rust" "Generate Rust template and run just ci"
-	@printf "  %-40s %s\n" "baseline-kotlin" "Generate Kotlin template and run just ci"
-	@printf "  %-40s %s\n" "baseline-scala" "Generate Scala template and run just ci"
-	@printf "  %-40s %s\n" "baseline-clojure" "Generate Clojure template and run just ci"
-	@printf "  %-40s %s\n" "baseline-typescript" "Generate TypeScript template and run just ci"
-	@printf "  %-40s %s\n" "baseline-mcp-typescript" "Generate TypeScript MCP server template and run just ci"
-	@printf "  %-40s %s\n" "baseline-shellscripts" "Generate shell scripts template and run just ci"
+	@printf "  %-40s %s\n" "baseline-python-cli-base" "Generate Python template and run just ci"
+	@printf "  %-40s %s\n" "baseline-java-cli-base" "Generate Java template and run just ci"
+	@printf "  %-40s %s\n" "baseline-go-cli-base" "Generate Go template and run just ci"
+	@printf "  %-40s %s\n" "baseline-elixir-otp-base" "Generate Elixir template and run just ci"
+	@printf "  %-40s %s\n" "baseline-cpp-cli-base" "Generate C++ template and run just ci"
+	@printf "  %-40s %s\n" "baseline-cpp-3dgame-base" "Generate C++ 3D game template and run just ci"
+	@printf "  %-40s %s\n" "baseline-rust-cli-base" "Generate Rust template and run just ci"
+	@printf "  %-40s %s\n" "baseline-kotlin-cli-base" "Generate Kotlin template and run just ci"
+	@printf "  %-40s %s\n" "baseline-scala-cli-base" "Generate Scala template and run just ci"
+	@printf "  %-40s %s\n" "baseline-clojure-cli-base" "Generate Clojure template and run just ci"
+	@printf "  %-40s %s\n" "baseline-react-vite-typescript-base" "Generate TypeScript template and run just ci"
+	@printf "  %-40s %s\n" "baseline-mcp-server-typescript-base" "Generate TypeScript MCP server template and run just ci"
+	@printf "  %-40s %s\n" "baseline-node-typescript-cli-base" "Generate Node.js TypeScript CLI template and run just ci"
+	@printf "  %-40s %s\n" "baseline-shellscripts-base" "Generate shell scripts template and run just ci"
 	@echo ""
 	@printf "\033[0;33mCI & Testing:\033[0m\n"
 	@printf "  %-40s %s\n" "test-info" "Test direct dependency inventory output"
 	@printf "  %-40s %s\n" "test-prerequisites" "Verify every template checks prerequisites first"
-	@printf "  %-40s %s\n" "test-shellscripts-contracts" "Test shell scripts blueprint contracts"
+	@printf "  %-40s %s\n" "test-shellscripts-base-contracts" "Test shell scripts blueprint contracts"
 	@printf "  %-40s %s\n" "test" "Run all baseline + violation tests"
-	@printf "  %-40s %s\n" "test-python" "Run Python baseline + violation tests"
-	@printf "  %-40s %s\n" "test-java" "Run Java baseline + violation tests"
-	@printf "  %-40s %s\n" "test-go" "Run Go baseline + violation tests"
-	@printf "  %-40s %s\n" "test-elixir" "Run Elixir baseline + violation tests"
-	@printf "  %-40s %s\n" "test-cpp" "Run C++ baseline + violation tests"
-	@printf "  %-40s %s\n" "test-cpp-3dgame" "Run C++ 3D game baseline + violation tests"
-	@printf "  %-40s %s\n" "test-cpp-3dgame-linux" "Run C++ 3D game full CI in a Linux (amd64) container"
-	@printf "  %-40s %s\n" "test-rust" "Run Rust baseline + violation tests"
-	@printf "  %-40s %s\n" "test-kotlin" "Run Kotlin baseline + violation tests"
-	@printf "  %-40s %s\n" "test-scala" "Run Scala baseline + violation tests"
-	@printf "  %-40s %s\n" "test-clojure" "Run Clojure baseline + violation tests"
-	@printf "  %-40s %s\n" "test-typescript" "Run TypeScript baseline + violation tests"
-	@printf "  %-40s %s\n" "test-mcp-typescript" "Run TypeScript MCP server baseline + violation tests"
-	@printf "  %-40s %s\n" "test-shellscripts" "Run shell scripts baseline + violation tests"
-	@printf "  %-40s %s\n" "test-shellscripts-linux" "Run shell scripts tests in a Linux container"
+	@printf "  %-40s %s\n" "test-python-cli-base" "Run Python baseline + violation tests"
+	@printf "  %-40s %s\n" "test-java-cli-base" "Run Java baseline + violation tests"
+	@printf "  %-40s %s\n" "test-go-cli-base" "Run Go baseline + violation tests"
+	@printf "  %-40s %s\n" "test-elixir-otp-base" "Run Elixir baseline + violation tests"
+	@printf "  %-40s %s\n" "test-cpp-cli-base" "Run C++ baseline + violation tests"
+	@printf "  %-40s %s\n" "test-cpp-3dgame-base" "Run C++ 3D game baseline + violation tests"
+	@printf "  %-40s %s\n" "test-cpp-3dgame-base-linux" "Run C++ 3D game full CI in a Linux (amd64) container"
+	@printf "  %-40s %s\n" "test-rust-cli-base" "Run Rust baseline + violation tests"
+	@printf "  %-40s %s\n" "test-kotlin-cli-base" "Run Kotlin baseline + violation tests"
+	@printf "  %-40s %s\n" "test-scala-cli-base" "Run Scala baseline + violation tests"
+	@printf "  %-40s %s\n" "test-clojure-cli-base" "Run Clojure baseline + violation tests"
+	@printf "  %-40s %s\n" "test-react-vite-typescript-base" "Run TypeScript baseline + violation tests"
+	@printf "  %-40s %s\n" "test-mcp-server-typescript-base" "Run TypeScript MCP server baseline + violation tests"
+	@printf "  %-40s %s\n" "test-node-typescript-cli-base" "Run Node.js TypeScript CLI baseline + violation tests"
+	@printf "  %-40s %s\n" "test-shellscripts-base" "Run shell scripts baseline + violation tests"
+	@printf "  %-40s %s\n" "test-shellscripts-base-linux" "Run shell scripts tests in a Linux container"
 	@printf "  %-40s %s\n" "test-create" "Run just create for all templates"
 	@printf "  %-40s %s\n" "ci" "Run all checks + all template tests (quiet)"
 	@printf "  %-40s %s\n" "ci-verbose" "Run all checks + all template tests (verbose)"
@@ -193,7 +196,7 @@ check:
 	@echo ""
 
 # Check Clojure template prerequisites before generation or testing
-check-clojure:
+check-clojure-cli-base:
 	@echo ""
 	@missing=0; \
 	for tool in git java clojure just copier codespell semgrep; do \
@@ -302,81 +305,87 @@ baseline:
 	@echo ""
 
 # Generate Python template and run just ci
-baseline-python:
+baseline-python-cli-base:
 	@echo ""
-	@./tests/run-tests.sh python baseline && printf "\033[32m✓ python baseline passed\033[0m\n" || { printf "\033[31m✗ python baseline failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh python-cli-base baseline && printf "\033[32m✓ python-cli-base baseline passed\033[0m\n" || { printf "\033[31m✗ python-cli-base baseline failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Generate Java template and run just ci
-baseline-java:
+baseline-java-cli-base:
 	@echo ""
-	@./tests/run-tests.sh java baseline && printf "\033[32m✓ java baseline passed\033[0m\n" || { printf "\033[31m✗ java baseline failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh java-cli-base baseline && printf "\033[32m✓ java-cli-base baseline passed\033[0m\n" || { printf "\033[31m✗ java-cli-base baseline failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Generate Go template and run just ci
-baseline-go:
+baseline-go-cli-base:
 	@echo ""
-	@./tests/run-tests.sh go baseline && printf "\033[32m✓ go baseline passed\033[0m\n" || { printf "\033[31m✗ go baseline failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh go-cli-base baseline && printf "\033[32m✓ go-cli-base baseline passed\033[0m\n" || { printf "\033[31m✗ go-cli-base baseline failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Generate Elixir template and run just ci
-baseline-elixir:
+baseline-elixir-otp-base:
 	@echo ""
-	@./tests/run-tests.sh elixir baseline && printf "\033[32m✓ elixir baseline passed\033[0m\n" || { printf "\033[31m✗ elixir baseline failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh elixir-otp-base baseline && printf "\033[32m✓ elixir-otp-base baseline passed\033[0m\n" || { printf "\033[31m✗ elixir-otp-base baseline failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Generate C++ template and run just ci
-baseline-cpp:
+baseline-cpp-cli-base:
 	@echo ""
-	@./tests/run-tests.sh cpp baseline && printf "\033[32m✓ cpp baseline passed\033[0m\n" || { printf "\033[31m✗ cpp baseline failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh cpp-cli-base baseline && printf "\033[32m✓ cpp-cli-base baseline passed\033[0m\n" || { printf "\033[31m✗ cpp-cli-base baseline failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Generate C++ 3D game template and run just ci
-baseline-cpp-3dgame:
+baseline-cpp-3dgame-base:
 	@echo ""
-	@./tests/run-tests.sh cpp-3dgame baseline && printf "\033[32m✓ cpp-3dgame baseline passed\033[0m\n" || { printf "\033[31m✗ cpp-3dgame baseline failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh cpp-3dgame-base baseline && printf "\033[32m✓ cpp-3dgame-base baseline passed\033[0m\n" || { printf "\033[31m✗ cpp-3dgame-base baseline failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Generate Rust template and run just ci
-baseline-rust:
+baseline-rust-cli-base:
 	@echo ""
-	@./tests/run-tests.sh rust baseline && printf "\033[32m✓ rust baseline passed\033[0m\n" || { printf "\033[31m✗ rust baseline failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh rust-cli-base baseline && printf "\033[32m✓ rust-cli-base baseline passed\033[0m\n" || { printf "\033[31m✗ rust-cli-base baseline failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Generate Kotlin template and run just ci
-baseline-kotlin:
+baseline-kotlin-cli-base:
 	@echo ""
-	@./tests/run-tests.sh kotlin baseline && printf "\033[32m✓ kotlin baseline passed\033[0m\n" || { printf "\033[31m✗ kotlin baseline failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh kotlin-cli-base baseline && printf "\033[32m✓ kotlin-cli-base baseline passed\033[0m\n" || { printf "\033[31m✗ kotlin-cli-base baseline failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Generate Scala template and run just ci
-baseline-scala:
+baseline-scala-cli-base:
 	@echo ""
-	@./tests/run-tests.sh scala baseline && printf "\033[32m✓ scala baseline passed\033[0m\n" || { printf "\033[31m✗ scala baseline failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh scala-cli-base baseline && printf "\033[32m✓ scala-cli-base baseline passed\033[0m\n" || { printf "\033[31m✗ scala-cli-base baseline failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Generate Clojure template and run just ci
-baseline-clojure: check-clojure
+baseline-clojure-cli-base: check-clojure-cli-base
 	@echo ""
-	@./tests/run-tests.sh clojure baseline && printf "\033[32m✓ clojure baseline passed\033[0m\n" || { printf "\033[31m✗ clojure baseline failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh clojure-cli-base baseline && printf "\033[32m✓ clojure-cli-base baseline passed\033[0m\n" || { printf "\033[31m✗ clojure-cli-base baseline failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Generate TypeScript template and run just ci
-baseline-typescript:
+baseline-react-vite-typescript-base:
 	@echo ""
-	@./tests/run-tests.sh typescript baseline && printf "\033[32m✓ typescript baseline passed\033[0m\n" || { printf "\033[31m✗ typescript baseline failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh react-vite-typescript-base baseline && printf "\033[32m✓ react-vite-typescript-base baseline passed\033[0m\n" || { printf "\033[31m✗ react-vite-typescript-base baseline failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Generate TypeScript MCP server template and run just ci
-baseline-mcp-typescript:
+baseline-mcp-server-typescript-base:
 	@echo ""
-	@./tests/run-tests.sh mcp-typescript baseline && printf "\033[32m✓ typescript MCP server baseline passed\033[0m\n" || { printf "\033[31m✗ typescript MCP server baseline failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh mcp-server-typescript-base baseline && printf "\033[32m✓ mcp-server-typescript-base baseline passed\033[0m\n" || { printf "\033[31m✗ mcp-server-typescript-base baseline failed\033[0m\n"; exit 1; }
+	@echo ""
+
+# Generate Node.js TypeScript CLI template and run just ci
+baseline-node-typescript-cli-base:
+	@echo ""
+	@./tests/run-tests.sh node-typescript-cli-base baseline && printf "\033[32m✓ node-typescript-cli-base baseline passed\033[0m\n" || { printf "\033[31m✗ node-typescript-cli-base baseline failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Generate shell scripts template and run just ci
-baseline-shellscripts:
+baseline-shellscripts-base:
 	@echo ""
-	@./tests/run-tests.sh shellscripts baseline && printf "\033[32m✓ shell scripts baseline passed\033[0m\n" || { printf "\033[31m✗ shell scripts baseline failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh shellscripts-base baseline && printf "\033[32m✓ shellscripts-base baseline passed\033[0m\n" || { printf "\033[31m✗ shellscripts-base baseline failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Test direct dependency inventory output
@@ -407,13 +416,23 @@ test-prerequisites:
 	@echo ""
 
 # Test shell scripts blueprint contracts
-test-shellscripts-contracts:
-	@echo ""
-	@printf "\033[0;34m=== Testing Shell Scripts Blueprint Contracts ===\033[0m\n"
-	@python3 tests/test_shellscripts.py \
+test-shellscripts-base-contracts:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	echo ""
+	printf "\033[0;34m=== Testing Shell Scripts Blueprint Contracts ===\033[0m\n"
+	# Match the shellscripts suite's macOS toolchain selection.
+	if [ "$(uname -s)" = "Darwin" ]; then
+		if [ -x "/opt/homebrew/bin/bash" ]; then
+			export PATH="/opt/homebrew/bin:$PATH"
+		elif [ -x "/usr/local/bin/bash" ]; then
+			export PATH="/usr/local/bin:$PATH"
+		fi
+	fi
+	python3 tests/test_shellscripts.py \
 		&& printf "\033[32m✓ shell scripts blueprint contracts passed\033[0m\n" \
 		|| { printf "\033[31m✗ shell scripts blueprint contracts failed\033[0m\n"; exit 1; }
-	@echo ""
+	echo ""
 
 # Test all templates (baseline + violations)
 test:
@@ -422,39 +441,39 @@ test:
 	@echo ""
 
 # Test the Python template (baseline + violations)
-test-python:
+test-python-cli-base:
 	@echo ""
-	@./tests/run-tests.sh python && printf "\033[32m✓ python tests passed\033[0m\n" || { printf "\033[31m✗ python tests failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh python-cli-base && printf "\033[32m✓ python-cli-base tests passed\033[0m\n" || { printf "\033[31m✗ python-cli-base tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Test the Java template (baseline + violations)
-test-java:
+test-java-cli-base:
 	@echo ""
-	@./tests/run-tests.sh java && printf "\033[32m✓ java tests passed\033[0m\n" || { printf "\033[31m✗ java tests failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh java-cli-base && printf "\033[32m✓ java-cli-base tests passed\033[0m\n" || { printf "\033[31m✗ java-cli-base tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Test the Go template (baseline + violations)
-test-go:
+test-go-cli-base:
 	@echo ""
-	@./tests/run-tests.sh go && printf "\033[32m✓ go tests passed\033[0m\n" || { printf "\033[31m✗ go tests failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh go-cli-base && printf "\033[32m✓ go-cli-base tests passed\033[0m\n" || { printf "\033[31m✗ go-cli-base tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Test the Elixir template (baseline + violations)
-test-elixir:
+test-elixir-otp-base:
 	@echo ""
-	@./tests/run-tests.sh elixir && printf "\033[32m✓ elixir tests passed\033[0m\n" || { printf "\033[31m✗ elixir tests failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh elixir-otp-base && printf "\033[32m✓ elixir-otp-base tests passed\033[0m\n" || { printf "\033[31m✗ elixir-otp-base tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Test the C++ template (baseline + violations)
-test-cpp:
+test-cpp-cli-base:
 	@echo ""
-	@./tests/run-tests.sh cpp && printf "\033[32m✓ cpp tests passed\033[0m\n" || { printf "\033[31m✗ cpp tests failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh cpp-cli-base && printf "\033[32m✓ cpp-cli-base tests passed\033[0m\n" || { printf "\033[31m✗ cpp-cli-base tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Test the C++ 3D game template (baseline + violations)
-test-cpp-3dgame:
+test-cpp-3dgame-base:
 	@echo ""
-	@./tests/run-tests.sh cpp-3dgame && printf "\033[32m✓ cpp-3dgame tests passed\033[0m\n" || { printf "\033[31m✗ cpp-3dgame tests failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh cpp-3dgame-base && printf "\033[32m✓ cpp-3dgame-base tests passed\033[0m\n" || { printf "\033[31m✗ cpp-3dgame-base tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Run the C++ 3D game template's full CI inside a Linux amd64 container.
@@ -462,7 +481,7 @@ test-cpp-3dgame:
 # binaries exclusively for x86_64 (runs via Rosetta on Apple Silicon).
 # Conan dependencies and installed tools persist in named Docker volumes,
 # so only the first run pays the from-source dependency build.
-test-cpp-3dgame-linux:
+test-cpp-3dgame-base-linux:
 	#!/usr/bin/env bash
 	set -euo pipefail
 	echo ""
@@ -485,54 +504,60 @@ test-cpp-3dgame-linux:
 		-v cpp-3dgame-tools-cache:/root/.local \
 		-v "$(pwd)":/repo:ro \
 		cpp-3dgame-linux-ci /repo/tests/docker/cpp-3dgame-linux-ci.sh \
-		&& printf "\033[32m✓ cpp-3dgame Linux container CI passed\033[0m\n" \
-		|| { printf "\033[31m✗ cpp-3dgame Linux container CI failed\033[0m\n"; exit 1; }
+		&& printf "\033[32m✓ cpp-3dgame-base Linux container CI passed\033[0m\n" \
+		|| { printf "\033[31m✗ cpp-3dgame-base Linux container CI failed\033[0m\n"; exit 1; }
 	echo ""
 
 # Test the Rust template (baseline + violations)
-test-rust:
+test-rust-cli-base:
 	@echo ""
-	@./tests/run-tests.sh rust && printf "\033[32m✓ rust tests passed\033[0m\n" || { printf "\033[31m✗ rust tests failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh rust-cli-base && printf "\033[32m✓ rust-cli-base tests passed\033[0m\n" || { printf "\033[31m✗ rust-cli-base tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Test the Kotlin template (baseline + violations)
-test-kotlin:
+test-kotlin-cli-base:
 	@echo ""
-	@./tests/run-tests.sh kotlin && printf "\033[32m✓ kotlin tests passed\033[0m\n" || { printf "\033[31m✗ kotlin tests failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh kotlin-cli-base && printf "\033[32m✓ kotlin-cli-base tests passed\033[0m\n" || { printf "\033[31m✗ kotlin-cli-base tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Test the Scala template (baseline + violations)
-test-scala:
+test-scala-cli-base:
 	@echo ""
-	@./tests/run-tests.sh scala && printf "\033[32m✓ scala tests passed\033[0m\n" || { printf "\033[31m✗ scala tests failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh scala-cli-base && printf "\033[32m✓ scala-cli-base tests passed\033[0m\n" || { printf "\033[31m✗ scala-cli-base tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Test the Clojure template (baseline + violations)
-test-clojure: check-clojure
+test-clojure-cli-base: check-clojure-cli-base
 	@echo ""
-	@./tests/run-tests.sh clojure && printf "\033[32m✓ clojure tests passed\033[0m\n" || { printf "\033[31m✗ clojure tests failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh clojure-cli-base && printf "\033[32m✓ clojure-cli-base tests passed\033[0m\n" || { printf "\033[31m✗ clojure-cli-base tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Test the TypeScript template (baseline + violations)
-test-typescript:
+test-react-vite-typescript-base:
 	@echo ""
-	@./tests/run-tests.sh typescript && printf "\033[32m✓ typescript tests passed\033[0m\n" || { printf "\033[31m✗ typescript tests failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh react-vite-typescript-base && printf "\033[32m✓ react-vite-typescript-base tests passed\033[0m\n" || { printf "\033[31m✗ react-vite-typescript-base tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Run TypeScript MCP server baseline + violation tests
-test-mcp-typescript:
+test-mcp-server-typescript-base:
 	@echo ""
-	@./tests/run-tests.sh mcp-typescript && printf "\033[32m✓ typescript MCP server tests passed\033[0m\n" || { printf "\033[31m✗ typescript MCP server tests failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh mcp-server-typescript-base && printf "\033[32m✓ mcp-server-typescript-base tests passed\033[0m\n" || { printf "\033[31m✗ mcp-server-typescript-base tests failed\033[0m\n"; exit 1; }
+	@echo ""
+
+# Run Node.js TypeScript CLI baseline + violation tests
+test-node-typescript-cli-base:
+	@echo ""
+	@./tests/run-tests.sh node-typescript-cli-base && printf "\033[32m✓ node-typescript-cli-base tests passed\033[0m\n" || { printf "\033[31m✗ node-typescript-cli-base tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Run shell scripts baseline + violation tests
-test-shellscripts:
+test-shellscripts-base:
 	@echo ""
-	@./tests/run-tests.sh shellscripts && printf "\033[32m✓ shell scripts tests passed\033[0m\n" || { printf "\033[31m✗ shell scripts tests failed\033[0m\n"; exit 1; }
+	@./tests/run-tests.sh shellscripts-base && printf "\033[32m✓ shellscripts-base tests passed\033[0m\n" || { printf "\033[31m✗ shellscripts-base tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Run the shell scripts template's baseline and violation tests in Linux
-test-shellscripts-linux:
+test-shellscripts-base-linux:
 	#!/usr/bin/env bash
 	set -euo pipefail
 	echo ""
@@ -553,8 +578,8 @@ test-shellscripts-linux:
 	docker run --rm \
 		-v "$(pwd):/repo:ro" \
 		shellscripts-linux-ci /repo/tests/docker/shellscripts-linux-ci.sh \
-		&& printf "\033[32m✓ shell scripts Linux container tests passed\033[0m\n" \
-		|| { printf "\033[31m✗ shell scripts Linux container tests failed\033[0m\n"; exit 1; }
+		&& printf "\033[32m✓ shellscripts-base Linux container tests passed\033[0m\n" \
+		|| { printf "\033[31m✗ shellscripts-base Linux container tests failed\033[0m\n"; exit 1; }
 	echo ""
 
 # Test just create for all templates
@@ -569,6 +594,15 @@ test-create:
         quiet_progress=1
     else
         quiet_progress=0
+    fi
+    # Match the shellscripts suite's macOS toolchain selection: the generated
+    # project's check requires Bash 4+, which macOS only ships via Homebrew.
+    if [ "$(uname -s)" = "Darwin" ]; then
+        if [ -x "/opt/homebrew/bin/bash" ]; then
+            export PATH="/opt/homebrew/bin:$PATH"
+        elif [ -x "/usr/local/bin/bash" ]; then
+            export PATH="/usr/local/bin:$PATH"
+        fi
     fi
     tmp_dir="$(mktemp -d)"
     trap 'rm -rf "$tmp_dir"' EXIT
@@ -601,7 +635,7 @@ test-create:
     echo ""
 
 # Run all checks and all template tests
-ci-verbose: check test-prerequisites test-shellscripts-contracts code-spell code-semgrep code-shellcheck test-info test test-create
+ci-verbose: check test-prerequisites test-shellscripts-base-contracts code-spell code-semgrep code-shellcheck test-info test test-create
 	@echo ""
 	@printf "\033[32m✓ ci-verbose passed\033[0m\n"
 	@echo ""
@@ -616,7 +650,7 @@ ci:
     echo ""
     # Keep this list identical to ci-verbose's dependencies so both run the
     # exact same tests; only the output verbosity differs.
-    steps=(check test-prerequisites test-shellscripts-contracts code-spell code-semgrep code-shellcheck test-info test test-create)
+    steps=(check test-prerequisites test-shellscripts-base-contracts code-spell code-semgrep code-shellcheck test-info test test-create)
     for step in "${steps[@]}"; do
         printf "\033[0;34m▶ starting %s\033[0m\n" "$step"
         if output="$(just "$step" 2>&1)"; then

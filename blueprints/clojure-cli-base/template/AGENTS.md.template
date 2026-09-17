@@ -48,7 +48,7 @@
 - antq owns dependency update visibility.
 - clj-depend owns layer direction and namespace cycles.
 
-Every custom clojure-lsp rule must live under `resources/clojure-lsp.exports/linters/`, run headlessly through `just code-lsp`, have a focused test using `clojure-lsp-test-helper`, and have an inverted fixture under the template repository's `violations/clojure/` suite.
+Every custom clojure-lsp rule must live under `resources/clojure-lsp.exports/linters/`, run headlessly through `just code-lsp`, have a focused test using `clojure-lsp-test-helper`, and have an inverted fixture under the template repository's `violations/clojure-cli-base/` suite.
 
 ## Justfile conventions
 

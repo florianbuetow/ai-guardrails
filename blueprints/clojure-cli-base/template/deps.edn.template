@@ -1,7 +1,7 @@
 {:mvn/repos {"central" {:url "https://repo1.maven.org/maven2/"}
              "clojars" {:url "https://repo.clojars.org/"}}
  :paths ["src/main/clojure" "resources"]
- :deps {org.clojure/clojure {:mvn/version "1.12.5"}
+ :deps {org.clojure/clojure {:mvn/version "1.12.6"}
         metosin/malli {:mvn/version "0.20.1"}}
  :aliases
  {:run {:main-opts ["-m" "{{namespace_name}}.cli.main"]}
@@ -40,7 +40,7 @@
                           {:git/url "https://github.com/borkdude/unused-deps.git"
                            :git/sha "c6673b5549d02fa131d21b61695e283b18124b59"}
                           clj-kondo/clj-kondo {:mvn/version "2026.08.04"}
-                          org.clojure/tools.deps {:mvn/version "0.31.1642"}}
+                          org.clojure/tools.deps {:mvn/version "0.31.1646"}}
              :main-opts ["-m" "check-deps"]}
   :antq {:replace-deps {com.github.liquidz/antq {:mvn/version "2.11.1276"}}
          :main-opts ["-m" "antq.core" "--no-changes"]}}}

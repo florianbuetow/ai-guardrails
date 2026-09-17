@@ -129,7 +129,7 @@ To verify the template generates correctly:
 
 ```bash
 cd /path/to/ai-guardrails
-just test-elixir
+just test-elixir-otp-base
 ```
 
 This will:
@@ -153,7 +153,7 @@ copier update
 To modify this template:
 
 1. Edit files in `template/` directory
-2. Test with: `just test-elixir` (from repository root)
+2. Test with: `just test-elixir-otp-base` (from repository root)
 3. Verify generated project works
 4. Commit changes
 

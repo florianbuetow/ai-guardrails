@@ -5,7 +5,7 @@ This file provides guidance to AI agents and AI-assisted development tools when 
 
 ## Repository Overview
 
-This repository contains Copier templates for Python, Java, Go, Elixir, C++, Rust, Kotlin, Scala, Clojure, TypeScript (React), TypeScript MCP servers, and portable shell scripts that enforce strict validation guardrails on AI-generated code — catching antipatterns, suppressing silent defaults, and providing immediate feedback so AI agents write better, more maintainable code from the start.
+This repository contains Copier templates for Python, Java, Go, Elixir, C++, Rust, Kotlin, Scala, Clojure, TypeScript (React), TypeScript MCP servers, Node.js TypeScript CLIs, and portable shell scripts that enforce strict validation guardrails on AI-generated code — catching antipatterns, suppressing silent defaults, and providing immediate feedback so AI agents write better, more maintainable code from the start.
 
 ## Core Coding Principles
 
@@ -30,6 +30,7 @@ These rules apply everywhere — repo scripts, justfiles, test infrastructure, a
 - Keep commit messages professional and focused on the changes made
 - Commit messages should describe what changed and why, without mentioning AI assistance
 - ALWAYS run `git push` after creating a commit to push changes to the remote repository
+- An explicit user instruction not to commit overrides commit and push requirements only: continue authorized local edits and validation, and leave Git history untouched.
 
 ## Current Contents
 
@@ -57,10 +58,12 @@ This is an inverted test pattern: a passing test means the project's own CI caug
 
 **To add a new violation test:**
 
-1. Create a new subdirectory under the target language (for example `violations/python/no-default-values/`).
+1. Create a new subdirectory under the target language (for example `violations/python-cli-base/no-default-values/`).
 2. Add only the files that must be overlaid onto the generated project.
 3. Optionally add a `check` file containing the justfile recipe name to run (one line, e.g. `code-security`). If omitted, `code-semgrep` is used.
 4. Ensure the injected code triggers the intended rule without relying on placeholder/broken syntax.
+
+Before running a violation, confirm that its resolved recipe (`check` or the `code-semgrep` default) exists in the rendered project's justfile and exercises the intended guardrail.
 
 ### The Python CLI Template (`blueprints/python-cli-base`)
 
@@ -108,7 +111,7 @@ This is an inverted test pattern: a passing test means the project's own CI caug
 - Shaders are HLSL only, compiled to SPIR-V at build time by DXC; toktx/ktx, gltfpack, and DXC (Linux) are pinned prerequisite installs via just init
 - One headless-safe GoogleTest smoke test per library in tests/deps/
 - Interactive Vulkan cube demo (src/demo/, `just demo`) with mouse control, ImGui menu, debug-build validation layers (fail-fast), Tracy frame profiling, and a persisted pipeline cache
-- Headless GPU rendering test (`just test-render`, in ci): offscreen render + pixel readback; Linux verification via `just test-cpp-3dgame-linux` (amd64 Docker container with lavapipe)
+- Headless GPU rendering test (`just test-render`, in ci): offscreen render + pixel readback; Linux verification via `just test-cpp-3dgame-base-linux` (amd64 Docker container with lavapipe)
 - Validation: clang-format, clang-tidy, cppcheck, flawfinder, Infer, IWYU, semgrep, codespell, GoogleTest, ASan/UBSan, lcov coverage
 - Conventions: Justfile workflow, CMakePresets.json (Conan toolchains), strict compiler warnings, LLVM/Clang only
 
@@ -149,6 +152,14 @@ This is an inverted test pattern: a passing test means the project's own CI caug
 - Validation: prettier, oxlint, tsc, semgrep, codespell, knip, dependency-cruiser, Vitest, real MCP client integration tests, npm audit
 - MCP guardrails: stdout is reserved for JSON-RPC, tool inputs have no silent defaults, recoverable failures return model-readable tool errors
 
+### The Node.js TypeScript CLI Template (`blueprints/node-typescript-cli-base`)
+
+- TypeScript on Node.js 24+, ES modules, npm-only tooling, executable `bin` plus a typed public API under `exports`
+- Architecture: `index.ts -> cli/* -> application/* -> domain/*`, enforced by dependency-cruiser (import direction) and `@nielspeter/ts-archunit` (function-body rules behind `just code-architecture-deep`)
+- Everything runs locally from the repository: no containers, SaaS, databases, external APIs, hosted analysis, or live vulnerability feeds (no `npm audit`)
+- Validation: prettier, oxlint, tsc, semgrep, codespell, ShellCheck + shfmt, knip, dependency-cruiser, ts-archunit, CodeQL CLI, Gitleaks, publint, `@arethetypeswrong/cli`, `npm pack --dry-run`, Vitest (unit, fast-check property, `expectTypeOf` type, `child_process` CLI black-box, and packed-artifact tests), V8 coverage thresholds, StrykerJS mutation thresholds
+- CLI guardrails: exit `0`/`1`/`2` for success/runtime failure/usage error, stdout reserved for results, no shell execution (`exec`, `execSync`, `shell: true` forbidden), no argv or env fallbacks
+
 ### The Portable Shell Scripts Template (`blueprints/shellscripts-base`)
 
 - POSIX shell source with macOS and Linux compatibility checks
@@ -157,6 +168,8 @@ This is an inverted test pattern: a passing test means the project's own CI caug
 - Conventions: Justfile workflow, executable project scripts, no checker suppressions, no silent fallbacks
 
 All templates emphasize creating immediately runnable projects with no placeholders, comprehensive CI pipelines, and AGENTS.md/CLAUDE.md files for AI agent guidance.
+
+After changing a template, render a fresh project and inspect generated paths for duplicate trees, empty leftover directories, and unrendered template syntax before broader validation.
 
 ## Justfile Conventions
 
@@ -173,9 +186,11 @@ These rules apply to all justfiles — in this repository and in all generated t
 
 - `just ci` — Run all repo-level checks (codespell, semgrep, shellcheck) + all template tests
 - `just test` — Run baseline + violation tests for all templates
-- `just test-<language>` — Run tests for one template family (python, java, go, elixir, cpp, cpp-3dgame, rust, kotlin, scala, clojure, typescript, mcp-typescript, shellscripts)
+- `just test-<language>` — Run tests for one template family (python-cli-base, java-cli-base, go-cli-base, elixir-otp-base, cpp-cli-base, cpp-3dgame-base, rust-cli-base, kotlin-cli-base, scala-cli-base, clojure-cli-base, react-vite-typescript-base, mcp-server-typescript-base, node-typescript-cli-base, shellscripts-base)
 - `just check` — Verify required tools are installed
 - `just create <template> <target-dir>` — Scaffold a new project from a blueprint
+
+Before concluding, verify and report evidence for every language, component, and comparison explicitly named in the user's request.
 
 ## Delegating to Sub-Agents
 
@@ -184,6 +199,8 @@ For large implementation tasks, long debugging sessions, or any work that benefi
 ## Landing the Plane (Session Completion)
 
 **When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
+
+For implementation requests, diagnosis, research, review, or partial validation is not completion. Continue through the requested edits and applicable quality gates; if a gate cannot run, report the exact blocker and do not claim completion.
 
 **MANDATORY WORKFLOW:**
 

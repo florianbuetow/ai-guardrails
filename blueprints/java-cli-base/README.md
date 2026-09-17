@@ -141,7 +141,7 @@ To verify the template generates correctly:
 
 ```bash
 cd /path/to/ai-guardrails
-just test-java
+just test-java-cli-base
 ```
 
 This will:
@@ -165,7 +165,7 @@ copier update
 To modify this template:
 
 1. Edit files in `template/` directory
-2. Test with: `just test-java` (from repository root)
+2. Test with: `just test-java-cli-base` (from repository root)
 3. Verify generated project works
 4. Commit changes
 

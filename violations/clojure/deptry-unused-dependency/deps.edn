@@ -1,3 +1,0 @@
-{:paths ["src/main/clojure" "resources"]
- :deps {org.clojure/clojure {:mvn/version "1.12.1"}
-        cheshire/cheshire {:mvn/version "5.13.0"}}}

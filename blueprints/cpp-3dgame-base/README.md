@@ -144,7 +144,7 @@ removed in imgui 1.92.
 **Bumping the Vulkan stack:** move `vulkan-headers` (force-override),
 `vulkan-loader`, `volk`, `spirv-tools`, and `spirv-cross` in lockstep to one
 SDK line, re-check the `vk-bootstrap` force-override, keep the pinned DXC
-release on the same SDK line, then run `just test-cpp-3dgame`. brew MoltenVK
+release on the same SDK line, then run `just test-cpp-3dgame-base`. brew MoltenVK
 moves independently (currently 1.4.1).
 
 ## Usage
@@ -229,7 +229,7 @@ To verify the template generates correctly:
 
 ```bash
 cd /path/to/ai-guardrails
-just test-cpp-3dgame
+just test-cpp-3dgame-base
 ```
 
 This will:
@@ -253,7 +253,7 @@ copier update
 To modify this template:
 
 1. Edit files in `template/` directory
-2. Test with: `just test-cpp-3dgame` (from repository root)
+2. Test with: `just test-cpp-3dgame-base` (from repository root)
 3. Verify generated project works
 4. Commit changes
 

@@ -13,7 +13,7 @@ This directory contains a complete setup system for bootstrapping new Python pro
   - Emphasizes using `uv` exclusively for package management (never pip or python directly)
   - Serves as the "blueprint" that AI agents follow when creating new projects
 
-- **`setup-project-python-claude.sh`** - Automated project creation script
+- **`setup-project-python-cli-base-claude.sh`** - Automated project creation script
   - Bash script that automates the entire project creation process
   - Takes a project name/path as an argument
   - Uses the locally cloned template (no download needed)
@@ -64,13 +64,13 @@ update-templates
 Run the project creation script directly without installing an alias:
 
 ```bash
-./setup-project-python-claude.sh my-new-project
+./setup-project-python-cli-base-claude.sh my-new-project
 ```
 
 Or use it in the current directory:
 
 ```bash
-./setup-project-python-claude.sh .
+./setup-project-python-cli-base-claude.sh .
 ```
 
 ### Option 3: Manual Alias Setup
@@ -89,7 +89,7 @@ git clone https://github.com/florianbuetow/ai-guardrails.git
 2. Add these aliases to your `~/.zshrc`:
 ```bash
 # Aliases for AI project templates
-alias newpy='~/scripts/ai-guardrails/project-setup/setup-project-python-claude.sh'
+alias newpy='~/scripts/ai-guardrails/project-setup/setup-project-python-cli-base-claude.sh'
 alias update-templates='cd ~/scripts/ai-guardrails && git pull && cd - > /dev/null'
 ```
 
@@ -110,7 +110,7 @@ git clone https://github.com/florianbuetow/ai-guardrails.git
 2. Add these aliases to your `~/.bashrc` or `~/.bash_profile`:
 ```bash
 # Aliases for AI project templates
-alias newpy='~/scripts/ai-guardrails/project-setup/setup-project-python-claude.sh'
+alias newpy='~/scripts/ai-guardrails/project-setup/setup-project-python-cli-base-claude.sh'
 alias update-templates='cd ~/scripts/ai-guardrails && git pull && cd - > /dev/null'
 ```
 

@@ -144,7 +144,7 @@ code-compile:
 code-deptry:
     @echo ""
     @printf "\033[34m=== Checking Dependency Hygiene ===\033[0m\n"
-    @clojure -Sdeps '{:aliases {:guardrails-depcheck {:extra-paths ["scripts"] :extra-deps {io.github.borkdude/unused-deps {:git/url "https://github.com/borkdude/unused-deps.git" :git/sha "c6673b5549d02fa131d21b61695e283b18124b59"} clj-kondo/clj-kondo {:mvn/version "2026.08.04"} org.clojure/tools.deps {:mvn/version "0.31.1642"}} :main-opts ["-m" "check-deps"]}}}' -M:guardrails-depcheck
+    @clojure -Sdeps '{:aliases {:guardrails-depcheck {:extra-paths ["scripts"] :extra-deps {io.github.borkdude/unused-deps {:git/url "https://github.com/borkdude/unused-deps.git" :git/sha "c6673b5549d02fa131d21b61695e283b18124b59"} clj-kondo/clj-kondo {:mvn/version "2026.08.04"} org.clojure/tools.deps {:mvn/version "0.31.1646"}} :main-opts ["-m" "check-deps"]}}}' -M:guardrails-depcheck
     @printf "\033[32m✓ code-deptry completed successfully\033[0m\n"
     @echo ""
 

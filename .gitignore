@@ -238,6 +238,7 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+.back*.json
 # Dolt database files (added by bd init)
 .dolt/
 *.db

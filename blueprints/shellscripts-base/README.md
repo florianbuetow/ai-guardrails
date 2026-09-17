@@ -26,6 +26,6 @@ The macOS toolchain is available through Homebrew. Coverage requires Bash 4+
 and Kcov 38+; put Homebrew Bash first in `PATH` on macOS. Full setup instructions
 and tool references are in the [generated README](template/README.md.template).
 
-Run `just test-shellscripts` for the generated baseline, pre-commit hook, and
-injected violation checks, or `just baseline-shellscripts` for baseline only.
+Run `just test-shellscripts-base` for the generated baseline, pre-commit hook, and
+injected violation checks, or `just baseline-shellscripts-base` for baseline only.
 The [Linux CI image](docker/Dockerfile.linux-ci) provisions the Linux toolchain.
