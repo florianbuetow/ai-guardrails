@@ -1,0 +1,11 @@
+version: 1
+
+threshold:
+  compliance: 100
+  coverage: 0
+
+dependenciesRules:
+  - package: "github.com/test/test-go-project/cmd"
+    shouldNotDependsOn:
+      internal:
+        - "github.com/test/test-go-project/internal/**"

@@ -1,0 +1,25 @@
+[package]
+name = "test-rust-project"
+version = "0.1.0"
+edition = "2024"
+description = "Test Rust CLI application"
+authors = ["Test Author <test@example.com>"]
+license = "MIT"
+
+[dependencies]
+anyhow = "1"
+thiserror = "2"
+
+[dev-dependencies]
+assert_cmd = "2"
+predicates = "3"
+
+[lints.clippy]
+all = "deny"
+pedantic = "warn"
+nursery = "warn"
+cargo = "warn"
+cargo_common_metadata = { level = "allow", priority = 1 }
+
+[lints.rust]
+unsafe_code = "warn"

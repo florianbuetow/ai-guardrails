@@ -1,0 +1,176 @@
+[project]
+name = "test-cli-project"
+version = "0.0.1"
+description = "Test CLI application"
+authors = [{ name = "Test Author", email = "test@example.com" }]
+requires-python = ">=3.12"
+dependencies = [
+    "pyyaml==5.4",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/test_cli_project"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-randomly>=3.15.0",
+    "pytest-timeout>=2.2.0",
+    "ruff>=0.1.0",
+    "mypy>=1.7.0",
+    "pyright>=1.1.0",
+    "pytestarch>=4.0.0",
+    "bandit[toml]>=1.7.8",
+    "deptry>=0.20.0",
+    "pygount>=1.6.4",
+    "codespell>=2.3.0",
+    "pip-audit>=2.7.0",
+    "semgrep>=1.144.0",
+    "pre-commit>=3.6.0",
+]
+
+[tool.ruff]
+line-length = 140
+indent-width = 4
+target-version = "py312"
+exclude = [".git", ".ruff_cache", ".venv", ".vscode", "reports"]
+
+[tool.ruff.lint]
+select = [
+  "E", "F",
+  "D",
+  "ANN",
+  "B",
+  "Q",
+  "I",
+  "N",
+  "C90",
+  "UP",
+  "PERF",
+  "SIM",
+  "TID",
+]
+ignore = [
+  "D107",
+  "N802",
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["D", "ANN"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+pythonpath = ["."]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+timeout = 30
+timeout_method = "thread"
+markers = [
+    "architecture: Architecture import rule tests",
+]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unused_configs = true
+files = ["src", "tests"]
+show_error_codes = true
+pretty = true
+exclude = [".venv/"]
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_defs = false
+check_untyped_defs = false
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__init__.py",
+]
+branch = true
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+    "@abc.abstractmethod",
+]
+
+[tool.coverage.html]
+directory = "reports/coverage/html"
+
+[tool.coverage.xml]
+output = "reports/coverage/coverage.xml"
+
+[tool.bandit]
+targets = ["src"]
+exclude = [
+    "tests",
+    ".venv",
+    "venv",
+]
+severity = "MEDIUM"
+confidence = "MEDIUM"
+
+[tool.deptry]
+extend_exclude = [
+    "build",
+    "dist",
+    "docs",
+    "scripts",
+    "data",
+    "reports",
+    "notes",
+]
+ignore_notebooks = true
+known_first_party = [
+    "src",
+]
+pep621_dev_dependency_groups = [
+    "dev",
+]
+ignore = []
+json_output = "reports/deptry/deptry.json"
+
+[tool.deptry.per_rule_ignores]
+DEP002 = [
+    "pytestarch",
+]
+
+[tool.codespell]
+check-filenames = true
+check-hidden = false
+skip = ".git,.venv,venv,build,dist,reports,*.lock,uv.lock"
+ignore-words = "config/codespell/ignore.txt"

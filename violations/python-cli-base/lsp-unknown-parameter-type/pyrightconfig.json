@@ -1,0 +1,22 @@
+{
+  "pythonVersion": "3.12",
+  "pythonPlatform": "Darwin",
+  "venvPath": ".",
+  "venv": ".venv",
+  "stubPath": "stubs",
+  "include": [
+    "src",
+    "tests"
+  ],
+  "exclude": [
+    "**/__pycache__",
+    "**/.pytest_cache",
+    "**/node_modules",
+    "**/.venv"
+  ],
+  "typeCheckingMode": "strict",
+  "useLibraryCodeForTypes": true,
+  "reportMissingParameterType": false,
+  "reportUnknownVariableType": false,
+  "reportUnknownArgumentType": false
+}
