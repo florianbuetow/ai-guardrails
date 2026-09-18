@@ -1,0 +1,11 @@
+rules:
+  - id: typescript.insecure-predictable-random
+    languages: [generic]
+    message: Use cryptographic randomness for tokens, nonces, and identifiers.
+    severity: ERROR
+    pattern-regex: 'Math\.random\s*\('
+    paths:
+      include:
+        - "*.ts"
+      exclude:
+        - "*.test.ts"

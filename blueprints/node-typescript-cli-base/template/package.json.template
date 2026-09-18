@@ -1,0 +1,49 @@
+{
+  "name": "{{project_name}}",
+  "version": "0.1.0",
+  "private": true,
+  "description": "{{project_description}}",
+  "author": "{{author_name}}{% if author_email %} <{{author_email}}>{% endif %}",
+  "license": "UNLICENSED",
+  "type": "module",
+  "engines": {
+    "node": ">={{node_version}}"
+  },
+  "bin": {
+    "{{project_name}}": "./dist/index.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/lib.d.ts",
+      "import": "./dist/lib.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:mutation": "stryker run"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "0.18.5",
+    "@nielspeter/ts-archunit": "0.61.0",
+    "@stryker-mutator/core": "10.0.0",
+    "@stryker-mutator/vitest-runner": "10.0.0",
+    "@types/node": "24.13.5",
+    "@vitest/coverage-v8": "4.1.11",
+    "dependency-cruiser": "17.4.3",
+    "fast-check": "4.10.1",
+    "knip": "6.32.2",
+    "oxlint": "1.79.0",
+    "prettier": "3.9.6",
+    "publint": "0.3.24",
+    "tsx": "4.23.12",
+    "typescript": "6.0.3",
+    "vitest": "4.1.11"
+  }
+}

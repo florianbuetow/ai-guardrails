@@ -1,0 +1,16 @@
+title = "Gitleaks configuration"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Generated and third-party artifacts are never scanned"
+paths = [
+  '''^node_modules/''',
+  '''^dist/''',
+  '''^coverage/''',
+  '''^reports/''',
+  '''^\.stryker-tmp/''',
+  '''^\.codeql-db/''',
+  '''^package-lock\.json$''',
+]

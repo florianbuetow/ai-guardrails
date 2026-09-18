@@ -1,0 +1,42 @@
+export type Command =
+  | { readonly kind: 'help' }
+  | { readonly kind: 'summarize'; readonly source: string }
+
+export class UsageError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'UsageError'
+  }
+}
+
+export const USAGE = `Usage:
+  {{project_name}} summarize <file>   Summarize the numbers in <file>, one per line
+  {{project_name}} summarize -        Summarize the numbers read from stdin
+  {{project_name}} --help             Show this help
+
+Exit codes:
+  0  success
+  1  runtime failure (unreadable input, invalid number)
+  2  usage error
+`
+
+export function parseArguments(argv: readonly string[]): Command {
+  if (argv.length === 0) {
+    throw new UsageError('missing command')
+  }
+  const [command, ...rest] = argv
+  if (command === '--help' || command === '-h') {
+    return { kind: 'help' }
+  }
+  if (command !== 'summarize') {
+    throw new UsageError(`unknown command: ${command}`)
+  }
+  if (rest.length !== 1) {
+    throw new UsageError('summarize takes exactly one source: a file path or -')
+  }
+  const [source] = rest
+  if (source === undefined || source.length === 0) {
+    throw new UsageError('summarize source must not be empty')
+  }
+  return { kind: 'summarize', source }
+}

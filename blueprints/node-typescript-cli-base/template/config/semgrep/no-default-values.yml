@@ -1,0 +1,26 @@
+rules:
+  - id: typescript.no-env-fallback-default
+    languages: [generic]
+    message: >
+      Falling back to a default when an environment variable is absent hides
+      missing configuration. Read the value and fail explicitly when missing.
+    severity: ERROR
+    pattern-regex: 'process\.env\.[A-Za-z_][A-Za-z0-9_]*\s*(\?\?|\|\|)'
+    paths:
+      include:
+        - "*.ts"
+      exclude:
+        - "*.test.ts"
+
+  - id: typescript.no-argv-fallback-default
+    languages: [generic]
+    message: >
+      Falling back to a default when a CLI argument is absent hides missing
+      input. Validate the argument list and fail with a usage error instead.
+    severity: ERROR
+    pattern-regex: 'process\.argv\[[0-9]+\]\s*(\?\?|\|\|)'
+    paths:
+      include:
+        - "*.ts"
+      exclude:
+        - "*.test.ts"

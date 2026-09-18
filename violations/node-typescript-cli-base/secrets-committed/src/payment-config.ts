@@ -1,0 +1,1 @@
+export const PAYMENT_API_KEY = 'q8Zr2kL9xW4vN7bT1yH6mP3sC5dF0gJ8aE2uK4nR7wX'

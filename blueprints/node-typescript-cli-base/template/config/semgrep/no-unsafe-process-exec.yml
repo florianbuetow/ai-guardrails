@@ -1,0 +1,24 @@
+rules:
+  - id: node-typescript-cli-base.no-shell-exec
+    languages: [generic]
+    message: >
+      exec and execSync run a shell and interpolate their command string.
+      Use execFile, execFileSync, spawn, or spawnSync with an argument array.
+    severity: ERROR
+    pattern-regex: '\b(exec|execSync)\s*\('
+    paths:
+      include:
+        - "/src/*.ts"
+        - "/src/**/*.ts"
+
+  - id: node-typescript-cli-base.no-shell-true
+    languages: [generic]
+    message: >
+      shell: true hands the argument list to a shell and reintroduces command
+      injection. Pass a program and an argument array instead.
+    severity: ERROR
+    pattern-regex: 'shell\s*:\s*true'
+    paths:
+      include:
+        - "/src/*.ts"
+        - "/src/**/*.ts"

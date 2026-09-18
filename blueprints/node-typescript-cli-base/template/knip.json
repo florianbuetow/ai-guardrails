@@ -1,0 +1,5 @@
+{
+  "entry": ["src/lib.ts", "test/**/*.test.ts", "test/**/*.test-d.ts", "arch.rules.ts"],
+  "project": ["src/**/*.ts", "test/**/*.ts"],
+  "ignoreDependencies": ["@arethetypeswrong/cli", "dependency-cruiser", "oxlint", "prettier", "publint"]
+}

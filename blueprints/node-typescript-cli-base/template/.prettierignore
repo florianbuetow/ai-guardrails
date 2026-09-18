@@ -1,0 +1,7 @@
+node_modules/
+dist/
+coverage/
+reports/
+.stryker-tmp/
+.codeql-db/
+package-lock.json

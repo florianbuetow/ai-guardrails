@@ -1,0 +1,14 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "packageManager": "npm",
+  "testRunner": "vitest",
+  "mutate": ["src/**/*.ts", "!src/index.ts"],
+  "coverageAnalysis": "perTest",
+  "reporters": ["clear-text", "progress"],
+  "tempDirName": ".stryker-tmp",
+  "thresholds": {
+    "high": 90,
+    "low": {{mutation_threshold}},
+    "break": {{mutation_threshold}}
+  }
+}

@@ -1,0 +1,53 @@
+# AGENTS.md
+
+Guidance for AI coding agents working on this Node.js TypeScript CLI.
+
+## Core rules
+
+1. Fail fast. Propagate errors as typed `Error` subclasses and map them to exit codes only in the CLI layer.
+2. Never add silent defaults for missing arguments, files, or configuration. Required inputs stay required and produce a usage error.
+3. Never suppress checks with `@ts-ignore`, `@ts-expect-error`, lint-disable comments, coverage ignores, Stryker or ts-archunit exclusion comments, or skipped tests.
+4. Never run a shell from the CLI. Use `execFile`, `spawn`, or their sync variants with an argument array; `exec`, `execSync`, and `shell: true` are forbidden.
+5. Use npm and the checked-in scripts exclusively. Do not introduce another package manager.
+6. Preserve ES modules and `.js` extensions in relative TypeScript imports.
+7. Add no dependency when Node.js, TypeScript, or an existing dependency already solves the problem.
+8. Every check runs locally from the repository. Do not add containers, hosted services, or checks that need live network data.
+
+## Architecture
+
+The dependency direction is:
+
+```text
+index.ts -> cli/* -> application/* -> domain/*
+lib.ts   -> application/*, domain/*
+```
+
+- `index.ts` is the executable entrypoint: it wires process streams and sets the exit code, nothing else.
+- `lib.ts` is the public programmatic API and the only module `exports` points at.
+- `cli/` owns argument parsing, input/output streams, usage text, and exit codes.
+- `application/` owns use cases that turn raw input into domain calls.
+- `domain/` owns pure business behavior: no file system, processes, environment, or network.
+- dependency-cruiser enforces import direction; ts-archunit enforces what happens inside function bodies (typed errors only, no `process.env` in inner layers, no eval, no stubs).
+- Do not add command frameworks, dependency-injection containers, base classes, or plugin registries without a demonstrated need.
+
+## CLI behavior
+
+- Exit `0` on success, `1` on runtime failure, `2` on usage errors. Usage errors print the usage text to stderr.
+- Results go to stdout; diagnostics go to stderr. Keep stdout machine-readable.
+- Read `-` as stdin. Never guess a source when none is given.
+
+## Verification
+
+- Test the domain and application layers directly with Vitest.
+- Cover invariants with fast-check property tests, and the public TypeScript contract with `test/types/*.test-d.ts`.
+- Test the built CLI as a black box through `child_process` (exit codes, stdout, stderr).
+- Test the packed artifact (`npm pack`) so what ships is what was tested.
+- Keep coverage at or above {{coverage_threshold}}% and the mutation score at or above {{mutation_threshold}}%.
+- Run `just ci` before committing. Fix every finding instead of suppressing it.
+
+## Justfile conventions
+
+- Use `printf` for colored or formatted output.
+- Keep a blank output line before and after command blocks.
+- Keep the dedicated, manually grouped `help` recipe current.
+- Every recipe must fail fast and end with a clear status message.

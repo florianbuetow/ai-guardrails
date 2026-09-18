@@ -1,0 +1,58 @@
+# {{project_name}}
+
+{{project_description}}
+
+This is a Node.js command-line tool written in TypeScript. It ships as an npm package with an executable `bin` and a typed programmatic API, and every guardrail runs locally from the repository — no containers, hosted services, or live vulnerability feeds.
+
+## Requirements
+
+- Node.js {{node_version}}+
+- npm
+- [just](https://github.com/casey/just)
+- [Semgrep](https://semgrep.dev/)
+- [codespell](https://github.com/codespell-project/codespell)
+- [CodeQL CLI](https://codeql.github.com/)
+- [Gitleaks](https://github.com/gitleaks/gitleaks)
+- [ShellCheck](https://www.shellcheck.net/) and [shfmt](https://github.com/mvdan/sh)
+
+## Start
+
+```bash
+just init
+just test
+just run -- --help
+```
+
+`just run -- summarize <file>` summarizes the numbers in a file (one per line); `just run -- summarize -` reads stdin. Results are written to stdout as JSON, diagnostics to stderr.
+
+Exit codes: `0` success, `1` runtime failure, `2` usage error.
+
+## Architecture
+
+```text
+src/index.ts      executable entrypoint (bin)
+src/lib.ts        public programmatic API (exports)
+      │
+      ▼
+src/cli/          arguments, streams, usage, exit codes
+      │
+      ▼
+src/application/  use cases over raw input
+      │
+      ▼
+src/domain/       pure business behavior
+```
+
+- `test/unit/` tests each layer directly.
+- `test/property/` holds fast-check property tests.
+- `test/types/` asserts the public TypeScript contract with `expectTypeOf`.
+- `test/cli/` runs the built CLI as a black box through `child_process`.
+- `test/package/` packs the project with `npm pack` and tests the shipped artifact.
+
+Replace the example statistics domain with your behavior while preserving the layer boundaries.
+
+## Validation
+
+`just ci` runs initialization, formatting, linting, spelling, shell script checks, Semgrep guardrails, strict TypeScript checks, security linting, secret scanning, dependency and dead-code hygiene, import-boundary and deep architecture checks, package correctness (publint, arethetypeswrong, `npm pack --dry-run`), the full test suite, coverage thresholds, local CodeQL data-flow analysis, and mutation testing. `just ci-quiet` runs the same checks with compact fail-fast output and is installed as the repository pre-commit hook.
+
+Run `just help` for every available command.

@@ -1,0 +1,9 @@
+name: Local CodeQL data-flow analysis
+paths:
+  - src
+paths-ignore:
+  - node_modules
+  - dist
+  - coverage
+  - reports
+  - test

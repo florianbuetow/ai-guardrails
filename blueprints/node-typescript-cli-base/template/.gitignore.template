@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+reports/
+.stryker-tmp/
+.codeql-db/
+*.tgz
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+*.iml
+.DS_Store
+npm-debug.log*
+.copier-answers.yml
