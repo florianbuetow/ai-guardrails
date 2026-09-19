@@ -107,13 +107,14 @@ build:
     set -euo pipefail
     echo ""
     printf "\033[34m=== Building {{project_name}} ===\033[0m\n"
+    build_target="$(scripts/build-target.sh)"
     mkdir -p build/obj
     for source in src/main.S src/lib/*.S; do
         object="build/obj/$(basename "${source%.S}").o"
-        xcrun clang -target arm64-apple-macos11 -x assembler-with-cpp -Iinclude \
+        xcrun clang -target "$build_target" -x assembler-with-cpp -Iinclude \
             -Wall -Werror -Wa,--fatal-warnings -g -c "$source" -o "$object"
     done
-    xcrun clang -target arm64-apple-macos11 build/obj/*.o -o "build/{{project_name}}"
+    xcrun clang -target "$build_target" build/obj/*.o -o "build/{{project_name}}"
     printf "\033[32m✓ build completed successfully\033[0m\n"
     echo ""
 
@@ -186,7 +187,10 @@ code-shell:
 code-semgrep:
     @echo ""
     @printf "\033[34m=== Running Semgrep Policy Rules ===\033[0m\n"
-    @semgrep --config config/semgrep/ --error src tests include scripts
+    @# --disable-nosem: a 'nosemgrep' comment must not silence a rule here.
+    @# Without it, the rule that forbids suppression comments is suppressed by
+    @# the very comment it exists to catch.
+    @semgrep --config config/semgrep/ --error --disable-nosem src tests include scripts
     @printf "\033[32m✓ code-semgrep completed successfully\033[0m\n"
     @echo ""
 
@@ -197,8 +201,9 @@ code-lspchecks:
     printf "\033[34m=== Validating Sources with the Integrated Assembler ===\033[0m\n"
     # This is Clang's integrated assembler, not ArmLS. -Wa,--fatal-warnings is
     # required: -Werror alone leaves assembler warnings non-fatal.
+    build_target="$(scripts/build-target.sh)"
     for source in src/main.S src/lib/*.S tests/unit/*.S; do
-        xcrun clang -target arm64-apple-macos11 -x assembler-with-cpp -Iinclude \
+        xcrun clang -target "$build_target" -x assembler-with-cpp -Iinclude \
             -Wall -Werror -Wa,--fatal-warnings -c "$source" -o /dev/null
     done
     printf "\033[32m✓ code-lspchecks completed successfully\033[0m\n"
@@ -238,10 +243,11 @@ perf-mca: build
     echo ""
     printf "\033[34m=== llvm-mca Throughput Report (informational) ===\033[0m\n"
     llvm_bin="$(scripts/llvm-bin.sh)"
+    build_target="$(scripts/build-target.sh)"
     mkdir -p build/pp
     for source in src/lib/*.S; do
         name="$(basename "${source%.S}")"
-        xcrun clang -target arm64-apple-macos11 -x assembler-with-cpp -Iinclude -E "$source" -o "build/pp/$name.s"
+        xcrun clang -target "$build_target" -x assembler-with-cpp -Iinclude -E "$source" -o "build/pp/$name.s"
         printf "\033[0;36m--- %s ---\033[0m\n" "$name"
         "$llvm_bin/llvm-mca" -mtriple=arm64-apple-macos -mcpu=apple-m1 "build/pp/$name.s"
     done
@@ -253,10 +259,11 @@ test: build
     set -euo pipefail
     echo ""
     printf "\033[34m=== Running Tests ===\033[0m\n"
+    build_target="$(scripts/build-target.sh)"
     mkdir -p build/tests
     for source in tests/unit/*.S; do
         name="$(basename "${source%.S}")"
-        xcrun clang -target arm64-apple-macos11 -x assembler-with-cpp -Iinclude \
+        xcrun clang -target "$build_target" -x assembler-with-cpp -Iinclude \
             -Wall -Werror -Wa,--fatal-warnings -g -c "$source" -o "build/tests/$name.o"
         objects=("build/tests/$name.o")
         for object in build/obj/*.o; do
@@ -264,7 +271,7 @@ test: build
                 objects+=("$object")
             fi
         done
-        xcrun clang -target arm64-apple-macos11 "${objects[@]}" -o "build/tests/$name"
+        xcrun clang -target "$build_target" "${objects[@]}" -o "build/tests/$name"
         printf "  unit: %s\n" "$name"
         "./build/tests/$name"
     done

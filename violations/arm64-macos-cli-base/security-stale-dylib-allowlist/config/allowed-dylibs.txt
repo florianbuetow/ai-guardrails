@@ -1,0 +1,4 @@
+# An allowlist entry the binary does not actually link. Exact set equality
+# means a stale entry is as much an error as a missing one.
+/usr/lib/libSystem.B.dylib
+/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation

@@ -88,11 +88,30 @@ check_security() {
     return "$findings"
 }
 
+# The project's pinned build target. config/target.txt is the single input
+# every build step reads; this constant is the contract it must satisfy.
+# Changing the target is a deliberate decision that has to update both.
+PINNED_TARGET="arm64-apple-macos11"
+
 check_structure() {
     local findings=0
     local architectures
     local platform
     local minos
+    local configured_target
+    local expected_minos
+
+    configured_target="$(scripts/build-target.sh)"
+    if [ "$configured_target" != "$PINNED_TARGET" ]; then
+        printf "\033[31m✗ config/target.txt is %s, but this project is pinned to %s\033[0m\n" \
+            "$configured_target" "$PINNED_TARGET" >&2
+        printf "  macOS 11 is the first Apple Silicon release and this project uses only basic\n" >&2
+        printf "  libSystem functionality. Raising the floor drops compatibility for nothing.\n" >&2
+        findings=$((findings + 1))
+    else
+        printf "  build target: %s\n" "$configured_target"
+    fi
+    expected_minos="${PINNED_TARGET##*macos}.0"
 
     architectures="$(lipo -info "$binary" | sed 's/.*architecture: //; s/.*are: //')"
     if [ "$architectures" != "arm64" ]; then
@@ -112,12 +131,12 @@ check_structure() {
         printf "  platform: macOS\n"
     fi
 
-    if [ "$minos" != "11.0" ]; then
-        printf "\033[31m✗ expected minos 11.0, found: %s\033[0m\n" "${minos:-none}" >&2
+    if [ "$minos" != "$expected_minos" ]; then
+        printf "\033[31m✗ expected minos %s, found: %s\033[0m\n" "$expected_minos" "${minos:-none}" >&2
         printf "  The deployment target is fixed at macOS 11, the first Apple Silicon release.\n" >&2
         findings=$((findings + 1))
     else
-        printf "  minimum macOS: 11.0\n"
+        printf "  minimum macOS: %s\n" "$minos"
     fi
 
     if otool -l "$binary" | grep -q LC_LOAD_WEAK_DYLIB; then
