@@ -1,0 +1,58 @@
+# AGENTS.md
+
+Guidance for AI coding agents working on this ARM64 macOS assembly CLI.
+
+## Core rules
+
+1. Fail fast. Every error path returns a distinct status and produces a diagnostic on stderr. Never continue with a guessed value.
+2. Never introduce default values for missing input. Empty input, a malformed line and an over-long input are all failures, not zeros.
+3. Never suppress a checker. There is no suppression comment, no exemption directory, no environment override. Fix the finding.
+4. Never issue a raw syscall. `svc` is forbidden everywhere. Apple guarantees binary compatibility at the libSystem level, not the syscall level.
+5. Never touch `x18`. Apple reserves it on arm64.
+6. Allocate stack frames only through `FRAME_PUSH` / `FRAME_POP`. Raw `sp` arithmetic is rejected by `just code-abi`.
+7. Open every exported function with `FUNC` and close it with `ENDFUNC`; use `LOCAL_FUNC` / `LOCAL_ENDFUNC` for file-local helpers.
+8. Every check runs locally from this repository. Do not add containers, hosted services, or checks that need live network data.
+
+## Architecture
+
+```text
+main.S -> lib/parse.S, lib/stats.S, lib/fmt.S, lib/io.S
+lib/io.S -> libSystem
+```
+
+- `main.S` consumes argc/argv, drives the modules, and returns the exit status in `w0`. It carries no external imports of its own.
+- `lib/io.S` is the **only** module permitted to call libSystem. Every file, stdin, stdout and stderr operation belongs there.
+- `lib/parse.S`, `lib/stats.S` and `lib/fmt.S` are pure leaves with zero undefined symbols.
+- `just code-architecture` enforces this from the object files: `external(obj) = undefined(obj) - project_defined` must be empty for every object except `io.o`.
+
+If you need a new system call, add a wrapper in `io.S` and add its symbol to `config/allowed-imports.txt`. That file is compared by exact set equality, so a stale entry is as much an error as a missing one.
+
+## CLI behavior
+
+- `{{project_name}} sum <file|->` reads decimal integers, one per line, and prints `count=N sum=N max=N`.
+- Exit `0` on success, `1` on runtime failure, `2` on usage error. Usage text goes to stderr.
+- Results go to stdout; diagnostics go to stderr. Keep stdout machine-readable.
+- `-` reads stdin. Never guess a source when none is given.
+
+## Verification
+
+- `tests/unit/*.S` are standalone assembly executables: they assert against one module and exit 0 or 1.
+- `tests/cli/*.sh` drive the built binary as a black box — exit codes, stdout, stderr.
+- `tests/binary/*.filecheck` assert real disassembly through `llvm-objdump --disassemble-symbols` piped to FileCheck. Each suite declares its target with `// OBJECT:` and `// SYMBOL:` headers.
+- There is no code coverage and no mutation testing. Neither has a workable equivalent for hand-written assembly, so neither is faked.
+- Run `just ci` before committing. Fix every finding instead of suppressing it.
+
+## Tooling notes
+
+- **`code-lspchecks` is Clang's integrated assembler, not ArmLS.** It runs `clang -x assembler-with-cpp -Wall -Werror -Wa,--fatal-warnings`. The `-Wa,--fatal-warnings` flag is load-bearing: `-Werror` alone leaves assembler warnings non-fatal.
+- `FileCheck`, `llvm-objdump`, `llvm-readobj` and `llvm-mca` come from Homebrew LLVM, which is keg-only. `scripts/llvm-bin.sh` resolves them or fails; there is no fallback to Xcode's partial set.
+- `just perf-mca` prints an `llvm-mca` throughput report. It asserts nothing and is deliberately outside `ci`.
+- **ArmLS** (Arm's assembly language server) and **xctrace** are useful during development but are deliberately not CI gates: ArmLS has no Homebrew formula and describes its own diagnostics as alpha quality, and xctrace requires a full Xcode install.
+- The build target is fixed at `arm64-apple-macos11` with generic `arm64` tuning. Do not add `-mcpu` tuning without a measured reason.
+
+## Justfile conventions
+
+- Use `printf` for colored or formatted output.
+- Keep a blank output line before and after command blocks.
+- Keep the dedicated, manually grouped `help` recipe current.
+- Every recipe must fail fast and end with a clear status message.

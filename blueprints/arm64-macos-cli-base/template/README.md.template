@@ -1,0 +1,70 @@
+# {{project_name}}
+
+{{project_description}}
+
+A command-line tool written entirely in hand-written ARM64 assembly for Apple Silicon macOS. Clang is used only as assembler and linker driver; the binary links `libSystem` through the standard dynamic linker and issues no raw syscalls.
+
+## Usage
+
+```bash
+{{project_name}} sum <file|->
+```
+
+Reads decimal integers, one per line, and reports the count, sum and maximum:
+
+```console
+$ printf '5\n-7\n12\n0\n' | {{project_name}} sum -
+count=4 sum=10 max=12
+```
+
+Exit status is `0` on success, `1` on a runtime failure (unreadable input, a malformed line, a value out of range, or empty input), and `2` on a usage error.
+
+## Getting started
+
+```bash
+just init     # check prerequisites and activate the pre-commit hook
+just build    # assemble and link
+just test     # unit, CLI and disassembly tests
+just ci       # every validation check
+just help     # all recipes
+```
+
+## Prerequisites
+
+- **Xcode Command Line Tools** — `clang`, `otool`, `nm`, `lipo`, `codesign`, `lldb`
+- **Homebrew LLVM** (`brew install llvm`) — `FileCheck`, `llvm-objdump`, `llvm-readobj`, `llvm-mca`
+- `just`, `semgrep`, `codespell`, `shellcheck`, `shfmt`
+
+`just check` verifies all of these and fails with an install hint for anything missing.
+
+## Layout
+
+```text
+src/main.S        argv handling, dispatch, exit status
+src/lib/io.S      the only module that calls libSystem
+src/lib/parse.S   decimal parsing        (pure leaf)
+src/lib/stats.S   running statistics     (pure leaf)
+src/lib/fmt.S     decimal formatting     (pure leaf)
+include/abi.inc   FUNC / FRAME_PUSH macros carrying the ABI guarantees
+tests/unit/       assembly test executables
+tests/cli/        black-box tests of the built binary
+tests/binary/     FileCheck assertions over real disassembly
+config/           allowlists, Semgrep rules, codespell dictionary
+scripts/          the guardrail scripts behind the code-* recipes
+```
+
+## Guardrails
+
+Assembly has no semantic source analyser, so validation is layered differently from a compiled-language project:
+
+| Recipe | Enforces |
+| --- | --- |
+| `code-style` | source hygiene and a mechanical ARM64 style policy |
+| `code-semgrep` | no `svc`, no `x18`, no suppressions, no private symbols, no absolute paths |
+| `code-lspchecks` | Clang integrated-assembler validation with fatal warnings |
+| `code-abi` | ABI macro discipline and test coverage of every export |
+| `code-architecture` | only `io.o` may import libSystem |
+| `code-security` | exact-equality import and dylib allowlists, valid signature |
+| `code-binary` | arm64-only, macOS 11 minimum, no weak dylibs, no W+X segments |
+
+`just perf-mca` prints an `llvm-mca` throughput report. It is informational and deliberately excluded from `ci`.
