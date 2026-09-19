@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises'
+import { text } from 'node:stream/consumers'
 
 class InputReadError extends Error {
   constructor(
@@ -13,11 +14,7 @@ class InputReadError extends Error {
 export async function readInput(source: string, stdin: NodeJS.ReadableStream): Promise<string> {
   try {
     if (source === '-') {
-      const chunks: Buffer[] = []
-      for await (const chunk of stdin) {
-        chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)
-      }
-      return Buffer.concat(chunks).toString('utf8')
+      return await text(stdin)
     }
     return await readFile(source, 'utf8')
   } catch (error: unknown) {
