@@ -50,6 +50,17 @@ If you need a new system call, add a wrapper in `io.S` and add its symbol to `co
 - **ArmLS** (Arm's assembly language server) and **xctrace** are useful during development but are deliberately not CI gates: ArmLS has no Homebrew formula and describes its own diagnostics as alpha quality, and xctrace requires a full Xcode install.
 - The build target is fixed at `arm64-apple-macos11` with generic `arm64` tuning. Do not add `-mcpu` tuning without a measured reason.
 
+## Git Commit Guidelines
+
+**IMPORTANT:** When creating git commits in this repository:
+- **NEVER include AI attribution in commit messages**
+- **NEVER add "Generated with [AI tool name]" or similar phrases**
+- **NEVER add "Co-Authored-By: [AI name]" or similar attribution**
+- **NEVER run `git add -A` or `git add .` - always stage files explicitly**
+- Keep commit messages professional and focused on the changes made
+- Commit messages should describe what changed and why, without mentioning AI assistance
+- **ALWAYS run `git push` after creating a commit to push changes to the remote repository**
+
 ## Justfile conventions
 
 - Use `printf` for colored or formatted output.
