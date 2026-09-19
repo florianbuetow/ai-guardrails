@@ -1,0 +1,14 @@
+rules:
+  - id: arm64-macos-cli-base.no-raw-syscall
+    languages: [generic]
+    severity: ERROR
+    message: >
+      Raw syscalls are forbidden. Apple provides binary compatibility at the
+      libSystem level, not the syscall level, so an svc instruction can break
+      on any macOS update. Call the libSystem wrapper from src/lib/io.S instead.
+      There is no exemption directory for this rule.
+    pattern-regex: '(?<![A-Za-z0-9_])svc(?![A-Za-z0-9_])'
+    paths:
+      include:
+        - "*.S"
+        - "*.inc"

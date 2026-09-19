@@ -1,0 +1,13 @@
+rules:
+  - id: arm64-macos-cli-base.no-hardcoded-path
+    languages: [generic]
+    severity: ERROR
+    message: >
+      Absolute paths tie the project to one machine. Take the path as an
+      argument, or create temporary files with mktemp.
+    pattern-regex: '(/Users/|/home/|/private/var/|/var/folders/|/tmp/)'
+    paths:
+      include:
+        - "*.S"
+        - "*.inc"
+        - "*.sh"

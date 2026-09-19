@@ -1,0 +1,9 @@
+// OBJECT: fmt.o
+// SYMBOL: _fmt_i64
+//
+// Formatting is pure arithmetic against a caller-supplied buffer: no
+// calls out, and division by the constant ten rather than a helper.
+CHECK-LABEL: <_fmt_i64>:
+CHECK-NOT:   bl
+CHECK:       udiv
+CHECK:       ret

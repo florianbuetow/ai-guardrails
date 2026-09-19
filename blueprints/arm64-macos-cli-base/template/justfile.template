@@ -177,7 +177,7 @@ code-shell:
         echo ""
         exit 1
     fi
-    shfmt -d -i 4 "${scripts[@]}"
+    shfmt -d -i 4 -ci "${scripts[@]}"
     shellcheck "${scripts[@]}"
     printf "\033[32m✓ code-shell completed successfully\033[0m\n"
     echo ""

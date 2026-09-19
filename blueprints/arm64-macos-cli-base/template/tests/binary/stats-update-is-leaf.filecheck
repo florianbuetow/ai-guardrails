@@ -1,0 +1,9 @@
+// OBJECT: stats.o
+// SYMBOL: _stats_update
+//
+// _stats_update is on the hot path of every input line. It must stay a
+// leaf: no calls, no stack frame, and never a touch of the reserved x18.
+CHECK-LABEL: <_stats_update>:
+CHECK-NOT:   bl
+CHECK-NOT:   x18
+CHECK:       ret

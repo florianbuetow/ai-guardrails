@@ -1,0 +1,9 @@
+rules:
+  - id: arm64-macos-cli-base.no-shellcheck-disable
+    languages: [generic]
+    severity: ERROR
+    message: Fix ShellCheck findings instead of suppressing them.
+    pattern-regex: '#\s*shellcheck\s+disable='
+    paths:
+      include:
+        - "*.sh"

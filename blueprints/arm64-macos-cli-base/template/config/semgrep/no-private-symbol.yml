@@ -1,0 +1,12 @@
+rules:
+  - id: arm64-macos-cli-base.no-private-symbol
+    languages: [generic]
+    severity: ERROR
+    message: >
+      Undocumented dynamic-loader and runtime internals are not a stable
+      interface. Link only documented libSystem entry points.
+    pattern-regex: '(?<![A-Za-z0-9_])(__dyld_[A-Za-z0-9_]+|___[A-Za-z0-9_]+)'
+    paths:
+      include:
+        - "*.S"
+        - "*.inc"

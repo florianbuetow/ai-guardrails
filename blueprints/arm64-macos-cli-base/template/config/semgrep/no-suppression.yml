@@ -1,0 +1,25 @@
+rules:
+  - id: arm64-macos-cli-base.no-checker-suppression
+    languages: [generic]
+    severity: ERROR
+    message: >
+      Fix the finding instead of suppressing it. This project has no
+      suppression mechanism for any checker.
+    pattern-regex: '(nosemgrep|codespell:ignore|NOLINT|lint:disable|shellcheck disable)'
+    paths:
+      include:
+        - "*.S"
+        - "*.inc"
+        - "*.sh"
+
+  - id: arm64-macos-cli-base.no-assembly-dead-fence
+    languages: [generic]
+    severity: ERROR
+    message: >
+      '.if 0' fences code out of the build without deleting it. Delete the
+      code instead, or fix it.
+    pattern-regex: '\.if\s+0(?![0-9])'
+    paths:
+      include:
+        - "*.S"
+        - "*.inc"

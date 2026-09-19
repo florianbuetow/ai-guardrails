@@ -1,0 +1,12 @@
+rules:
+  - id: arm64-macos-cli-base.no-reserved-register
+    languages: [generic]
+    severity: ERROR
+    message: >
+      x18 is reserved by Apple on arm64 and must never be read or written.
+      Use any other caller-saved register.
+    pattern-regex: '(?<![A-Za-z0-9_])[xw]18(?![A-Za-z0-9_])'
+    paths:
+      include:
+        - "*.S"
+        - "*.inc"

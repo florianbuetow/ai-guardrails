@@ -1,0 +1,3 @@
+# Dynamic libraries the executable is allowed to link.
+# This project uses libSystem only. Frameworks are not permitted.
+/usr/lib/libSystem.B.dylib

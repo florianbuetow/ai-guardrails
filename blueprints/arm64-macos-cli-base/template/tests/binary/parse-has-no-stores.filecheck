@@ -1,0 +1,10 @@
+// OBJECT: parse.o
+// SYMBOL: _parse_i64
+//
+// The parser reads its input slice and returns a value; it must never
+// write to memory, so a caller can pass a read-only buffer safely.
+CHECK-LABEL: <_parse_i64>:
+CHECK-NOT:   str
+CHECK-NOT:   stp
+CHECK-NOT:   stur
+CHECK:       ret

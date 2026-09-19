@@ -1,0 +1,11 @@
+# Undefined symbols the linked executable is allowed to import.
+# Compared by exact set equality: an unexpected import and a stale entry
+# are both errors. Adding one is an ordinary reviewed source change.
+#
+# dyld_stub_binder is added by the linker to every dynamically linked
+# executable; the rest are the libSystem calls made by src/lib/io.S.
+_close
+_open
+_read
+_write
+dyld_stub_binder

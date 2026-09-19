@@ -1,0 +1,10 @@
+rules:
+  - id: arm64-macos-cli-base.no-skipped-tests
+    languages: [generic]
+    severity: ERROR
+    message: >
+      Do not skip or disable tests. Fix the test or the implementation.
+    pattern-regex: '(?i)(^|[^A-Za-z0-9_])(skip|disabled|todo)_test|test_(skip|disabled)|//\s*(SKIP|DISABLED)'
+    paths:
+      include:
+        - "tests/"
