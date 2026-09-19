@@ -15,7 +15,7 @@ just init
 just test
 ```
 
-Run `just run -- sum -` to pipe integers through the CLI, and `just help` to see every recipe.
+Run `just run sum -` to pipe integers through the CLI, and `just help` to see every recipe.
 
 ## Prerequisites
 

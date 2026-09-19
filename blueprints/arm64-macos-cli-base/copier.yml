@@ -31,7 +31,7 @@ _message_after_copy: |
     cd {{project_name}}
     just init
     just test
-    just run -- sum -
+    just run sum -
 
 _tasks:
   - "ln -sf AGENTS.md CLAUDE.md"

@@ -1,0 +1,339 @@
+# =============================================================================
+# Justfile Rules:
+# 1. Use printf for colored or formatted output.
+# 2. Add an empty @echo "" before and after every command block.
+# 3. Keep help ordered by lifecycle, run/build, quality, then tests.
+# 4. Composite recipes fail fast.
+# 5. Every recipe ends with a clear success or failure status.
+# =============================================================================
+
+_default:
+    @just help
+
+check:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo ""
+    for tool in clang otool nm lipo codesign lldb; do
+        if ! xcrun --find "$tool" >/dev/null 2>&1 && ! command -v "$tool" >/dev/null 2>&1; then
+            printf "\033[31m✗ Error: %s is not available\033[0m\n" "$tool"
+            printf "  Install the Xcode Command Line Tools: xcode-select --install\n"
+            echo ""
+            exit 1
+        fi
+        printf "\033[32m✓ %s is installed\033[0m\n" "$tool"
+    done
+    llvm_bin="$(scripts/llvm-bin.sh)"
+    for tool in FileCheck llvm-objdump llvm-readobj llvm-mca; do
+        if [ ! -x "$llvm_bin/$tool" ]; then
+            printf "\033[31m✗ Error: %s is missing from %s\033[0m\n" "$tool" "$llvm_bin"
+            printf "  Install with: brew install llvm\n"
+            echo ""
+            exit 1
+        fi
+        printf "\033[32m✓ %s is installed\033[0m\n" "$tool"
+    done
+    for tool in codespell semgrep shellcheck shfmt; do
+        if ! command -v "$tool" >/dev/null 2>&1; then
+            printf "\033[31m✗ Error: %s is not installed\033[0m\n" "$tool"
+            printf "  Install with: brew install %s\n" "$tool"
+            echo ""
+            exit 1
+        fi
+        printf "\033[32m✓ %s is installed\033[0m\n" "$tool"
+    done
+    echo ""
+
+help:
+    @clear
+    @echo ""
+    @printf "\033[0;34m=== {{project_name}} ===\033[0m\n"
+    @echo ""
+    @printf "\033[0;33mSetup & Lifecycle:\033[0m\n"
+    @printf "  %-40s %s\n" "init" "Check prerequisites and activate the pre-commit hook"
+    @printf "  %-40s %s\n" "destroy" "Remove build output and reports"
+    @printf "  %-40s %s\n" "check" "Check prerequisites"
+    @printf "  %-40s %s\n" "help" "Show this help message"
+    @echo ""
+    @printf "\033[0;33mRun & Build:\033[0m\n"
+    @printf "  %-40s %s\n" "build" "Assemble and link the executable"
+    @printf "  %-40s %s\n" "run <args>" "Run the CLI (e.g. just run sum -)"
+    @printf "  %-40s %s\n" "debug <args>" "Run the CLI under lldb"
+    @echo ""
+    @printf "\033[0;33mCode Quality:\033[0m\n"
+    @printf "  %-40s %s\n" "code-format" "Normalize source hygiene in place"
+    @printf "  %-40s %s\n" "code-style" "Check source hygiene and ARM64 style policy"
+    @printf "  %-40s %s\n" "code-spell" "Check spelling with codespell"
+    @printf "  %-40s %s\n" "code-shell" "Check project shell scripts with shfmt + ShellCheck"
+    @printf "  %-40s %s\n" "code-semgrep" "Run assembly policy rules with Semgrep"
+    @printf "  %-40s %s\n" "code-lspchecks" "Validate sources with the Clang integrated assembler"
+    @printf "  %-40s %s\n" "code-abi" "Check ABI macro discipline"
+    @printf "  %-40s %s\n" "code-architecture" "Check the object-file import boundary"
+    @printf "  %-40s %s\n" "code-security" "Check import, dylib and signature allowlists"
+    @printf "  %-40s %s\n" "code-binary" "Check Mach-O structure and platform metadata"
+    @echo ""
+    @printf "\033[0;33mPerformance (informational):\033[0m\n"
+    @printf "  %-40s %s\n" "perf-mca" "Print an llvm-mca throughput report"
+    @echo ""
+    @printf "\033[0;33mCI & Testing:\033[0m\n"
+    @printf "  %-40s %s\n" "test" "Run assembly unit tests and CLI black-box tests"
+    @printf "  %-40s %s\n" "test-binary" "Assert disassembly with FileCheck"
+    @printf "  %-40s %s\n" "ci" "Run every validation check verbosely"
+    @printf "  %-40s %s\n" "ci-quiet" "Run every validation check fail-fast with compact output"
+    @echo ""
+
+init: check
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo ""
+    printf "\033[34m=== Initializing Development Environment ===\033[0m\n"
+    if ! git rev-parse --git-dir >/dev/null 2>&1; then
+        git init -q
+    fi
+    if [ ! -f ".git/hooks/pre-commit" ]; then
+        printf "\033[31m✗ Error: .git/hooks/pre-commit is missing\033[0m\n"
+        printf "  Re-apply the template or restore the generated hook.\n"
+        echo ""
+        exit 1
+    fi
+    chmod +x .git/hooks/pre-commit
+    chmod +x scripts/*.sh
+    chmod +x tests/cli/*.sh
+    printf "\033[32m✓ init completed successfully\033[0m\n"
+    echo ""
+
+build:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo ""
+    printf "\033[34m=== Building {{project_name}} ===\033[0m\n"
+    mkdir -p build/obj
+    for source in src/main.S src/lib/*.S; do
+        object="build/obj/$(basename "${source%.S}").o"
+        xcrun clang -target arm64-apple-macos11 -x assembler-with-cpp -Iinclude \
+            -Wall -Werror -Wa,--fatal-warnings -g -c "$source" -o "$object"
+    done
+    xcrun clang -target arm64-apple-macos11 build/obj/*.o -o "build/{{project_name}}"
+    printf "\033[32m✓ build completed successfully\033[0m\n"
+    echo ""
+
+{% raw %}
+run *ARGS: build
+    @echo ""
+    @printf "\033[34m=== Running CLI ===\033[0m\n"
+    @./build/{% endraw %}{{project_name}}{% raw %} {{ARGS}}
+    @printf "\033[32m✓ run completed successfully\033[0m\n"
+    @echo ""
+
+debug *ARGS: build
+    @echo ""
+    @printf "\033[34m=== Debugging with lldb ===\033[0m\n"
+    @lldb -- ./build/{% endraw %}{{project_name}}{% raw %} {{ARGS}}
+    @printf "\033[32m✓ debug session ended\033[0m\n"
+    @echo ""
+{% endraw %}
+
+destroy:
+    @echo ""
+    @printf "\033[34m=== Cleaning Generated Artifacts ===\033[0m\n"
+    @rm -rf build reports
+    @printf "\033[32m✓ destroy completed successfully\033[0m\n"
+    @echo ""
+
+code-format:
+    @echo ""
+    @printf "\033[34m=== Normalizing Source Hygiene ===\033[0m\n"
+    @./scripts/format-asm.sh --write
+    @printf "\033[32m✓ code-format completed successfully\033[0m\n"
+    @echo ""
+
+code-style:
+    @echo ""
+    @printf "\033[34m=== Checking Source Style ===\033[0m\n"
+    @./scripts/format-asm.sh --check
+    @./scripts/lint-asm.sh
+    @printf "\033[32m✓ code-style completed successfully\033[0m\n"
+    @echo ""
+
+code-spell:
+    @echo ""
+    @printf "\033[34m=== Checking Spelling ===\033[0m\n"
+    @codespell src tests include scripts config *.md --ignore-words=config/codespell/ignore.txt
+    @printf "\033[32m✓ code-spell completed successfully\033[0m\n"
+    @echo ""
+
+{% raw %}
+code-shell:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo ""
+    printf "\033[34m=== Checking Shell Scripts ===\033[0m\n"
+    scripts=()
+    while IFS= read -r script; do
+        scripts+=("$script")
+    done < <(find scripts tests/cli -type f -name '*.sh' | sort)
+    if [ "${#scripts[@]}" -eq 0 ]; then
+        printf "\033[31m✗ Error: no shell scripts found to check\033[0m\n"
+        echo ""
+        exit 1
+    fi
+    shfmt -d -i 4 "${scripts[@]}"
+    shellcheck "${scripts[@]}"
+    printf "\033[32m✓ code-shell completed successfully\033[0m\n"
+    echo ""
+{% endraw %}
+
+code-semgrep:
+    @echo ""
+    @printf "\033[34m=== Running Semgrep Policy Rules ===\033[0m\n"
+    @semgrep --config config/semgrep/ --error src tests include scripts
+    @printf "\033[32m✓ code-semgrep completed successfully\033[0m\n"
+    @echo ""
+
+code-lspchecks:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo ""
+    printf "\033[34m=== Validating Sources with the Integrated Assembler ===\033[0m\n"
+    # This is Clang's integrated assembler, not ArmLS. -Wa,--fatal-warnings is
+    # required: -Werror alone leaves assembler warnings non-fatal.
+    for source in src/main.S src/lib/*.S tests/unit/*.S; do
+        xcrun clang -target arm64-apple-macos11 -x assembler-with-cpp -Iinclude \
+            -Wall -Werror -Wa,--fatal-warnings -c "$source" -o /dev/null
+    done
+    printf "\033[32m✓ code-lspchecks completed successfully\033[0m\n"
+    echo ""
+
+code-abi:
+    @echo ""
+    @printf "\033[34m=== Checking ABI Macro Discipline ===\033[0m\n"
+    @./scripts/verify-abi.sh
+    @printf "\033[32m✓ code-abi completed successfully\033[0m\n"
+    @echo ""
+
+code-architecture: build
+    @echo ""
+    @printf "\033[34m=== Checking Object-File Import Boundary ===\033[0m\n"
+    @./scripts/verify-layering.sh
+    @printf "\033[32m✓ code-architecture completed successfully\033[0m\n"
+    @echo ""
+
+code-security: build
+    @echo ""
+    @printf "\033[34m=== Checking Import and Signature Allowlists ===\033[0m\n"
+    @./scripts/verify-binary.sh --security
+    @printf "\033[32m✓ code-security completed successfully\033[0m\n"
+    @echo ""
+
+code-binary: build
+    @echo ""
+    @printf "\033[34m=== Checking Mach-O Structure ===\033[0m\n"
+    @./scripts/verify-binary.sh --structure
+    @printf "\033[32m✓ code-binary completed successfully\033[0m\n"
+    @echo ""
+
+perf-mca: build
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo ""
+    printf "\033[34m=== llvm-mca Throughput Report (informational) ===\033[0m\n"
+    llvm_bin="$(scripts/llvm-bin.sh)"
+    mkdir -p build/pp
+    for source in src/lib/*.S; do
+        name="$(basename "${source%.S}")"
+        xcrun clang -target arm64-apple-macos11 -x assembler-with-cpp -Iinclude -E "$source" -o "build/pp/$name.s"
+        printf "\033[0;36m--- %s ---\033[0m\n" "$name"
+        "$llvm_bin/llvm-mca" -mtriple=arm64-apple-macos -mcpu=apple-m1 "build/pp/$name.s"
+    done
+    printf "\033[32m✓ perf-mca completed successfully\033[0m\n"
+    echo ""
+
+test: build
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo ""
+    printf "\033[34m=== Running Tests ===\033[0m\n"
+    mkdir -p build/tests
+    for source in tests/unit/*.S; do
+        name="$(basename "${source%.S}")"
+        xcrun clang -target arm64-apple-macos11 -x assembler-with-cpp -Iinclude \
+            -Wall -Werror -Wa,--fatal-warnings -g -c "$source" -o "build/tests/$name.o"
+        objects=("build/tests/$name.o")
+        for object in build/obj/*.o; do
+            if [ "$(basename "$object")" != "main.o" ]; then
+                objects+=("$object")
+            fi
+        done
+        xcrun clang -target arm64-apple-macos11 "${objects[@]}" -o "build/tests/$name"
+        printf "  unit: %s\n" "$name"
+        "./build/tests/$name"
+    done
+    for script in tests/cli/*.sh; do
+        printf "  cli:  %s\n" "$(basename "$script")"
+        "./$script" "./build/{{project_name}}"
+    done
+    printf "\033[32m✓ test completed successfully\033[0m\n"
+    echo ""
+
+test-binary: build
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo ""
+    printf "\033[34m=== Asserting Disassembly ===\033[0m\n"
+    llvm_bin="$(scripts/llvm-bin.sh)"
+    while IFS= read -r suite; do
+        symbol="$(basename "${suite%.filecheck}")"
+        object="build/obj/$(sed -n 's/^\/\/ OBJECT: //p' "$suite" | head -1)"
+        target_symbol="$(sed -n 's/^\/\/ SYMBOL: //p' "$suite" | head -1)"
+        if [ ! -f "$object" ] || [ -z "$target_symbol" ]; then
+            printf "\033[31m✗ Error: %s must declare '// OBJECT:' and '// SYMBOL:' headers\033[0m\n" "$suite"
+            echo ""
+            exit 1
+        fi
+        printf "  %s (%s)\n" "$symbol" "$target_symbol"
+        "$llvm_bin/llvm-objdump" --disassemble-symbols="$target_symbol" "$object" \
+            | "$llvm_bin/FileCheck" "$suite"
+    done < <(find tests/binary -type f -name '*.filecheck' | sort)
+    printf "\033[32m✓ test-binary completed successfully\033[0m\n"
+    echo ""
+
+ci:
+    #!/usr/bin/env bash
+    set -e
+    echo ""
+    printf "\033[34m=== Running CI Checks ===\033[0m\n"
+    echo ""
+    just check
+    just init
+    just code-format
+    just code-style
+    just code-spell
+    just code-shell
+    just code-semgrep
+    just code-lspchecks
+    just code-abi
+    just code-architecture
+    just code-security
+    just code-binary
+    just test
+    just test-binary
+    echo ""
+    printf "\033[32m✓ ci completed successfully\033[0m\n"
+    echo ""
+
+ci-quiet:
+    #!/usr/bin/env bash
+    set -e
+    printf "\033[34m=== Running CI Checks (Quiet Mode) ===\033[0m\n"
+    TMPFILE=$(mktemp)
+    trap "rm -f $TMPFILE" EXIT
+
+    for target in check init code-format code-style code-spell code-shell code-semgrep \
+        code-lspchecks code-abi code-architecture code-security code-binary test test-binary; do
+        just "$target" > "$TMPFILE" 2>&1 || { printf "\033[31m✗ %s failed\033[0m\n" "$target"; cat "$TMPFILE"; exit 1; }
+        printf "\033[32m✓ %s passed\033[0m\n" "$target"
+    done
+
+    echo ""
+    printf "\033[32m✓ ci-quiet completed successfully\033[0m\n"
+    echo ""
