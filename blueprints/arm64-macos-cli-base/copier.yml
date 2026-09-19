@@ -1,0 +1,62 @@
+# ARM64 macOS Assembly CLI Base Template Configuration
+_min_copier_version: "9.0.0"
+
+_subdirectory: template
+_templates_suffix: ".template"
+_answers_file: .copier-answers.yml
+
+_exclude:
+  - "build"
+  - ".git"
+  - "CLAUDE.md"
+
+_skip_if_exists:
+  - "src/"
+  - "include/"
+  - "tests/"
+  - "scripts/"
+  - "config/"
+  - "data/input/"
+  - "data/output/"
+
+_message_before_copy: |
+  Creating an ARM64 macOS CLI written entirely in hand-written assembly.
+  Clang is used only as assembler and linker driver; the binary links
+  libSystem through the standard dynamic linker and issues no raw syscalls.
+
+_message_after_copy: |
+  Project {{project_name}} created successfully!
+
+  Next steps:
+    cd {{project_name}}
+    just init
+    just test
+    just run -- sum -
+
+_tasks:
+  - "ln -sf AGENTS.md CLAUDE.md"
+  - "git init -q"
+  - "mkdir -p .git/hooks && printf '%s\n' '#!/usr/bin/env sh' 'set -e' 'just ci-quiet' > .git/hooks/pre-commit"
+
+project_name:
+  type: str
+  help: Project name (e.g., line-stats)?
+  validator: >-
+    {% if not (project_name | regex_search('^[a-z0-9]([a-z0-9._-]*[a-z0-9])?$')) %}
+    Invalid project name. Use lowercase letters, digits, -, _, . only.
+    {% endif %}
+
+project_description:
+  type: str
+  help: Short description?
+  default: "An ARM64 macOS assembly CLI application"
+
+author_name:
+  type: str
+  help: Author name?
+  default: ""
+
+author_email:
+  type: str
+  help: Author email?
+  default: ""

@@ -1,0 +1,11 @@
+#include "abi.inc"
+#include "macros.inc"
+
+.section __TEXT,__text
+
+FUNC _main
+    FRAME_PUSH 0
+    mov w0, #EXIT_OK
+    FRAME_POP 0
+    ret
+ENDFUNC _main

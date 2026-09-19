@@ -1,0 +1,18 @@
+# Build output
+build/
+
+# Reports
+reports/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+
+# Copier answers
+.copier-answers.yml
