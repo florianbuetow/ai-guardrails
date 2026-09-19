@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- ARM64 macOS assembly CLI template (arm64-macos-cli-base): 100% hand-written `.S` sources for Apple Silicon, linking libSystem with raw syscalls forbidden everywhere. Guardrails are layered for a language with no semantic source analyser — ABI macro discipline, Semgrep generic policy, Clang integrated-assembler validation with `-Wa,--fatal-warnings`, object-file import layering, exact-equality import and dylib allowlists, Mach-O and signature validation, assembly unit executables, CLI black-box tests, and FileCheck assertions over real disassembly — plus the `newarm64` alias and violation tests. No coverage or mutation gate: neither has a workable equivalent for hand-written assembly.
 - Node.js TypeScript CLI template (node-typescript-cli-base) with a fully local guardrail stack: oxlint, tsc, Semgrep, knip, dependency-cruiser, ts-archunit, CodeQL CLI, Gitleaks, publint, arethetypeswrong, Vitest (unit, fast-check, type, CLI black-box, packed-artifact tests), coverage and StrykerJS mutation thresholds, plus the `newnode` alias and violation tests.
 - Verified generated hooks against real template commits in the lifecycle workflow.
 - Exposed template dependency pins from the lifecycle workflow.

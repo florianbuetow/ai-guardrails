@@ -132,6 +132,9 @@ case "$TEMPLATE_NAME" in
   shellscripts-base)
     PROJECT_DESCRIPTION="A portable shell script project"
     ;;
+  arm64-macos-cli-base)
+    PROJECT_DESCRIPTION="An ARM64 macOS assembly CLI application"
+    ;;
   *)
     printf "${RED}Error: no project description configured for template: %s${NC}\n" "$TEMPLATE_NAME"
     exit 1
