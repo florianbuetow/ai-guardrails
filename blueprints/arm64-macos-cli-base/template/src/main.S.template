@@ -1,11 +1,295 @@
+// CLI entrypoint.
+//
+// Consumes argc/argv, drives the pure modules, and returns the process
+// exit status in w0. All stream access goes through io.S, so this module
+// carries no external undefined symbols of its own.
+//
+// Exit contract: 0 success, 1 runtime failure, 2 usage error.
+
 #include "abi.inc"
 #include "macros.inc"
 
+.section __TEXT,__cstring
+Lusage:
+    .asciz "usage: {{project_name}} sum <file|->\n"
+Lcmd_sum:
+    .asciz "sum"
+Lstdin_name:
+    .asciz "-"
+Lerr_open:
+    .asciz "{{project_name}}: cannot open input\n"
+Lerr_read:
+    .asciz "{{project_name}}: cannot read input\n"
+Lerr_malformed:
+    .asciz "{{project_name}}: malformed input line\n"
+Lerr_range:
+    .asciz "{{project_name}}: value out of range\n"
+Lerr_empty:
+    .asciz "{{project_name}}: no input values\n"
+Lerr_write:
+    .asciz "{{project_name}}: cannot write output\n"
+Lkey_count:
+    .asciz "count="
+Lkey_sum:
+    .asciz " sum="
+Lkey_max:
+    .asciz " max="
+
+.zerofill __DATA,__bss,_input_buffer,65536,4
+.zerofill __DATA,__bss,_output_buffer,256,4
+
 .section __TEXT,__text
 
+// Frame layout (96 bytes):
+//   [sp,#0]  argv          [sp,#40] input length
+//   [sp,#8]  fd            [sp,#48] cursor
+//   [sp,#16] stats.count   [sp,#56] line length
+//   [sp,#24] stats.sum     [sp,#64] output cursor
+//   [sp,#32] stats.max
 FUNC _main
-    FRAME_PUSH 0
+    FRAME_PUSH 96
+    str x1, [sp]
+    cmp w0, #3
+    b.ne Lmain_usage
+
+    ldr x0, [sp]
+    ldr x0, [x0, #8]
+    adrp x1, Lcmd_sum@PAGE
+    add x1, x1, Lcmd_sum@PAGEOFF
+    bl Lstreq
+    cbz w0, Lmain_usage
+
+    ldr x0, [sp]
+    ldr x0, [x0, #16]
+    adrp x1, Lstdin_name@PAGE
+    add x1, x1, Lstdin_name@PAGEOFF
+    bl Lstreq
+    cbnz w0, Lmain_stdin
+
+    ldr x0, [sp]
+    ldr x0, [x0, #16]
+    bl _io_open
+    cmp x0, #0
+    b.lt Lmain_open_failed
+    str x0, [sp, #8]
+    b Lmain_read
+
+Lmain_stdin:
+    mov x0, #STDIN_FD
+    str x0, [sp, #8]
+
+Lmain_read:
+    ldr x0, [sp, #8]
+    adrp x1, _input_buffer@PAGE
+    add x1, x1, _input_buffer@PAGEOFF
+    mov x2, #BUF_SIZE
+    bl _io_read_all
+    cmp x0, #0
+    b.lt Lmain_read_failed
+    str x0, [sp, #40]
+
+    ldr x0, [sp, #8]
+    cmp x0, #STDIN_FD
+    b.eq Lmain_scan_init
+    bl _io_close
+
+Lmain_scan_init:
+    add x0, sp, #16
+    bl _stats_init
+    str xzr, [sp, #48]
+
+Lmain_lines:
+    ldr x1, [sp, #48]
+    ldr x2, [sp, #40]
+    cmp x1, x2
+    b.hs Lmain_finish
+    adrp x3, _input_buffer@PAGE
+    add x3, x3, _input_buffer@PAGEOFF
+    add x4, x3, x1
+    mov x5, #0
+Lmain_scan:
+    add x6, x1, x5
+    cmp x6, x2
+    b.hs Lmain_have_line
+    ldrb w7, [x4, x5]
+    cmp w7, #10
+    b.eq Lmain_have_line
+    add x5, x5, #1
+    b Lmain_scan
+
+Lmain_have_line:
+    str x5, [sp, #56]
+    cbz x5, Lmain_advance
+    mov x0, x4
+    mov x1, x5
+    bl _parse_i64
+    cmp w1, #PARSE_OVERFLOW
+    b.eq Lmain_range_failed
+    cbnz w1, Lmain_malformed
+    mov x1, x0
+    add x0, sp, #16
+    bl _stats_update
+    cbnz w0, Lmain_range_failed
+
+Lmain_advance:
+    ldr x1, [sp, #48]
+    ldr x5, [sp, #56]
+    add x1, x1, x5
+    add x1, x1, #1
+    str x1, [sp, #48]
+    b Lmain_lines
+
+Lmain_finish:
+    add x0, sp, #16
+    bl _stats_count
+    cbz x0, Lmain_empty
+
+    adrp x0, _output_buffer@PAGE
+    add x0, x0, _output_buffer@PAGEOFF
+    str x0, [sp, #64]
+
+    adrp x1, Lkey_count@PAGE
+    add x1, x1, Lkey_count@PAGEOFF
+    bl Lappend_cstr
+    str x0, [sp, #64]
+    add x0, sp, #16
+    bl _stats_count
+    ldr x1, [sp, #64]
+    bl _fmt_i64
+    ldr x1, [sp, #64]
+    add x1, x1, x0
+    str x1, [sp, #64]
+
+    ldr x0, [sp, #64]
+    adrp x1, Lkey_sum@PAGE
+    add x1, x1, Lkey_sum@PAGEOFF
+    bl Lappend_cstr
+    str x0, [sp, #64]
+    add x0, sp, #16
+    bl _stats_sum
+    ldr x1, [sp, #64]
+    bl _fmt_i64
+    ldr x1, [sp, #64]
+    add x1, x1, x0
+    str x1, [sp, #64]
+
+    ldr x0, [sp, #64]
+    adrp x1, Lkey_max@PAGE
+    add x1, x1, Lkey_max@PAGEOFF
+    bl Lappend_cstr
+    str x0, [sp, #64]
+    add x0, sp, #16
+    bl _stats_max
+    ldr x1, [sp, #64]
+    bl _fmt_i64
+    ldr x1, [sp, #64]
+    add x1, x1, x0
+    mov w2, #10
+    strb w2, [x1], #1
+    str x1, [sp, #64]
+
+    adrp x1, _output_buffer@PAGE
+    add x1, x1, _output_buffer@PAGEOFF
+    ldr x2, [sp, #64]
+    sub x2, x2, x1
+    mov x0, #STDOUT_FD
+    bl _io_write_all
+    cbnz w0, Lmain_write_failed
     mov w0, #EXIT_OK
-    FRAME_POP 0
+    FRAME_POP 96
+    ret
+
+Lmain_usage:
+    adrp x0, Lusage@PAGE
+    add x0, x0, Lusage@PAGEOFF
+    bl Lreport
+    mov w0, #EXIT_USAGE
+    FRAME_POP 96
+    ret
+
+Lmain_open_failed:
+    adrp x0, Lerr_open@PAGE
+    add x0, x0, Lerr_open@PAGEOFF
+    b Lmain_fail
+
+Lmain_read_failed:
+    adrp x0, Lerr_read@PAGE
+    add x0, x0, Lerr_read@PAGEOFF
+    b Lmain_fail
+
+Lmain_malformed:
+    adrp x0, Lerr_malformed@PAGE
+    add x0, x0, Lerr_malformed@PAGEOFF
+    b Lmain_fail
+
+Lmain_range_failed:
+    adrp x0, Lerr_range@PAGE
+    add x0, x0, Lerr_range@PAGEOFF
+    b Lmain_fail
+
+Lmain_empty:
+    adrp x0, Lerr_empty@PAGE
+    add x0, x0, Lerr_empty@PAGEOFF
+    b Lmain_fail
+
+Lmain_write_failed:
+    adrp x0, Lerr_write@PAGE
+    add x0, x0, Lerr_write@PAGEOFF
+    b Lmain_fail
+
+Lmain_fail:
+    bl Lreport
+    mov w0, #EXIT_FAIL
+    FRAME_POP 96
     ret
 ENDFUNC _main
+
+// Lstreq(x0 = a, x1 = b) -> w0 = 1 when equal, else 0. Leaf.
+LOCAL_FUNC Lstreq
+Lstreq_next:
+    ldrb w2, [x0], #1
+    ldrb w3, [x1], #1
+    cmp w2, w3
+    b.ne Lstreq_differ
+    cbnz w2, Lstreq_next
+    mov w0, #1
+    ret
+Lstreq_differ:
+    mov w0, #0
+    ret
+LOCAL_ENDFUNC Lstreq
+
+// Lcstr_len(x0 = cstr) -> x0 = length without the terminator. Leaf.
+LOCAL_FUNC Lcstr_len
+    mov x1, x0
+Lcstr_len_scan:
+    ldrb w2, [x1], #1
+    cbnz w2, Lcstr_len_scan
+    sub x0, x1, x0
+    sub x0, x0, #1
+    ret
+LOCAL_ENDFUNC Lcstr_len
+
+// Lappend_cstr(x0 = dst, x1 = cstr) -> x0 = dst past the copy. Leaf.
+LOCAL_FUNC Lappend_cstr
+Lappend_cstr_next:
+    ldrb w2, [x1], #1
+    cbz w2, Lappend_cstr_done
+    strb w2, [x0], #1
+    b Lappend_cstr_next
+Lappend_cstr_done:
+    ret
+LOCAL_ENDFUNC Lappend_cstr
+
+// Lreport(x0 = cstr) writes a diagnostic to stderr.
+LOCAL_FUNC Lreport
+    FRAME_PUSH 16
+    str x0, [sp]
+    bl Lcstr_len
+    mov x2, x0
+    ldr x1, [sp]
+    mov x0, #STDERR_FD
+    bl _io_write_all
+    FRAME_POP 16
+    ret
+LOCAL_ENDFUNC Lreport

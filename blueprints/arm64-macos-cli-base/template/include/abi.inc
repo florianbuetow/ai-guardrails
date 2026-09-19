@@ -24,6 +24,19 @@
     .cfi_endproc
 .endm
 
+// Open a file-local helper. Same unwind discipline as FUNC, but the
+// symbol stays out of the global symbol table.
+.macro LOCAL_FUNC name
+    .p2align 2
+\name:
+    .cfi_startproc
+.endm
+
+// Close a helper opened with LOCAL_FUNC.
+.macro LOCAL_ENDFUNC name
+    .cfi_endproc
+.endm
+
 // Save the frame pointer and link register, then allocate \size bytes of
 // locals rounded up to a multiple of 16. The rounding happens at assembly
 // time, so an unaligned request cannot reach the stack pointer.
