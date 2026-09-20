@@ -270,26 +270,26 @@ just run
 
 ```bash
 cd ai-guardrails
-just test          # Run all language suites (baseline + violation tests)
-just test-python-cli-base   # Run Python baseline + violation tests
-just test-java-cli-base     # Run Java baseline + violation tests
-just test-go-cli-base       # Run Go baseline + violation tests
-just test-elixir-otp-base   # Run Elixir baseline + violation tests
-just test-cpp-cli-base      # Run C++ baseline + violation tests
-just test-cpp-3dgame-base   # Run C++ 3D game baseline + violation tests
-just test-rust-cli-base     # Run Rust baseline + violation tests
-just test-kotlin-cli-base   # Run Kotlin baseline + violation tests
-just test-scala-cli-base    # Run Scala baseline + violation tests
-just test-clojure-cli-base  # Run Clojure baseline + violation tests
+just test                             # Run all language suites (baseline + violation tests)
+just test-python-cli-base             # Run Python baseline + violation tests
+just test-java-cli-base               # Run Java baseline + violation tests
+just test-go-cli-base                 # Run Go baseline + violation tests
+just test-elixir-otp-base             # Run Elixir baseline + violation tests
+just test-cpp-cli-base                # Run C++ baseline + violation tests
+just test-cpp-3dgame-base             # Run C++ 3D game baseline + violation tests
+just test-rust-cli-base               # Run Rust baseline + violation tests
+just test-kotlin-cli-base             # Run Kotlin baseline + violation tests
+just test-scala-cli-base              # Run Scala baseline + violation tests
+just test-clojure-cli-base            # Run Clojure baseline + violation tests
 just test-react-vite-typescript-base  # Run React/Vite/TypeScript baseline + violation tests
 just test-mcp-server-typescript-base  # Run TypeScript MCP server baseline + violation tests
-just test-node-typescript-cli-base  # Run Node.js TypeScript CLI baseline + violation tests
-just test-shellscripts-base    # Run shell scripts baseline + violation tests
-just test-shellscripts-base-linux  # Run shell scripts tests in a Linux container
-just test-arm64-macos-cli-base  # Run ARM64 macOS assembly baseline + violation tests
-just test-create      # Smoke-test `just create` for every template, then run its CI
-just ci               # Full repo CI suite, quiet: prints start/done per step, details only on failure
-just ci-verbose       # Full repo CI suite, verbose: streams the full output of every step
+just test-node-typescript-cli-base    # Run Node.js TypeScript CLI baseline + violation tests
+just test-shellscripts-base           # Run shell scripts baseline + violation tests
+just test-shellscripts-base-linux     # Run shell scripts tests in a Linux container
+just test-arm64-macos-cli-base        # Run ARM64 macOS assembly baseline + violation tests
+just test-create                      # Smoke-test `just create` for every template, then run its CI
+just ci                               # Full repo CI suite, quiet: prints start/done per step, details only on failure
+just ci-verbose                       # Full repo CI suite, verbose: streams the full output of every step
 ```
 
 `just ci` and `just ci-verbose` run the exact same steps (`check`, `test-prerequisites`,
