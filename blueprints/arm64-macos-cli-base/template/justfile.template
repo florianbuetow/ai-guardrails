@@ -108,12 +108,24 @@ build:
     echo ""
     printf "\033[34m=== Building {{project_name}} ===\033[0m\n"
     build_target="$(scripts/build-target.sh)"
+    if [ ! -f src/main.S ]; then
+        printf "\033[31m✗ Error: src/main.S is missing\033[0m\n"
+        printf "  The project is incomplete. Re-apply the template.\n"
+        echo ""
+        exit 1
+    fi
+    modules="$(scripts/list-sources.sh src/lib '*.S' 'library modules')"
+    sources="src/main.S"$'\n'"$modules"
+    # Start from an empty object directory. Reusing build/obj would let an
+    # object from a deleted source survive into the link, so removing a
+    # module would still produce a working binary.
+    rm -rf build/obj
     mkdir -p build/obj
-    for source in src/main.S src/lib/*.S; do
+    while IFS= read -r source; do
         object="build/obj/$(basename "${source%.S}").o"
         xcrun clang -target "$build_target" -x assembler-with-cpp -Iinclude \
             -Wall -Werror -Wa,--fatal-warnings -g -c "$source" -o "$object"
-    done
+    done <<<"$sources"
     xcrun clang -target "$build_target" build/obj/*.o -o "build/{{project_name}}"
     printf "\033[32m✓ build completed successfully\033[0m\n"
     echo ""
@@ -202,10 +214,18 @@ code-lspchecks:
     # This is Clang's integrated assembler, not ArmLS. -Wa,--fatal-warnings is
     # required: -Werror alone leaves assembler warnings non-fatal.
     build_target="$(scripts/build-target.sh)"
-    for source in src/main.S src/lib/*.S tests/unit/*.S; do
+    if [ ! -f src/main.S ]; then
+        printf "\033[31m✗ Error: src/main.S is missing\033[0m\n"
+        printf "  The project is incomplete. Re-apply the template.\n"
+        echo ""
+        exit 1
+    fi
+    sources="src/main.S"$'\n'"$(scripts/list-sources.sh src/lib '*.S' 'library modules')"
+    sources="$sources"$'\n'"$(scripts/list-sources.sh tests/unit '*.S' 'assembly unit tests')"
+    while IFS= read -r source; do
         xcrun clang -target "$build_target" -x assembler-with-cpp -Iinclude \
             -Wall -Werror -Wa,--fatal-warnings -c "$source" -o /dev/null
-    done
+    done <<<"$sources"
     printf "\033[32m✓ code-lspchecks completed successfully\033[0m\n"
     echo ""
 
@@ -244,13 +264,14 @@ perf-mca: build
     printf "\033[34m=== llvm-mca Throughput Report (informational) ===\033[0m\n"
     llvm_bin="$(scripts/llvm-bin.sh)"
     build_target="$(scripts/build-target.sh)"
+    modules="$(scripts/list-sources.sh src/lib '*.S' 'library modules')"
     mkdir -p build/pp
-    for source in src/lib/*.S; do
+    while IFS= read -r source; do
         name="$(basename "${source%.S}")"
         xcrun clang -target "$build_target" -x assembler-with-cpp -Iinclude -E "$source" -o "build/pp/$name.s"
         printf "\033[0;36m--- %s ---\033[0m\n" "$name"
         "$llvm_bin/llvm-mca" -mtriple=arm64-apple-macos -mcpu=apple-m1 "build/pp/$name.s"
-    done
+    done <<<"$modules"
     printf "\033[32m✓ perf-mca completed successfully\033[0m\n"
     echo ""
 
@@ -260,25 +281,28 @@ test: build
     echo ""
     printf "\033[34m=== Running Tests ===\033[0m\n"
     build_target="$(scripts/build-target.sh)"
+    unit_sources="$(scripts/list-sources.sh tests/unit '*.S' 'assembly unit tests')"
+    cli_scripts="$(scripts/list-sources.sh tests/cli '*.sh' 'CLI black-box tests')"
+    compiled_objects="$(scripts/list-sources.sh build/obj '*.o' 'compiled objects')"
     mkdir -p build/tests
-    for source in tests/unit/*.S; do
+    while IFS= read -r source; do
         name="$(basename "${source%.S}")"
         xcrun clang -target "$build_target" -x assembler-with-cpp -Iinclude \
             -Wall -Werror -Wa,--fatal-warnings -g -c "$source" -o "build/tests/$name.o"
         objects=("build/tests/$name.o")
-        for object in build/obj/*.o; do
+        while IFS= read -r object; do
             if [ "$(basename "$object")" != "main.o" ]; then
                 objects+=("$object")
             fi
-        done
+        done <<<"$compiled_objects"
         xcrun clang -target "$build_target" "${objects[@]}" -o "build/tests/$name"
         printf "  unit: %s\n" "$name"
         "./build/tests/$name"
-    done
-    for script in tests/cli/*.sh; do
+    done <<<"$unit_sources"
+    while IFS= read -r script; do
         printf "  cli:  %s\n" "$(basename "$script")"
         "./$script" "./build/{{project_name}}"
-    done
+    done <<<"$cli_scripts"
     printf "\033[32m✓ test completed successfully\033[0m\n"
     echo ""
 
