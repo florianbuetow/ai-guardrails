@@ -226,7 +226,7 @@ Use these plugins after scaffolding a project with AI Guardrails to maintain cod
 - **copier** - Template engine ([installation guide](https://copier.readthedocs.io/))
 
 Each template has its own language-specific prerequisites. See the template READMEs for details:
-[Python](blueprints/python-cli-base/) | [Java](blueprints/java-cli-base/) | [Go](blueprints/go-cli-base/) | [Elixir](blueprints/elixir-otp-base/) | [C++](blueprints/cpp-cli-base/) | [C++ 3D Game](blueprints/cpp-3dgame-base/) | [Rust](blueprints/rust-cli-base/) | [Kotlin](blueprints/kotlin-cli-base/) | [Scala](blueprints/scala-cli-base/) | [Clojure](blueprints/clojure-cli-base/) | [React/Vite/TypeScript](blueprints/react-vite-typescript-base/) | [TypeScript MCP](blueprints/mcp-server-typescript-base/) | [Node.js TypeScript CLI](blueprints/node-typescript-cli-base/) | [Shell scripts](blueprints/shellscripts-base/)
+[Python](blueprints/python-cli-base/) | [Java](blueprints/java-cli-base/) | [Go](blueprints/go-cli-base/) | [Elixir](blueprints/elixir-otp-base/) | [C++](blueprints/cpp-cli-base/) | [C++ 3D Game](blueprints/cpp-3dgame-base/) | [Rust](blueprints/rust-cli-base/) | [Kotlin](blueprints/kotlin-cli-base/) | [Scala](blueprints/scala-cli-base/) | [Clojure](blueprints/clojure-cli-base/) | [React/Vite/TypeScript](blueprints/react-vite-typescript-base/) | [TypeScript MCP](blueprints/mcp-server-typescript-base/) | [Node.js TypeScript CLI](blueprints/node-typescript-cli-base/) | [Shell scripts](blueprints/shellscripts-base/) | [ARM64 macOS assembly](blueprints/arm64-macos-cli-base/)
 
 ## Installation
 
@@ -252,7 +252,7 @@ just run
 ```
 
 The `just create` command takes two arguments:
-1. Template name (e.g., `python-cli-base`, `java-cli-base`, `go-cli-base`, `elixir-otp-base`, `cpp-cli-base`, `cpp-3dgame-base`, `rust-cli-base`, `kotlin-cli-base`, `scala-cli-base`, `clojure-cli-base`, `react-vite-typescript-base`, `mcp-server-typescript-base`, `node-typescript-cli-base`, or `shellscripts-base`)
+1. Template name (e.g., `python-cli-base`, `java-cli-base`, `go-cli-base`, `elixir-otp-base`, `cpp-cli-base`, `cpp-3dgame-base`, `rust-cli-base`, `kotlin-cli-base`, `scala-cli-base`, `clojure-cli-base`, `react-vite-typescript-base`, `mcp-server-typescript-base`, `node-typescript-cli-base`, `shellscripts-base`, or `arm64-macos-cli-base`)
 2. Target directory (absolute or relative path where the project will be created)
 
 **Method 2: Using Copier directly**
@@ -286,6 +286,7 @@ just test-mcp-server-typescript-base  # Run TypeScript MCP server baseline + vio
 just test-node-typescript-cli-base  # Run Node.js TypeScript CLI baseline + violation tests
 just test-shellscripts-base    # Run shell scripts baseline + violation tests
 just test-shellscripts-base-linux  # Run shell scripts tests in a Linux container
+just test-arm64-macos-cli-base  # Run ARM64 macOS assembly baseline + violation tests
 just test-create      # Smoke-test `just create` for every template, then run its CI
 just ci               # Full repo CI suite, quiet: prints start/done per step, details only on failure
 just ci-verbose       # Full repo CI suite, verbose: streams the full output of every step
