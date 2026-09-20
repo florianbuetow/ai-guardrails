@@ -331,27 +331,28 @@ This updates the ai-guardrails repository itself (via `git pull`). Existing proj
 
 ```
 ai-guardrails/
-├── blueprints/                                 # Copier-based project templates
-│   ├── python-cli-base/                       # Python CLI template (README, copier.yml, template/)
-│   ├── java-cli-base/                         # Java CLI template
-│   ├── go-cli-base/                           # Go CLI template
-│   ├── elixir-otp-base/                       # Elixir OTP template
-│   ├── cpp-cli-base/                          # C++ CLI template
-│   ├── cpp-3dgame-base/                       # C++ 3D game template (copy of cpp-cli-base)
-│   ├── rust-cli-base/                         # Rust CLI template
-│   ├── kotlin-cli-base/                       # Kotlin CLI template
-│   ├── scala-cli-base/                        # Scala CLI template
-│   ├── clojure-cli-base/                      # Clojure CLI template
-│   ├── react-vite-typescript-base/            # React + Vite + TypeScript template
-│   ├── mcp-server-typescript-base/             # TypeScript MCP server template
-│   ├── node-typescript-cli-base/               # Node.js TypeScript CLI template
-│   └── shellscripts-base/                      # Portable shell script template
+├── blueprints/                              # Copier-based project templates
+│   ├── python-cli-base/                     # Python CLI template (README, copier.yml, template/)
+│   ├── java-cli-base/                       # Java CLI template
+│   ├── go-cli-base/                         # Go CLI template
+│   ├── elixir-otp-base/                     # Elixir OTP template
+│   ├── cpp-cli-base/                        # C++ CLI template
+│   ├── cpp-3dgame-base/                     # C++ 3D game template (copy of cpp-cli-base)
+│   ├── rust-cli-base/                       # Rust CLI template
+│   ├── kotlin-cli-base/                     # Kotlin CLI template
+│   ├── scala-cli-base/                      # Scala CLI template
+│   ├── clojure-cli-base/                    # Clojure CLI template
+│   ├── react-vite-typescript-base/          # React + Vite + TypeScript template
+│   ├── mcp-server-typescript-base/          # TypeScript MCP server template
+│   ├── node-typescript-cli-base/            # Node.js TypeScript CLI template
+│   ├── shellscripts-base/                   # Portable shell script template
+│   └── arm64-macos-cli-base/                # ARM64 macOS assembly CLI template
 ├── tests/
-│   ├── run-tests.sh                           # Unified test entry point
-│   ├── lib/                                   # Shared test helpers and runner logic
+│   ├── run-tests.sh                         # Unified test entry point
+│   ├── lib/                                 # Shared test helpers and runner logic
 │   │   ├── helpers.sh
 │   │   └── runner.sh
-│   └── languages/                             # Per-language template config + prerequisites
+│   └── languages/                           # Per-language template config + prerequisites
 │       ├── python-cli-base.sh
 │       ├── java-cli-base.sh
 │       ├── go-cli-base.sh
@@ -365,8 +366,9 @@ ai-guardrails/
 │       ├── react-vite-typescript-base.sh
 │       ├── mcp-server-typescript-base.sh
 │       ├── node-typescript-cli-base.sh
-│       └── shellscripts-base.sh
-├── violations/                                 # Violation overlays used to force CI failures
+│       ├── shellscripts-base.sh
+│       └── arm64-macos-cli-base.sh
+├── violations/                              # Violation overlays used to force CI failures
 │   ├── python-cli-base/
 │   ├── java-cli-base/
 │   ├── go-cli-base/
@@ -380,12 +382,13 @@ ai-guardrails/
 │   ├── react-vite-typescript-base/
 │   ├── mcp-server-typescript-base/
 │   ├── node-typescript-cli-base/
-│   └── shellscripts-base/
-├── config/                                     # Shared validation configs (semgrep, codespell)
-├── docs/                                       # Documentation
-├── justfile                                    # Quick setup commands
-├── AGENTS.md                                   # Guidance for AI agents
-└── README.md                                   # This file
+│   ├── shellscripts-base/
+│   └── arm64-macos-cli-base/
+├── config/                                  # Shared validation configs (semgrep, codespell)
+├── docs/                                    # Documentation
+├── justfile                                 # Quick setup commands
+├── AGENTS.md                                # Guidance for AI agents
+└── README.md                                # This file
 ```
 
 ## Contributing
