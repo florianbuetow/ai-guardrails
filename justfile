@@ -96,6 +96,7 @@ help:
 	@printf "\033[0;33mCI & Testing:\033[0m\n"
 	@printf "  %-40s %s\n" "test-info" "Test direct dependency inventory output"
 	@printf "  %-40s %s\n" "test-prerequisites" "Verify every template checks prerequisites first"
+	@printf "  %-40s %s\n" "test-content-tracked" "Verify blueprint/violation content is tracked by git"
 	@printf "  %-40s %s\n" "test-shellscripts-base-contracts" "Test shell scripts blueprint contracts"
 	@printf "  %-40s %s\n" "test" "Run all baseline + violation tests"
 	@printf "  %-40s %s\n" "test-python-cli-base" "Run Python baseline + violation tests"
@@ -424,6 +425,15 @@ test-prerequisites:
 		|| { printf "\033[31m✗ template prerequisite contracts failed\033[0m\n"; exit 1; }
 	@echo ""
 
+# Verify blueprint and violation content survives a git clone
+test-content-tracked:
+	@echo ""
+	@printf "\033[0;34m=== Testing Blueprint and Violation Content Is Tracked ===\033[0m\n"
+	@python3 tests/test_repo_content_tracked.py \
+		&& printf "\033[32m✓ blueprint and violation content is tracked\033[0m\n" \
+		|| { printf "\033[31m✗ blueprint or violation content is missing from git\033[0m\n"; exit 1; }
+	@echo ""
+
 # Test shell scripts blueprint contracts
 test-shellscripts-base-contracts:
 	#!/usr/bin/env bash
@@ -650,7 +660,7 @@ test-create:
     echo ""
 
 # Run all checks and all template tests
-ci-verbose: check test-prerequisites test-shellscripts-base-contracts code-spell code-semgrep code-shellcheck test-info test test-create
+ci-verbose: check test-prerequisites test-content-tracked test-shellscripts-base-contracts code-spell code-semgrep code-shellcheck test-info test test-create
 	@echo ""
 	@printf "\033[32m✓ ci-verbose passed\033[0m\n"
 	@echo ""
@@ -665,7 +675,7 @@ ci:
     echo ""
     # Keep this list identical to ci-verbose's dependencies so both run the
     # exact same tests; only the output verbosity differs.
-    steps=(check test-prerequisites test-shellscripts-base-contracts code-spell code-semgrep code-shellcheck test-info test test-create)
+    steps=(check test-prerequisites test-content-tracked test-shellscripts-base-contracts code-spell code-semgrep code-shellcheck test-info test test-create)
     for step in "${steps[@]}"; do
         printf "\033[0;34m▶ starting %s\033[0m\n" "$step"
         if output="$(just "$step" 2>&1)"; then

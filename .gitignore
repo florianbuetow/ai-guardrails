@@ -7,20 +7,27 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+#
+# These are anchored to the repository root on purpose. Unanchored, they
+# match at any depth and silently swallow blueprint and violation content:
+# `lib/` alone hid blueprints/arm64-macos-cli-base/template/src/lib/*.S and
+# 30 violation overlay files, so `git add` skipped them and a fresh clone
+# received templates that could not build. Generated projects carry their
+# own .gitignore, so nothing here needs to reach into blueprints/.
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
+/build/
+/develop-eggs/
+/dist/
+/downloads/
+/eggs/
+/.eggs/
+/lib/
+/lib64/
+/parts/
+/sdist/
+/var/
+/wheels/
+/share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
