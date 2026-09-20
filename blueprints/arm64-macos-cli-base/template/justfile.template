@@ -97,8 +97,16 @@ init: check
         exit 1
     fi
     chmod +x .git/hooks/pre-commit
-    chmod +x scripts/*.sh
-    chmod +x tests/cli/*.sh
+    # Run the helper through bash: init is what restores the executable bit,
+    # so the helper cannot be assumed executable yet.
+    project_scripts="$(bash scripts/list-sources.sh scripts '*.sh' 'project scripts')"
+    cli_tests="$(bash scripts/list-sources.sh tests/cli '*.sh' 'CLI black-box tests')"
+    while IFS= read -r file; do
+        chmod +x "$file"
+    done <<<"$project_scripts"
+    while IFS= read -r file; do
+        chmod +x "$file"
+    done <<<"$cli_tests"
     printf "\033[32m✓ init completed successfully\033[0m\n"
     echo ""
 
