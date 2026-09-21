@@ -3,21 +3,34 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(_MSC_VER)
+#define scan_numbers sscanf_s
+#else
+#define scan_numbers sscanf
+#endif
+
 static void fail(const char *message) {
     fprintf(stderr, "assert: %s\n", message);
     exit(EXIT_FAILURE);
 }
 
-static FILE *open_file(const char *path) {
-    FILE *file = fopen(path, "rb");
+static FILE *open_mode(const char *path, const char *mode) {
+    FILE *file;
+#if defined(_MSC_VER)
+    if (fopen_s(&file, path, mode) != 0) fail(path);
+#else
+    file = fopen(path, mode);
+#endif
     if (file == NULL) fail(path);
     return file;
 }
 
+static FILE *open_file(const char *path) {
+    return open_mode(path, "rb");
+}
+
 static FILE *open_text(const char *path) {
-    FILE *file = fopen(path, "r");
-    if (file == NULL) fail(path);
-    return file;
+    return open_mode(path, "r");
 }
 
 static void close_file(FILE *file) {
@@ -114,7 +127,7 @@ static void object(const char *path) {
         unsigned int word;
         if (strstr(line, "Main = #0100 (") != NULL) main_found++;
         if (strcmp(line, "g255: 0000000000000100\n") == 0) entry_found++;
-        if (sscanf(line, "%16llx: %8x", &address, &word) == 2) {
+        if (scan_numbers(line, "%16llx: %8x", &address, &word) == 2) {
             if (address >= 0x2000000000000000ULL && address < 0x4000000000000000ULL) continue;
             if (address != 0x100ULL + 4 * instruction_count) fail("noncontiguous code or forbidden object segment");
             if (instruction_count == sizeof instructions / sizeof instructions[0]) fail("too many instructions");
@@ -137,10 +150,10 @@ static void listing(const char *path) {
         unsigned int offset;
         int emitted = 0;
         if (strstr(line, "error:") != NULL || strstr(line, "warning:") != NULL) fail("assembler diagnostic in listing");
-        if (line[0] != ' ' && sscanf(line, "%16llx:", &address) == 1) {
+        if (line[0] != ' ' && scan_numbers(line, "%16llx:", &address) == 1) {
             base = address & ~0xfffULL;
-            emitted = sscanf(line, "%16llx: %8x", &address, &word) == 2;
-        } else if (sscanf(line, " ...%3x: %8x", &offset, &word) == 2) {
+            emitted = scan_numbers(line, "%16llx: %8x", &address, &word) == 2;
+        } else if (scan_numbers(line, " ...%3x: %8x", &offset, &word) == 2) {
             address = base + offset;
             emitted = 1;
         }
@@ -168,7 +181,7 @@ static void coverage(const char *path) {
         unsigned long long address;
         unsigned int word;
         if (strcmp(line, "Program profile:\n") == 0) header++;
-        if (header && sscanf(line, " %llu. %16llx: %8x", &count, &address, &word) == 3) {
+        if (header && scan_numbers(line, " %llu. %16llx: %8x", &count, &address, &word) == 3) {
             size_t index;
             if (address < 0x100 || (address - 0x100) % 4 != 0) fail("invalid profile address");
             index = (size_t)((address - 0x100) / 4);

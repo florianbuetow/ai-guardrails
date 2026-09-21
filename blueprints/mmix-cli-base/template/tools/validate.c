@@ -431,6 +431,7 @@ static void validate_source_line(FileState *state, char *line) {
 
 static int validate_file(const char *path) {
     FILE *input;
+    int open_error;
     FileState state;
     char line[LINE_CAPACITY];
     size_t path_length = strlen(path);
@@ -449,9 +450,16 @@ static int validate_file(const char *path) {
         (void)fprintf(stderr, "%s: error: source path must end in .mms\n", path);
         return 1;
     }
+    input = NULL;
+#if defined(_MSC_VER)
+    open_error = (int)fopen_s(&input, path, "rb");
+#else
     input = fopen(path, "rb");
+    open_error = input == NULL ? errno : 0;
+#endif
     if (input == NULL) {
-        (void)fprintf(stderr, "%s: error: cannot open source: %s\n", path, strerror(errno));
+        (void)fprintf(stderr, "%s: error: cannot open source (error %d)\n", path,
+                      open_error);
         return 1;
     }
     while (fgets(line, (int)sizeof(line), input) != NULL) {
