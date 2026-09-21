@@ -5,7 +5,7 @@ This file provides guidance to AI agents and AI-assisted development tools when 
 
 ## Repository Overview
 
-This repository contains Copier templates for Python, Java, Go, Elixir, C++, Rust, Kotlin, Scala, Clojure, TypeScript (React), TypeScript MCP servers, Node.js TypeScript CLIs, portable shell scripts, and ARM64 macOS assembly that enforce strict validation guardrails on AI-generated code — catching antipatterns, suppressing silent defaults, and providing immediate feedback so AI agents write better, more maintainable code from the start.
+This repository contains Copier templates for Python, Java, Go, Elixir, C++, Rust, Kotlin, Scala, Clojure, TypeScript (React), TypeScript MCP servers, Node.js TypeScript CLIs, portable shell scripts, ARM64 macOS assembly, and MMIX assembly that enforce strict validation guardrails on AI-generated code — catching antipatterns, suppressing silent defaults, and providing immediate feedback so AI agents write better, more maintainable code from the start.
 
 ## Core Coding Principles
 
@@ -180,6 +180,15 @@ Before running a violation, confirm that its resolved recipe (`check` or the `co
 - `just perf-mca` prints an `llvm-mca` throughput report — informational, deliberately outside `ci`. ArmLS and `xctrace` are documented as developer-only tools and are never CI gates
 - `code-lspchecks` here means Clang's integrated assembler, **not** ArmLS; the generated AGENTS.md says so explicitly
 
+### The MMIX Assembly CLI Template (`blueprints/mmix-cli-base`)
+
+- MMIX assembly (`.mms`) with pinned generated MMIXware C sources vendored into every generated project
+- Builds `mmixal`, `mmix`, `mmotype`, and the local C guardrail executable using the host C compiler
+- Validation is fully local and offline: no Semgrep, Gitleaks, codespell, containers, external rule packs, hosted APIs, or downloaded data
+- Guardrails cover lexical/style policy, `Main`, instructions, `$255`, `LOC`/`GREG`/`IS`/`TRAP`, register names, magic addresses, the single-file module boundary, and generated/untracked artifacts
+- Tests parse assembler warnings and `.mml` listings, inspect `.mmo` objects with `mmotype`, run black-box and machine-state assertions with `mmix`, and calculate instruction coverage from `mmix -P` profiles
+- Generated-project prerequisites are only a C compiler, `just`, and Git; Copier is needed only to render the blueprint
+
 All templates emphasize creating immediately runnable projects with no placeholders, comprehensive CI pipelines, and AGENTS.md/CLAUDE.md files for AI agent guidance.
 
 After changing a template, render a fresh project and inspect generated paths for duplicate trees, empty leftover directories, and unrendered template syntax before broader validation.
@@ -199,7 +208,7 @@ These rules apply to all justfiles — in this repository and in all generated t
 
 - `just ci` — Run all repo-level checks (codespell, semgrep, shellcheck) + all template tests
 - `just test` — Run baseline + violation tests for all templates
-- `just test-<language>` — Run tests for one template family (python-cli-base, java-cli-base, go-cli-base, elixir-otp-base, cpp-cli-base, cpp-3dgame-base, rust-cli-base, kotlin-cli-base, scala-cli-base, clojure-cli-base, react-vite-typescript-base, mcp-server-typescript-base, node-typescript-cli-base, shellscripts-base, arm64-macos-cli-base)
+- `just test-<language>` — Run tests for one template family (python-cli-base, java-cli-base, go-cli-base, elixir-otp-base, cpp-cli-base, cpp-3dgame-base, rust-cli-base, kotlin-cli-base, scala-cli-base, clojure-cli-base, react-vite-typescript-base, mcp-server-typescript-base, node-typescript-cli-base, shellscripts-base, arm64-macos-cli-base, mmix-cli-base)
 - `just check` — Verify required tools are installed
 - `just create <template> <target-dir>` — Scaffold a new project from a blueprint
 

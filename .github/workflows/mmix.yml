@@ -1,0 +1,34 @@
+name: MMIX template
+on:
+  push:
+    paths:
+      - 'blueprints/mmix-cli-base/**'
+      - 'violations/mmix-cli-base/**'
+      - 'tests/**'
+      - '.github/workflows/mmix.yml'
+  pull_request:
+    paths:
+      - 'blueprints/mmix-cli-base/**'
+      - 'violations/mmix-cli-base/**'
+      - 'tests/**'
+      - '.github/workflows/mmix.yml'
+permissions:
+  contents: read
+jobs:
+  template:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: extractions/setup-just@v3
+      # Copier is a generation prerequisite, never a generated-project tool.
+      - run: python -m pip install copier==9.17.2
+      - name: Fresh project baseline and violation tests
+        shell: bash
+        run: bash tests/run-tests.sh mmix-cli-base

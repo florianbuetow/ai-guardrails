@@ -1,0 +1,61 @@
+# {{ project_name }}
+
+{{ project_description }}
+
+A self-contained MMIX assembly project. After generation, validation requires
+only a GCC/Clang-compatible C compiler, `just`, and Git. macOS and Linux use
+`cc`; On Windows run commands in Git Bash, with `clang` on PATH; Git supplies `sh`. Standard
+POSIX shell utilities are used for orchestration. MSVC is not supported.
+Copier and its Python runtime are only needed to generate the project.
+
+```
+just check
+just init
+just ci
+just run
+```
+
+`just check` checks local prerequisites and committed source files. It never
+installs or downloads anything. `just build` compiles the vendored MMIXware C
+sources plus two small C99 guardrail executables. CWEB is not required.
+MMIXware is compiled in its original C89 dialect; our guardrails compile with
+`-Wall -Wextra -Wpedantic -Werror`. See
+[vendor provenance and license](vendor/mmixware/PROVENANCE.md).
+
+## Validation
+
+- `code-policy`: local lexical, entry-point, instruction, register, address,
+  directive, and TRAP rules. See [the source policy](tools/POLICY.md).
+- `code-artifacts`: checks tracked, untracked, and ignored paths. Generated
+  objects, listings, and native binaries belong exclusively in ignored
+  `build/`; no tracked build outputs are allowed.
+- `code-object`: assembles `src/main.mms`, rejects any assembler diagnostics,
+  runs `mmotype`, and requires contiguous code at `#100`, a Main symbol,
+  the entry register, and data confined to the data segment.
+- `test`: exact stdout text (native Windows CRLF translation) and empty stderr; simulator-script assertions of
+  exit register `$255` and message memory; `.mml` instruction words matched
+  against `mmotype`; `mmix -P` instruction coverage required at 100% using the
+  object code as the denominator. Missing instructions cannot shrink coverage.
+  Negative tests verify rejection of empty reports, warnings, and artifacts.
+- `ci`: all of the above. No network, external rule packs, lint services,
+  vulnerability feeds, GNU binutils, or containers are used.
+
+The starter program prints `Hello, MMIX!` and exits zero. Update `tests/stdout.txt`
+and the scripted state assertions in `scripts/test.sh` when changing its
+contract. State commands live in `tests/state.txt`. These are real MMIX
+simulator register/memory reads, not host-side approximations.
+
+The initial module model is one standalone executable, `src/main.mms`; there
+is no linking or include mechanism. The validator accepts a deliberately
+restricted language subset rather than claiming to parse arbitrary MMIXAL.
+Coverage measures executed instructions, not branches. This is a policy and
+behavior suite, not a general security proof or secret scanner. `mmmix`,
+mutation testing, and hardware timing analysis are not part of this template.
+
+The GitHub Actions matrix executes on macOS, Linux, and Windows. Checkout and
+installation of the declared `just` prerequisite use the network during runner
+provisioning; all project validation after that is local. The runner provides
+the C compiler and Git. No project dependencies are downloaded by `just`.
+
+Build timestamps occur in MMO metadata and simulator register rN; binaries are
+not claimed to be reproducible byte-for-byte. No checks depend on timestamps.

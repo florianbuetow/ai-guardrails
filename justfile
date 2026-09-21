@@ -69,6 +69,7 @@ help:
 	@printf "    %-36s %s\n" "node-typescript-cli-base" "Node.js TypeScript CLI application"
 	@printf "    %-36s %s\n" "shellscripts-base" "Portable shell script project"
 	@printf "    %-36s %s\n" "arm64-macos-cli-base" "ARM64 macOS assembly CLI application"
+	@printf "    %-36s %s\n" "mmix-cli-base" "MMIX assembly CLI application"
 	@echo ""
 	@printf "\033[0;33mCode Quality:\033[0m\n"
 	@printf "  %-40s %s\n" "code-spell" "Check spelling across the repository"
@@ -92,6 +93,7 @@ help:
 	@printf "  %-40s %s\n" "baseline-node-typescript-cli-base" "Generate Node.js TypeScript CLI template and run just ci"
 	@printf "  %-40s %s\n" "baseline-shellscripts-base" "Generate shell scripts template and run just ci"
 	@printf "  %-40s %s\n" "baseline-arm64-macos-cli-base" "Generate ARM64 macOS assembly template and run just ci"
+	@printf "  %-40s %s\n" "baseline-mmix-cli-base" "Generate MMIX assembly template and run just ci"
 	@echo ""
 	@printf "\033[0;33mCI & Testing:\033[0m\n"
 	@printf "  %-40s %s\n" "test-info" "Test direct dependency inventory output"
@@ -116,6 +118,7 @@ help:
 	@printf "  %-40s %s\n" "test-shellscripts-base" "Run shell scripts baseline + violation tests"
 	@printf "  %-40s %s\n" "test-shellscripts-base-linux" "Run shell scripts tests in a Linux container"
 	@printf "  %-40s %s\n" "test-arm64-macos-cli-base" "Run ARM64 macOS assembly baseline + violation tests"
+	@printf "  %-40s %s\n" "test-mmix-cli-base" "Run MMIX assembly baseline + violation tests"
 	@printf "  %-40s %s\n" "test-create" "Run just create for all templates"
 	@printf "  %-40s %s\n" "ci" "Run all checks + all template tests (quiet)"
 	@printf "  %-40s %s\n" "ci-verbose" "Run all checks + all template tests (verbose)"
@@ -398,6 +401,12 @@ baseline-arm64-macos-cli-base:
 	@./tests/run-tests.sh arm64-macos-cli-base baseline && printf "\033[32m✓ arm64-macos-cli-base baseline passed\033[0m\n" || { printf "\033[31m✗ arm64-macos-cli-base baseline failed\033[0m\n"; exit 1; }
 	@echo ""
 
+# Generate MMIX assembly template and run just ci
+baseline-mmix-cli-base:
+	@echo ""
+	@./tests/run-tests.sh mmix-cli-base baseline && printf "\033[32m✓ mmix-cli-base baseline passed\033[0m\n" || { printf "\033[31m✗ mmix-cli-base baseline failed\033[0m\n"; exit 1; }
+	@echo ""
+
 # Test direct dependency inventory output
 test-info:
 	@echo ""
@@ -605,6 +614,12 @@ test-shellscripts-base-linux:
 test-arm64-macos-cli-base:
 	@echo ""
 	@./tests/run-tests.sh arm64-macos-cli-base && printf "\033[32m✓ arm64-macos-cli-base tests passed\033[0m\n" || { printf "\033[31m✗ arm64-macos-cli-base tests failed\033[0m\n"; exit 1; }
+	@echo ""
+
+# Run MMIX assembly baseline and violation tests
+test-mmix-cli-base:
+	@echo ""
+	@./tests/run-tests.sh mmix-cli-base && printf "\033[32m✓ mmix-cli-base tests passed\033[0m\n" || { printf "\033[31m✗ mmix-cli-base tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Test just create for all templates

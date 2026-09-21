@@ -1,0 +1,29 @@
+_min_copier_version: "9.0.0"
+_subdirectory: template
+_templates_suffix: ".template"
+_answers_file: .copier-answers.yml
+_exclude:
+  - build
+  - .git
+_tasks:
+  - "git init -q"
+  - "just init"
+project_name:
+  type: str
+  help: Project name?
+  validator: >-
+    {% if not (project_name | regex_search('^[a-z0-9]([a-z0-9._-]*[a-z0-9])?$')) %}
+    Use lowercase letters, digits, hyphens, underscores, and dots.
+    {% endif %}
+project_description:
+  type: str
+  help: Short description?
+  default: "A self-contained MMIX assembly application"
+author_name:
+  type: str
+  help: Author name?
+  default: ""
+author_email:
+  type: str
+  help: Author email?
+  default: ""

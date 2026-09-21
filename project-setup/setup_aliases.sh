@@ -27,6 +27,7 @@ ALIASES=(
   "newnode:setup-project-node-typescript-cli-base-claude.sh"
   "newshell:setup-project-shellscripts-base-claude.sh"
   "newarm64:setup-project-arm64-macos-cli-base-claude.sh"
+  "newmmix:setup-project-mmix-cli-base-claude.sh"
 )
 UPDATE_ALIAS="alias update-templates='cd ~/scripts/ai-guardrails && git pull && cd - > /dev/null'"
 
@@ -164,6 +165,7 @@ echo "     newmcp my-project       # TypeScript MCP server"
 echo "     newnode my-project      # Node.js TypeScript CLI"
 printf "     newshell my-project     # Portable shell scripts\n"
 printf "     newarm64 my-project     # ARM64 macOS assembly CLI\n"
+printf "     newmmix my-project      # MMIX assembly CLI\n"
 echo ""
 echo "  3. Update templates to latest version:"
 echo "     update-templates"

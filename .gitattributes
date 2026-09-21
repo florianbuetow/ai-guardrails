@@ -1,0 +1,5 @@
+# Keep generated MMIX sources and its test harness portable on Windows checkout.
+blueprints/mmix-cli-base/** text eol=lf
+violations/mmix-cli-base/** text eol=lf
+tests/**/*.sh text eol=lf
+tests/run-tests.sh text eol=lf

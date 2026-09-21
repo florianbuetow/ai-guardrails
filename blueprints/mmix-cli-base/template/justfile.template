@@ -1,0 +1,81 @@
+set windows-shell := ["sh", "-cu"]
+compiler := if os() == "windows" { "clang" } else { "cc" }
+
+_default:
+    @just help
+
+help:
+    @echo ""
+    @printf "  %-24s %s\n" "init" "Install the local Git hook"
+    @printf "  %-24s %s\n" "check" "Check local prerequisites; never downloads"
+    @printf "  %-24s %s\n" "build" "Compile vendored MMIXware and local validators"
+    @printf "  %-24s %s\n" "run" "Assemble and run the application"
+    @printf "  %-24s %s\n" "code-policy" "Validate the MMIX source policy"
+    @printf "  %-24s %s\n" "code-artifacts" "Reject binary artifacts outside build and tracked build outputs"
+    @printf "  %-24s %s\n" "code-object" "Assemble with no warnings and inspect MMO structure"
+    @printf "  %-24s %s\n" "test" "Run native output, register, memory and coverage tests"
+    @printf "  %-24s %s\n" "ci" "Run every local validation gate"
+    @printf "  %-24s %s\n" "ci-quiet" "Run CI from the pre-commit hook"
+    @printf "\033[32mhelp completed successfully\033[0m\n"
+    @echo ""
+
+check:
+    @echo ""
+    @sh scripts/check.sh "{{ '{{ compiler }}' }}" || { printf "\033[31mcheck failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32mcheck completed successfully\033[0m\n"
+    @echo ""
+
+init: check
+    @echo ""
+    @sh scripts/init.sh || { printf "\033[31minit failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32minit completed successfully\033[0m\n"
+    @echo ""
+
+build: check
+    @echo ""
+    @sh scripts/build.sh "{{ '{{ compiler }}' }}" || { printf "\033[31mbuild failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32mbuild completed successfully\033[0m\n"
+    @echo ""
+
+run: code-object
+    @echo ""
+    @build/mmix build/main.mmo || { printf "\033[31mrun failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32mrun completed successfully\033[0m\n"
+    @echo ""
+
+code-policy: build
+    @echo ""
+    @build/validate src/main.mms || { printf "\033[31mcode-policy failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32mcode-policy completed successfully\033[0m\n"
+    @echo ""
+
+code-artifacts: build
+    @echo ""
+    @sh scripts/artifacts.sh || { printf "\033[31mcode-artifacts failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32mcode-artifacts completed successfully\033[0m\n"
+    @echo ""
+
+code-object: build
+    @echo ""
+    @sh scripts/assemble.sh || { printf "\033[31mcode-object failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32mcode-object completed successfully\033[0m\n"
+    @echo ""
+
+test: code-object
+    @echo ""
+    @sh scripts/test.sh || { printf "\033[31mtest failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32mtest completed successfully\033[0m\n"
+    @echo ""
+
+ci:
+    @echo ""
+    @just check && just code-policy code-artifacts test || { printf "\033[31mci failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32mAll CI checks passed\033[0m\n"
+    @echo ""
+
+ci-quiet:
+    @echo ""
+    @printf "Running CI Checks (Quiet Mode)\n"
+    @just ci || { printf "\033[31mci-quiet failed\033[0m\n" >&2; exit 1; }
+    @printf "\033[32mci-quiet completed successfully\033[0m\n"
+    @echo ""
