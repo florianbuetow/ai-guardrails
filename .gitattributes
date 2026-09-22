@@ -3,3 +3,6 @@ blueprints/mmix-cli-base/** text eol=lf
 violations/mmix-cli-base/** text eol=lf
 tests/**/*.sh text eol=lf
 tests/run-tests.sh text eol=lf
+# Parser corpora and golden outputs include deliberately non-normalized bytes.
+blueprints/mmix-cli-base/template/tools/guard/fixtures/** -text
+blueprints/mmix-cli-base/template/tests/fixtures/** -text

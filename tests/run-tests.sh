@@ -44,6 +44,18 @@ requested_count=${#languages[@]}
 passed_languages=0
 
 for lang in "${languages[@]}"; do
+    if [ "$lang" = "mmix-cli-base" ]; then
+        mmix_args=()
+        if [ "$TEST_MODE" = "baseline" ]; then
+            mmix_args+=(--baseline)
+        fi
+        if ! python3 "$SCRIPT_DIR/test_mmix.py" ${mmix_args[@]+"${mmix_args[@]}"}; then
+            log_fail "$lang tests failed — aborting"
+            exit 1
+        fi
+        passed_languages=$((passed_languages + 1))
+        continue
+    fi
     lang_config="$SCRIPT_DIR/languages/$lang.sh"
 
     if [ ! -f "$lang_config" ]; then

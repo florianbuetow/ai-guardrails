@@ -147,7 +147,7 @@ just run sum -
 copier copy https://github.com/florianbuetow/ai-guardrails/blueprints/mmix-cli-base my-mmix-project
 cd my-mmix-project
 just init
-just run
+just run 4
 ```
 
 ## Features
@@ -178,7 +178,7 @@ just run
 | [**node-typescript-cli-base**](blueprints/node-typescript-cli-base/) | Node.js 24+ TypeScript | CLI apps with [Prettier](https://prettier.io/), [oxlint](https://oxc.rs/docs/guide/usage/linter.html), [TypeScript](https://www.typescriptlang.org/), [knip](https://knip.dev/), [dependency-cruiser](https://github.com/sverweij/dependency-cruiser), [ts-archunit](https://github.com/nielspeter/ts-archunit), [CodeQL](https://codeql.github.com/), [Gitleaks](https://github.com/gitleaks/gitleaks), [Vitest](https://vitest.dev/), [fast-check](https://fast-check.dev/), [StrykerJS](https://stryker-mutator.io/), [publint](https://publint.dev/), and [arethetypeswrong](https://arethetypeswrong.github.io/) |
 | [**shellscripts-base**](blueprints/shellscripts-base/) | POSIX shell | Portable shell projects with [ShellCheck](https://www.shellcheck.net/), [shfmt](https://github.com/mvdan/sh), [checkbashisms](https://tracker.debian.org/pkg/devscripts), Bash, dash, BusyBox ash, ksh, zsh, [Semgrep](https://semgrep.dev/), [codespell](https://github.com/codespell-project/codespell), [Bats](https://github.com/bats-core/bats-core), [ShellSpec](https://shellspec.info/), and [kcov](https://github.com/SimonKagstrom/kcov) |
 | [**arm64-macos-cli-base**](blueprints/arm64-macos-cli-base/) | ARM64 assembly (Apple Silicon) | Hand-written assembly CLIs with the [Clang integrated assembler](https://clang.llvm.org/docs/index.html), [llvm-objdump](https://llvm.org/docs/CommandGuide/llvm-objdump.html), [FileCheck](https://llvm.org/docs/CommandGuide/FileCheck.html), [llvm-readobj](https://llvm.org/docs/CommandGuide/llvm-readobj.html), [llvm-mca](https://llvm.org/docs/CommandGuide/llvm-mca.html), [Semgrep](https://semgrep.dev/), `nm`/`otool`/`lipo`/`codesign` binary validation, and assembly unit tests |
-| [**mmix-cli-base**](blueprints/mmix-cli-base/) | MMIX assembly | Self-contained MMIX CLIs with vendored, pinned MMIXware (`mmixal`, `mmix`, `mmotype`), a local C guardrail validator, object/listing/profile checks, black-box tests, and no validation-time network access |
+| [**mmix-cli-base**](blueprints/mmix-cli-base/) | MMIX assembly | Self-contained MMIX CLIs with vendored, pinned MMIXware (`mmixal`, `mmix`, `mmotype`), one cross-platform C guard/CI driver, exact capability allowlists, vendor hashes, MMIX unit tests, declarative CLI/state tests, 80% instruction coverage, and no validation-time network access |
 
 ## Validation Tools by Language
 
@@ -201,7 +201,7 @@ Every template runs the same CI check categories via `just ci`. The table below 
 
 See each template's README for tool details and configuration.
 
-The MMIX template is deliberately self-contained. It builds vendored generated MMIXware C sources and its validator locally, then uses `mmixal`, `mmotype`, and `mmix` for assembly, object structure, runtime, state, and instruction-profile checks. It does not use Semgrep, Gitleaks, codespell, external rule packs, containers, hosted APIs, or downloaded validation data.
+The MMIXAL template supports GCC/Clang on macOS/Linux and MSVC on Windows. It is deliberately self-contained. It builds vendored generated MMIXware C sources and its validator locally, then uses `mmixal`, `mmotype`, and `mmix` for assembly, object structure, runtime, state, and instruction-profile checks. It does not use Semgrep, Gitleaks, codespell, external rule packs, containers, hosted APIs, or downloaded validation data.
 
 The shell scripts template targets both macOS and Linux. Its CI parses the POSIX source with Bash, dash, BusyBox ash, ksh, and zsh, while `checkbashisms` rejects shell-specific constructs that would break `/bin/sh` portability.
 

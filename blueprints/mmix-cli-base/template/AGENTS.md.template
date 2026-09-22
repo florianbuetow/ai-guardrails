@@ -1,20 +1,30 @@
-# {{ project_name }} agent instructions
+# {{ project_name }}
 
-Write MMIX assembly in src/main.mms. Read tools/POLICY.md before editing.
-Keep the project self-contained: only a C compiler, just, and Git are required
-for validation. Never introduce downloads, external rule packs, language
-runtimes, hosted scanners, containers, or checker suppressions.
+MMIXAL is the application language. `mmixal` is the authoritative assembler and
+`mmix` is the authoritative runtime for behavioral tests. The application runs
+in the MMIX simulator; host binaries in build/bin are tooling only.
 
-Run `just ci` after changes. Treat assembler diagnostics as failures. Preserve
-100% instruction coverage and update exact output and simulator state tests
-when behavior changes. Put generated files only in build/ and never track them.
+There is no maintained semantic MMIXAL static analyzer in this template. MMIXAL
+provides authoritative assembly validation; repository-local guardrails enforce
+project policy; simulator-based tests verify behavior.
 
-MMIXware is unmodified upstream generated C, pinned in vendor/mmixware.
-Preserve its license and provenance. Do not modify the vendored source under
-its original names. Local guardrail programs belong in tools/ and compile with
-strict C99 warnings as errors. Compiler warnings from upstream K&R C are not
-suppressed or presented as local guardrail failures.
+- Run `just ci` before completion. Every behavioral change requires tests.
+- Never add network-dependent validation tools, package restoration, external rules,
+  remote APIs, containers, or runtime downloads.
+- Do not modify vendored MMIXware. Preserve notices, version provenance, and hashes.
+- Do not suppress guardrails or add skip/ignore directives.
+- TRAP operations, special registers, and direct `$255` uses are capability-controlled
+  by exact configuration allowlists. Remove stale permissions.
+- Pure modules must not perform I/O. Only src/lib/io.mms owns runtime TRAP calls.
+- Maintain explicit composition order: entry, parse, format, io. Define Main once.
+- Do not enable implicit instruction expansion with `mmixal -x` casually.
+- Keep long-lived/interface registers named and scratch use explicit.
+- Keep stdout/stderr byte contracts deterministic across macOS, Linux, and Windows.
+- Do not add host-specific application implementations.
+- Build output is disposable. Never commit generated host binaries, MMO files, or listings.
+- Do not weaken coverage thresholds to make tests pass. Add tests instead.
+- Use the declarative test format and MMIX unit programs, not host-specific test scripts.
+- Keep local C parsers bounded, check overflow and child status, and free resources.
+- Mutation testing, comprehensive secret detection, and dependency CVE scanning are not provided.
 
-The source model is a single executable, not a linker/module system. Do not
-add an unvalidated second source tree. The host scripts use standard POSIX sh;
-on Windows use Git for Windows with clang and just available in PATH.
+Read README.md and config/ before changing the toolchain or project conventions.

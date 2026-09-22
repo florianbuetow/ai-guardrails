@@ -136,7 +136,7 @@ case "$TEMPLATE_NAME" in
     PROJECT_DESCRIPTION="An ARM64 macOS assembly CLI application"
     ;;
   mmix-cli-base)
-    PROJECT_DESCRIPTION="An MMIX assembly CLI application"
+    PROJECT_DESCRIPTION="A portable MMIXAL CLI application"
     ;;
   *)
     printf "${RED}Error: no project description configured for template: %s${NC}\n" "$TEMPLATE_NAME"

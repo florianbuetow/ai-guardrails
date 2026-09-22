@@ -1,30 +1,29 @@
-# MMIX Assembly CLI Base Template
+# MMIX CLI Base
 
-A self-contained Copier template for command-line programs written in MMIX assembly.
+A portable MMIXAL development and verification environment. Generated projects
+build their own pinned `mmixal`, `mmix`, and `mmotype` from committed C sources.
+Validation requires Git, `just`, and a C compiler: GCC/Clang on macOS/Linux or
+MSVC in Developer PowerShell on Windows. No validation command downloads anything.
 
-The generated project vendors pinned, generated C sources for Donald Knuth's MMIXware and builds `mmixal`, `mmix`, and `mmotype` locally. Its guardrails are repository-contained C programs and portable scripts. Validation does not use Semgrep, Gitleaks, codespell, containers, external rule packs, hosted APIs, or downloaded rule data.
-
-## Generate a project
-
-```bash
+```text
 copier copy --trust blueprints/mmix-cli-base ./my-mmix-cli
-cd ./my-mmix-cli
+cd my-mmix-cli
 just init
-just run
+just run 4
 just ci
 ```
 
-Run `just help` to see every recipe.
+The multi-module sample separates command orchestration, parsing, formatting,
+and MMIX I/O. A single local C guard provides source/hygiene policies, exact
+capability allowlists, SHA-256 vendor integrity, structural object/listing
+checks, declarative CLI/state tests, and real instruction coverage (80% minimum).
+MMIX unit tests are independently assembled programs. Core validation is shared
+by every platform; shell/PowerShell code only bootstraps the compiler and driver.
 
-## Validation
+See the generated README for the command and tooling matrices, test schemas,
+static-analysis limits, host prerequisites, and documented exclusions. The
+application artifact is `.mmo`, not a host-native application executable.
 
-The local pipeline validates `.mms` source policy, assembles source with `mmixal`, inspects `.mmo` structure with `mmotype`, executes black-box tests with `mmix`, checks generated artifacts, and derives instruction coverage from execution profiles. MMIXAL assembler diagnostics fail validation. The unmodified upstream C uses legacy K&R definitions and may emit compiler warnings; local C guardrails compile with warnings as errors.
-
-## Prerequisites
-
-- A GCC/Clang-compatible C compiler (`cc` on macOS/Linux; `clang` in Git Bash on Windows)
-- `just`
-- Git
-- Copier, for generating the project
-
-MMIXware itself is included in the generated repository and the validation workflow performs no network access.
+Run `just test-mmix-cli-base` in ai-guardrails for fresh generation, clean rebuild,
+complete local CI, and deliberate violation checks. Python/Copier are parent
+blueprint-test dependencies only; generated projects do not use them.

@@ -185,9 +185,10 @@ Before running a violation, confirm that its resolved recipe (`check` or the `co
 - MMIX assembly (`.mms`) with pinned generated MMIXware C sources vendored into every generated project
 - Builds `mmixal`, `mmix`, `mmotype`, and the local C guardrail executable using the host C compiler
 - Validation is fully local and offline: no Semgrep, Gitleaks, codespell, containers, external rule packs, hosted APIs, or downloaded data
-- Guardrails cover lexical/style policy, `Main`, instructions, `$255`, `LOC`/`GREG`/`IS`/`TRAP`, register names, magic addresses, the single-file module boundary, and generated/untracked artifacts
+- Guardrails cover lexical/style policy, `Main`, instructions, `$255`, `LOC`/`GREG`/`IS`/`TRAP`, register names, magic addresses, the main/parse/format/io source boundaries, and generated/untracked artifacts
 - Tests parse assembler warnings and `.mml` listings, inspect `.mmo` objects with `mmotype`, run black-box and machine-state assertions with `mmix`, and calculate instruction coverage from `mmix -P` profiles
-- Generated-project prerequisites are only a C compiler, `just`, and Git; Copier is needed only to render the blueprint
+- Generated-project prerequisites are Git, `just`, and a C compiler (GCC/Clang on Unix, MSVC on Windows); Copier is needed only to render the blueprint
+- One C `mmix-guard` driver owns validation, declarative tests, exact capability allowlists, vendor hashing, and coverage (80% minimum); generated validation never downloads dependencies
 
 All templates emphasize creating immediately runnable projects with no placeholders, comprehensive CI pipelines, and AGENTS.md/CLAUDE.md files for AI agent guidance.
 

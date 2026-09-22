@@ -1,0 +1,4 @@
+0000000000000100: e300002a ("build/app/a-deliberately-long-project-name.mms", line 1)
+g255: 0000000000000100
+Symbol table (beginning at tetra 7):
+    Main = #0100 (1)

@@ -249,3 +249,6 @@ Temporary Items
 # Dolt database files (added by bd init)
 .dolt/
 *.db
+
+# Local Clang static-analysis report
+/build.plist

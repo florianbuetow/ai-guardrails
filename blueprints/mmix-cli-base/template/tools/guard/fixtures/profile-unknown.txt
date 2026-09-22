@@ -1,0 +1,5 @@
+Program profile:
+         1. 0000000000000100: e300002a (SETL)
+surprise
+  1 instruction, 0 mems, 1 oop; 0 good guesses, 0 bad
+  (halted at location #0000000000000100)

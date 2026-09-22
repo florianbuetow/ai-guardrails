@@ -1,0 +1,5 @@
+#ifndef MMIX_PROJECT_H
+#define MMIX_PROJECT_H
+#define G_PROJECT "{{ project_name }}"
+#define G_APP "build/app/{{ project_name }}"
+#endif

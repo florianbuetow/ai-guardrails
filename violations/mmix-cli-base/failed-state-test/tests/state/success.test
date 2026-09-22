@@ -1,0 +1,7 @@
+program=build/app/test-mmix-cli.mmo
+run=until-halt
+arg.1=4
+register.$255=0000000000000001
+memory.2000000000000000=350A006572726F72
+pc=00000000000001B4
+termination=halted

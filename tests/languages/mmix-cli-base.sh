@@ -24,7 +24,7 @@ check_prerequisites() {
 
     case "$(uname -s)" in
         MINGW*|MSYS*|CYGWIN*)
-            require_command clang "Install Clang and make it available in Git Bash"
+            require_command cl "Install MSVC and make it available in Git Bash"
             ;;
         *)
             require_command cc "Install a C compiler that provides cc"
@@ -37,12 +37,12 @@ post_baseline_tests() {
     local output
 
     log_section "$LANG_NAME runnable application"
-    if ! output="$(cd "$project_dir" && just run 2>&1)"; then
+    if ! output="$(cd "$project_dir" && just run 4 2>&1)"; then
         log_fail "just run failed"
         printf "%s\n" "$output"
         return 1
     fi
-    if ! printf "%s\n" "$output" | grep -F "Hello, MMIX!" >/dev/null; then
+    if ! printf "%s\n" "$output" | grep -x "5" >/dev/null; then
         log_fail "just run did not execute the generated MMIX program"
         printf "%s\n" "$output"
         return 1

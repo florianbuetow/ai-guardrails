@@ -22,6 +22,11 @@ The generated source files were copied byte-for-byte from CTANGLE output;
 their source-map `#line` directives deliberately retain the upstream `.w`
 filenames. `boilerplate.w` is the unmodified upstream license notice.
 
+`generated/abstime.h` records the `ABSTIME` value produced during the pinned
+import run. Committing and hashing this generated metadata keeps MMIXware's
+`rN` compilation-time value deterministic and avoids requiring CWEB or the
+timestamp generator when a generated project rebuilds its host utilities.
+
 ## Integrity
 
 ```

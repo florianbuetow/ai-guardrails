@@ -1,0 +1,6 @@
+program=build/app/{{ project_name }}.mmo
+stdin=tests/fixtures/input/empty.txt
+stdout=tests/fixtures/expected/success.out
+stderr=
+exit=0
+arg.1=4

@@ -10,9 +10,13 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Preserve symbolic links on Windows checkout
+        if: runner.os == 'Windows'
+        run: git config --global core.symlinks true
       - uses: actions/checkout@v4
       # Provision only the declared task-runner prerequisite. Validation itself
       # builds the committed C sources and never fetches tools, rules, or data.
       - uses: extractions/setup-just@v3
-      - shell: bash
-        run: just ci
+      - uses: ilammy/msvc-dev-cmd@v1
+        if: runner.os == 'Windows'
+      - run: just ci

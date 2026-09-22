@@ -1,0 +1,2 @@
+# Changes here record Copier generation answers, not validation configuration.
+{{ _copier_answers | to_nice_yaml }}

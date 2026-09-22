@@ -1,0 +1,6 @@
+program=build/app/example.mmo
+program=build/app/duplicate.mmo
+stdin=
+stdout=
+stderr=
+exit=0

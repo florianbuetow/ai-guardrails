@@ -1,0 +1,2 @@
+tests/cli/invalid-input.test
+tests/cli/usage.test

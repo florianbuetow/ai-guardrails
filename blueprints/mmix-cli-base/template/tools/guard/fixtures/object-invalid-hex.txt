@@ -1,0 +1,4 @@
+0000000000000100: e300002a ("source.mms", line 1)
+g255: 00000000000001ZZ
+Symbol table (beginning at tetra 7):
+    Main = #0100 (1)

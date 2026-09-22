@@ -2,60 +2,154 @@
 
 {{ project_description }}
 
-A self-contained MMIX assembly project. After generation, validation requires
-only a GCC/Clang-compatible C compiler, `just`, and Git. macOS and Linux use
-`cc`; On Windows run commands in Git Bash, with `clang` on PATH; Git supplies `sh`. Standard
-POSIX shell utilities are used for orchestration. MSVC is not supported.
-Copier and its Python runtime are only needed to generate the project.
+This project is a portable MMIXAL application running on Donald Knuth's MMIX
+reference architecture. The application artifact is `build/app/{{ project_name }}.mmo`,
+not a host-native executable. All validation tools and test fixtures are local.
+After generation, `just build`, `just test`, `just coverage`, `just ci`, and
+`just ci-quiet` work without network access.
 
-```
+## Prerequisites
+
+- Git and `just` 1.32 or newer.
+- macOS: Clang / `cc`; Linux: `cc`, Clang, or GCC.
+- Windows: MSVC `cl.exe` with C11 support in a Visual Studio Developer PowerShell, with the Windows SDK.
+  Enable Developer Mode or grant symbolic-link creation permission for `CLAUDE.md`.
+  Configure Git with `core.symlinks=true` before cloning so the guidance link remains a link.
+- The system POSIX shell on macOS/Linux; built-in Windows PowerShell on Windows.
+
+`CC` takes precedence and must name one compiler executable, not a shell command
+or a string containing compiler flags. Unix detection tries `cc`, `clang`, then
+`gcc`; Windows uses `cl.exe`. `just check` prints the selected compiler and platform
+and checks host prerequisites only. It never installs anything.
+
+Copier/Python is required only by the blueprint generator, not by this project.
+No global MMIXware installation, CWEB, package manager, or additional language
+runtime is needed for validation.
+
+## Start
+
+```text
 just check
 just init
-just ci
-just run
+just test
+just run 4
+just coverage
+just ci-quiet
 ```
 
-`just check` checks local prerequisites and committed source files. It never
-installs or downloads anything. `just build` compiles the vendored MMIXware C
-sources plus two small C99 guardrail executables. CWEB is not required.
-MMIXware is compiled in its original C89 dialect; our guardrails compile with
-`-Wall -Wextra -Wpedantic -Werror`. See
-[vendor provenance and license](vendor/mmixware/PROVENANCE.md).
+The sample accepts exactly one digit from `0` through `8`, prints the next digit
+and a newline, and exits zero. Invalid input writes a diagnostic to stderr and
+exits 1. Missing or extra arguments print usage to stderr and exit 2.
+The same MMIX instructions and byte-exact golden files run on every platform.
 
-## Validation
+`just init` initializes Git, installs the local `just ci-quiet` pre-commit hook,
+creates `CLAUDE.md -> AGENTS.md`, builds host tools, and executes the success smoke
+test. `just destroy` removes only disposable `build/` output.
 
-- `code-policy`: local lexical, entry-point, instruction, register, address,
-  directive, and TRAP rules. See [the source policy](tools/POLICY.md).
-- `code-artifacts`: checks tracked, untracked, and ignored paths. Generated
-  objects, listings, and native binaries belong exclusively in ignored
-  `build/`; no tracked build outputs are allowed.
-- `code-object`: assembles `src/main.mms`, rejects any assembler diagnostics,
-  runs `mmotype`, and requires contiguous code at `#100`, a Main symbol,
-  the entry register, and data confined to the data segment.
-- `test`: exact stdout text (native Windows CRLF translation) and empty stderr; simulator-script assertions of
-  exit register `$255` and message memory; `.mml` instruction words matched
-  against `mmotype`; `mmix -P` instruction coverage required at 100% using the
-  object code as the denominator. Missing instructions cannot shrink coverage.
-  Negative tests verify rejection of empty reports, warnings, and artifacts.
-- `ci`: all of the above. No network, external rule packs, lint services,
-  vulnerability feeds, GNU binutils, or containers are used.
+## Commands
 
-The starter program prints `Hello, MMIX!` and exits zero. Update `tests/stdout.txt`
-and the scripted state assertions in `scripts/test.sh` when changing its
-contract. State commands live in `tests/state.txt`. These are real MMIX
-simulator register/memory reads, not host-side approximations.
+| Group | Commands |
+| --- | --- |
+| Setup | `init`, `check`, `destroy`, `help` |
+| Build/run | `build`, `assemble`, `run`, `debug` |
+| Code | `code-style`, `code-source`, `code-vendor`, `code-object` |
+| Boundaries | `code-architecture`, `code-security` |
+| Tests | `test`, `test-unit`, `test-state`, `test-cli`, `selftest` |
+| Coverage/CI | `coverage`, `ci`, `ci-quiet` |
 
-The initial module model is one standalone executable, `src/main.mms`; there
-is no linking or include mechanism. The validator accepts a deliberately
-restricted language subset rather than claiming to parse arbitrary MMIXAL.
-Coverage measures executed instructions, not branches. This is a policy and
-behavior suite, not a general security proof or secret scanner. `mmmix`,
-mutation testing, and hardware timing analysis are not part of this template.
+`just debug` uses MMIX's own interactive simulator. No external debugger is used.
+`assemble` validates and assembles, rejects diagnostics, emits an MMO object and
+an MML listing, and inspects them; it does not execute behavioral tests.
+`ci-quiet` runs exactly the same stages as `ci`, prints each stage's status, and
+prints the full captured stdout/stderr of any failing stage.
 
-The GitHub Actions matrix executes on macOS, Linux, and Windows. Checkout and
-installation of the declared `just` prerequisite use the network during runner
-provisioning; all project validation after that is local. The runner provides
-the C compiler and Git. No project dependencies are downloaded by `just`.
+## Tooling matrix
 
-Build timestamps occur in MMO metadata and simulator register rN; binaries are
-not claimed to be reproducible byte-for-byte. No checks depend on timestamps.
+| Concern | Mechanism |
+| --- | --- |
+| Syntax | Vendored `mmixal` |
+| Execution | Vendored `mmix` |
+| Object inspection | Vendored `mmotype` |
+| Source policy | Local `mmix-guard` |
+| Capability control | Exact TRAP, special-register, and `$255` allowlists |
+| Architecture | Local source-boundary rules |
+| Unit testing | Independently assembled MMIX test programs |
+| State testing | Scripted MMIX register, memory, PC, and termination inspection |
+| CLI testing | Declarative `.test` fixtures with exact output bytes |
+| Coverage | Real MMIX execution profiles and executable listing addresses |
+| Vendor integrity | Local SHA-256 manifest and exact file inventory |
+| CI | Same C driver on macOS, Linux, and Windows |
+
+There is no maintained semantic MMIXAL static analyzer in this template. MMIXAL
+provides authoritative assembly validation; repository-local guardrails enforce
+project policy; simulator-based tests verify behavior.
+
+Mutation testing: not provided. Secret detection and dependency CVE scanning are
+not provided. The project deliberately omits Semgrep, Gitleaks, CodeQL, codespell,
+ShellCheck, shfmt, Docker, GNU binutils, external MMIX packages, third-party coverage
+systems, hosted analysis, remote APIs, and package restoration.
+
+## Source architecture and capabilities
+
+Composition order is explicit: the application or unit-test entry, then
+`src/lib/parse.mms`, `src/lib/format.mms`, and `src/lib/io.mms`. Each assembled
+composition defines `Main` exactly once. Entries own data/global-register layout;
+library files supply routines. Pure parse/format modules perform no TRAP operations.
+Only `io.mms` crosses the configured runtime capability boundary.
+
+`config/guardrails.conf` defines source conventions and scratch-register policy.
+`config/allowed-traps.txt`, `allowed-special-registers.txt`, and `allowed-255.txt`
+contain exact project permissions. Used permissions must equal configured
+permissions: unused or unknown capabilities fail. Source comments cannot suppress
+checks. Numeric constants are allowed; suspicious literal addresses and unexplained
+reserved-register uses are rejected within the documented policy's limits.
+
+MMIXAL is invoked without `-x`. Address construction must remain visible, and
+listings are checked against assembled instruction structure. There is no
+aggressive automatic formatter; `code-style` checks whitespace, final newlines,
+UTF-8, source artifacts, and case collisions. Deliberately malformed parser fixtures
+are test data, not production source or configuration.
+
+## Tests and coverage
+
+MMIX unit tests under `tests/unit` exercise parsing and formatting and exit nonzero
+on mismatches. CLI tests under `tests/cli` declare `program`, `stdin`, `stdout`,
+`stderr`, `exit`, and consecutive optional `arg.1`, `arg.2`, etc. An empty stream
+value means an empty stream, not an omitted assertion. Expected output files are
+committed under `tests/fixtures/expected` and compared byte-for-byte.
+
+State tests under `tests/state` declare `run=until-halt`, argument values, hexadecimal
+register/memory/PC expectations, and `termination=halted`. The driver invokes the
+real simulator and rejects malformed state output or unexpected termination.
+
+`coverage` aggregates production execution profiles from the CLI corpus against
+executable addresses from the assembly listing. Data and directives are excluded
+structurally. `config/coverage.conf` sets `minimum=80`. Missing, malformed, duplicate,
+or inconsistent profile records fail. There are no comment-based coverage exclusions.
+Do not lower the threshold to hide inadequate tests.
+
+## Trusted local tools
+
+The C11 guard sources live in `tools/guard`. They compile with strict warnings:
+`-Wall -Wextra -Wpedantic -Werror` on GCC/Clang and `/W4 /WX` on MSVC. Parsers have
+committed self-test cases; processes are invoked with argument arrays, bounded
+execution times, and checked exit status. No validation code uses network APIs.
+
+MMIXware's generated C and upstream notices remain unmodified under
+`vendor/mmixware`. Its legacy C compilation is separate from strict local guard
+compilation; its diagnostics are preserved in `build/tmp/*-compiler.err` and `.out`.
+`VERSION`, `UPSTREAM`, `SHA256SUMS`, and `PROVENANCE.md` identify the
+pinned source. Generated `abstime.h` is committed and hash-verified, making the
+simulator's metadata independent of the build clock. MMO creation timestamps are
+not used as behavioral assertions or claimed to be byte-reproducible.
+
+The Windows simulator adapter changes host standard streams to binary mode so MMIX
+program output has identical bytes across platforms. It does not change application
+behavior or upstream source. Bootstrap shell/PowerShell files only select a compiler,
+check prerequisites, and compile the C driver; the validation pipeline has one C
+implementation.
+
+CI infrastructure may provision Git, a compiler, and `just`; generated validation
+never provisions dependencies. The GitHub Actions matrix explicitly uses that policy.
+Deleting `build/` and running `just ci` recompiles the guard and all MMIXware tools
+from repository-contained inputs before running the complete validation suite.

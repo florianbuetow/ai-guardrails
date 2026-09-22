@@ -1,0 +1,3 @@
+src/lib/io.mms|0,Fputs,StdOut
+src/lib/io.mms|0,Fputs,StdErr
+src/lib/io.mms|0,Halt,0

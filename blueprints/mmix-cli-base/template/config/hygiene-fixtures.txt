@@ -1,0 +1,2 @@
+# Exact paths for intentionally malformed guard-parser fixtures belong here.
+tools/guard/fixtures/source-hygiene.cases

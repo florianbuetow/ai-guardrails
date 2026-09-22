@@ -5,6 +5,14 @@ _answers_file: .copier-answers.yml
 _exclude:
   - build
   - .git
+_message_before_copy: |
+  Creating a portable MMIXAL CLI application using the reference MMIXware
+  assembler and simulator. All project validation is repository-local and
+  requires no runtime network downloads.
+_message_after_copy: |
+  cd {{ project_name }}
+  just init
+  just test
 _tasks:
   - "git init -q"
   - "just init"
@@ -18,7 +26,7 @@ project_name:
 project_description:
   type: str
   help: Short description?
-  default: "A self-contained MMIX assembly application"
+  default: "A portable MMIXAL CLI application"
 author_name:
   type: str
   help: Author name?

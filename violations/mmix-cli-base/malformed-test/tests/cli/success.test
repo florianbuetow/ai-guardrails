@@ -1,0 +1,7 @@
+program=build/app/test-mmix-cli.mmo
+stdin=tests/fixtures/input/empty.txt
+stdout=tests/fixtures/expected/success.out
+stderr=
+exit=0
+exit=1
+arg.1=4

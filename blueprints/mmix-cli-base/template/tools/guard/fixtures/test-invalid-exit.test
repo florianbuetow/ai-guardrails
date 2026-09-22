@@ -1,0 +1,5 @@
+program=build/app/example.mmo
+stdin=
+stdout=
+stderr=
+exit=256

@@ -1,1 +1,4 @@
 * text=auto eol=lf
+# Preserve parser inputs and golden outputs byte-for-byte on every host.
+tools/guard/fixtures/** -text
+tests/fixtures/** -text

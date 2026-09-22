@@ -619,7 +619,7 @@ test-arm64-macos-cli-base:
 # Run MMIX assembly baseline and violation tests
 test-mmix-cli-base:
 	@echo ""
-	@./tests/run-tests.sh mmix-cli-base && printf "\033[32m✓ mmix-cli-base tests passed\033[0m\n" || { printf "\033[31m✗ mmix-cli-base tests failed\033[0m\n"; exit 1; }
+	@python3 tests/test_mmix.py && printf "\033[32m✓ mmix-cli-base tests passed\033[0m\n" || { printf "\033[31m✗ mmix-cli-base tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Test just create for all templates
