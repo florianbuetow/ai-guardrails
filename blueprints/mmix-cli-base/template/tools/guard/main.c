@@ -64,15 +64,23 @@ static int guidance_target_matches(void) {
             (void)CloseHandle(reference);
         return g_error("guidance link target is missing");
     }
-    valid = GetFileInformationByHandle(target, &actual) &&
-            GetFileInformationByHandle(reference, &expected);
+    if (!GetFileInformationByHandle(target, &actual)) {
+        (void)CloseHandle(target);
+        (void)CloseHandle(reference);
+        return g_internal("cannot inspect the guidance link target");
+    }
+    if (!GetFileInformationByHandle(reference, &expected)) {
+        (void)CloseHandle(target);
+        (void)CloseHandle(reference);
+        return g_internal("cannot inspect AGENTS.md");
+    }
     {
         int closed_target = CloseHandle(target) != 0;
         int closed_reference = CloseHandle(reference) != 0;
         if (!closed_target || !closed_reference)
             return g_internal("cannot close guidance handles");
     }
-    if (!valid || actual.dwVolumeSerialNumber != expected.dwVolumeSerialNumber ||
+    if (actual.dwVolumeSerialNumber != expected.dwVolumeSerialNumber ||
         actual.nFileIndexHigh != expected.nFileIndexHigh ||
         actual.nFileIndexLow != expected.nFileIndexLow)
         return g_error("CLAUDE.md must resolve to the project AGENTS.md file");
