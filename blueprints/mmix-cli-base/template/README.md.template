@@ -13,8 +13,6 @@ After generation, `just build`, `just test`, `just coverage`, `just ci`, and
 - Git and `just` 1.32 or newer.
 - macOS: Clang / `cc`; Linux: `cc`, Clang, or GCC.
 - Windows: MSVC `cl.exe` with C11 support in a Visual Studio Developer PowerShell, with the Windows SDK.
-  Enable Developer Mode or grant symbolic-link creation permission for `CLAUDE.md`.
-  Configure Git with `core.symlinks=true` before cloning so the guidance link remains a link.
 - The system POSIX shell on macOS/Linux; built-in Windows PowerShell on Windows.
 
 `CC` takes precedence and must name one compiler executable, not a shell command
@@ -43,8 +41,7 @@ exits 1. Missing or extra arguments print usage to stderr and exit 2.
 The same MMIX instructions and byte-exact golden files run on every platform.
 
 `just init` initializes Git, installs the local `just ci-quiet` pre-commit hook,
-creates `CLAUDE.md -> AGENTS.md`, builds host tools, and executes the success smoke
-test. `just destroy` removes only disposable `build/` output.
+builds host tools, and executes the success smoke test. `just destroy` removes only disposable `build/` output.
 
 ## Commands
 

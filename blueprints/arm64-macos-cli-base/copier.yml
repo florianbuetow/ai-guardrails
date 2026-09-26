@@ -8,7 +8,6 @@ _answers_file: .copier-answers.yml
 _exclude:
   - "build"
   - ".git"
-  - "CLAUDE.md"
 
 _skip_if_exists:
   - "src/"
@@ -34,7 +33,6 @@ _message_after_copy: |
     just run sum -
 
 _tasks:
-  - "ln -sf AGENTS.md CLAUDE.md"
   - "git init -q"
   - "mkdir -p .git/hooks && printf '%s\n' '#!/usr/bin/env sh' 'set -e' 'just ci-quiet' > .git/hooks/pre-commit"
 

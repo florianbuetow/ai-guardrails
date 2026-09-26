@@ -1,7 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 #include "guard.h"
 #include "project.h"
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,92 +35,6 @@ static int workspace(void) {
     }
     return g_write("build/tmp/empty", "", 0);
 }
-#ifdef _WIN32
-static int guidance_target_matches(void) {
-    HANDLE link = CreateFileA("CLAUDE.md", FILE_READ_ATTRIBUTES, FILE_SHARE_READ, NULL,
-                              OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT, NULL);
-    FILE_ATTRIBUTE_TAG_INFO tag;
-    BY_HANDLE_FILE_INFORMATION actual, expected;
-    HANDLE target, reference;
-    int valid;
-    if (link == INVALID_HANDLE_VALUE)
-        return g_internal("cannot inspect CLAUDE.md link");
-    valid =
-        GetFileInformationByHandleEx(link, FileAttributeTagInfo, &tag, (DWORD)sizeof tag) != 0 &&
-        tag.ReparseTag == IO_REPARSE_TAG_SYMLINK;
-    if (!CloseHandle(link))
-        return g_internal("cannot close guidance link handle");
-    if (!valid)
-        return g_error("CLAUDE.md must be a symbolic link");
-    target = CreateFileA("CLAUDE.md", FILE_READ_ATTRIBUTES, FILE_SHARE_READ, NULL, OPEN_EXISTING,
-                         FILE_ATTRIBUTE_NORMAL, NULL);
-    reference = CreateFileA("AGENTS.md", FILE_READ_ATTRIBUTES, FILE_SHARE_READ, NULL, OPEN_EXISTING,
-                            FILE_ATTRIBUTE_NORMAL, NULL);
-    if (target == INVALID_HANDLE_VALUE || reference == INVALID_HANDLE_VALUE) {
-        if (target != INVALID_HANDLE_VALUE)
-            (void)CloseHandle(target);
-        if (reference != INVALID_HANDLE_VALUE)
-            (void)CloseHandle(reference);
-        return g_error("guidance link target is missing");
-    }
-    if (!GetFileInformationByHandle(target, &actual)) {
-        (void)CloseHandle(target);
-        (void)CloseHandle(reference);
-        return g_internal("cannot inspect the guidance link target");
-    }
-    if (!GetFileInformationByHandle(reference, &expected)) {
-        (void)CloseHandle(target);
-        (void)CloseHandle(reference);
-        return g_internal("cannot inspect AGENTS.md");
-    }
-    {
-        int closed_target = CloseHandle(target) != 0;
-        int closed_reference = CloseHandle(reference) != 0;
-        if (!closed_target || !closed_reference)
-            return g_internal("cannot close guidance handles");
-    }
-    if (actual.dwVolumeSerialNumber != expected.dwVolumeSerialNumber ||
-        actual.nFileIndexHigh != expected.nFileIndexHigh ||
-        actual.nFileIndexLow != expected.nFileIndexLow)
-        return g_error("CLAUDE.md must resolve to the project AGENTS.md file");
-    return 0;
-}
-#endif
-
-static int linked_guidance(int create) {
-#ifdef _WIN32
-    DWORD attributes = GetFileAttributesA("CLAUDE.md");
-    if (attributes != INVALID_FILE_ATTRIBUTES) {
-        if ((attributes & FILE_ATTRIBUTE_REPARSE_POINT) == 0)
-            return g_error("CLAUDE.md must be a symbolic link to AGENTS.md");
-        return guidance_target_matches();
-    }
-    if (!create)
-        return g_error("missing CLAUDE.md symbolic link");
-    if (!CreateSymbolicLinkA("CLAUDE.md", "AGENTS.md",
-                             SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE))
-        return g_internal("cannot create CLAUDE.md symlink; enable Windows Developer Mode or "
-                          "symlink privilege (error %lu)",
-                          (unsigned long)GetLastError());
-#else
-    struct stat info;
-    if (lstat("CLAUDE.md", &info) == 0) {
-        char target[64];
-        ssize_t count;
-        if (!S_ISLNK(info.st_mode))
-            return g_error("CLAUDE.md must be a symbolic link to AGENTS.md");
-        count = readlink("CLAUDE.md", target, sizeof target);
-        if (count != 9 || memcmp(target, "AGENTS.md", 9) != 0)
-            return g_error("CLAUDE.md points to the wrong target");
-        return 0;
-    }
-    if (!create)
-        return g_error("missing CLAUDE.md symbolic link");
-    if (errno != ENOENT || symlink("AGENTS.md", "CLAUDE.md") != 0)
-        return g_internal("cannot create CLAUDE.md symlink");
-#endif
-    return 0;
-}
 static int initialize(void) {
     const char *const git_init[] = {"git", "init", "-q", NULL};
     const char *const hook_path[] = {"git", "rev-parse", "--git-path", "hooks", NULL};
@@ -138,9 +51,6 @@ static int initialize(void) {
     result = g_run(git_init, NULL, NULL, NULL, &status, 30);
     if (result != 0 || status != 0)
         return result != 0 ? result : g_error("git init failed");
-    result = linked_guidance(1);
-    if (result != 0)
-        return result;
     result = g_run(local_hooks, NULL, NULL, NULL, &status, 30);
     if (result != 0 || status != 0)
         return result != 0 ? result : g_error("cannot configure the project-local hook path");
@@ -302,10 +212,8 @@ static int stage(const char *name) {
         return check_host();
     if (strcmp(name, "code-vendor") == 0)
         return g_vendor();
-    if (strcmp(name, "code-style") == 0) {
-        int result = linked_guidance(0);
-        return result != 0 ? result : g_hygiene(0, NULL);
-    }
+    if (strcmp(name, "code-style") == 0)
+        return g_hygiene(0, NULL);
     if (strcmp(name, "code-source") == 0 || strcmp(name, "code-architecture") == 0)
         return g_source(4, production);
     if (strcmp(name, "code-security") == 0) {

@@ -37,7 +37,6 @@ blueprints/go-cli-base/
     ├── .pre-commit-config.yaml.template
     ├── .semgrepignore.template
     ├── AGENTS.md.template
-    ├── CLAUDE.md -> AGENTS.md         # Symlink (created via _tasks)
     ├── README.md.template
     ├── arch-go.yml
     ├── go.mod.template
@@ -136,9 +135,8 @@ just test-go-cli-base
 This will:
 1. Generate a test project in a temp directory
 2. Verify all expected files are created
-3. Verify CLAUDE.md symlink is correct
-4. Run `just init`, `just run`, `just ci`, `just ci-quiet`, and `just destroy`
-5. Clean up temp directory
+3. Run `just init`, `just run`, `just ci`, `just ci-quiet`, and `just destroy`
+4. Clean up temp directory
 
 ## Updating Generated Projects
 

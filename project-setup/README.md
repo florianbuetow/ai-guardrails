@@ -9,7 +9,7 @@ This directory contains a complete setup system for bootstrapping new Python pro
 - **`setup-project-python.md`** - The Python project template and guide
   - Contains comprehensive instructions for creating Python projects with AI agents
   - Includes project structure requirements, dependency management rules, and conventions
-  - Defines what should go in `AGENTS.md` and `CLAUDE.md` files for generated projects
+  - Defines what should go in the `AGENTS.md` file for generated projects
   - Emphasizes using `uv` exclusively for package management (never pip or python directly)
   - Serves as the "blueprint" that AI agents follow when creating new projects
 
@@ -145,7 +145,6 @@ When you run `newpy my-project-name`:
    - `justfile` with `init`, `run`, and `help` recipes
    - `README.md` with project documentation
    - `AGENTS.md` with AI agent development rules
-   - `CLAUDE.md` as a redirect to AGENTS.md
    - `src/main.py` with a working example
 5. The script cleans up the template file
 6. Your project is ready to use with `just init` and `just run`

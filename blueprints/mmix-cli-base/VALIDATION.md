@@ -5,8 +5,7 @@ No remote workflow execution was performed for this revision.
 
 ## Verified on macOS
 
-- Fresh Copier generation, saved answers, correct CLAUDE.md symbolic link, Git setup,
-  local pre-commit hook, host-tool build, and sample execution.
+- Fresh Copier generation, saved answers, Git setup, local pre-commit hook, host-tool build, and sample execution.
 - MMIX parsing/formatting unit programs, declarative CLI tests, and simulator state
   assertions for local/global/special registers, memory, PC, and termination.
 - All 21 committed violation cases reject their declared stage.
@@ -30,7 +29,7 @@ image and containers were removed; Docker is not a project validation dependency
 
 | Platform | Remaining verification |
 | --- | --- |
-| Windows | Run with MSVC cl.exe and inbox PowerShell, including native argument forwarding and symlinks. |
+| Windows | Run with MSVC cl.exe and inbox PowerShell, including native argument forwarding. |
 
 Both GitHub Actions matrices are configured, but were not triggered because this
 revision has not been published. Earlier CI runs for the provisional implementation
@@ -41,4 +40,4 @@ unverified until Windows executes the new suite.
 
 From ai-guardrails, run `python3 tests/test_mmix.py` (Copier is a generation-only
 prerequisite). In a generated project, run `just destroy` followed by `just ci`.
-Use Visual Studio Developer PowerShell on Windows, with symlink creation available.
+Use Visual Studio Developer PowerShell on Windows.

@@ -48,7 +48,6 @@ data/output/          Output data
 reports/              Generated reports
 justfile              Development and CI commands
 AGENTS.md             Coding conventions
-CLAUDE.md             Link to AGENTS.md
 ```
 
 ## Validation

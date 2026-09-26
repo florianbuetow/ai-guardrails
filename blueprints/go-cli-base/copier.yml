@@ -11,7 +11,6 @@ _answers_file: .copier-answers.yml
 _exclude:
   - ".git"
   - "reports/"
-  - "CLAUDE.md"
 
 # Skip if exists (never overwrite these on update)
 _skip_if_exists:
@@ -37,7 +36,6 @@ _message_after_copy: |
 
 # Post-generation tasks
 _tasks:
-  - "ln -s AGENTS.md CLAUDE.md"
   - "git init -q"
   - "mkdir -p .git/hooks && printf '%s\n' '#!/usr/bin/env sh' 'set -e' 'just ci-quiet' > .git/hooks/pre-commit"
 

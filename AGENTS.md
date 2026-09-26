@@ -190,7 +190,7 @@ Before running a violation, confirm that its resolved recipe (`check` or the `co
 - Generated-project prerequisites are Git, `just`, and a C compiler (GCC/Clang on Unix, MSVC on Windows); Copier is needed only to render the blueprint
 - One C `mmix-guard` driver owns validation, declarative tests, exact capability allowlists, vendor hashing, and coverage (80% minimum); generated validation never downloads dependencies
 
-All templates emphasize creating immediately runnable projects with no placeholders, comprehensive CI pipelines, and AGENTS.md/CLAUDE.md files for AI agent guidance.
+All templates emphasize creating immediately runnable projects with no placeholders, comprehensive CI pipelines, and AGENTS.md files for AI agent guidance.
 
 After changing a template, render a fresh project and inspect generated paths for duplicate trees, empty leftover directories, and unrendered template syntax before broader validation.
 

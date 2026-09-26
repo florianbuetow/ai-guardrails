@@ -40,7 +40,6 @@ blueprints/cpp-3dgame-base/
     ├── .pre-commit-config.yaml.template
     ├── .semgrepignore.template
     ├── AGENTS.md.template
-    ├── CLAUDE.md -> AGENTS.md          # Symlink (created via _tasks)
     ├── CMakeLists.txt.template
     ├── CMakePresets.json.template
     ├── conanfile.py.template           # Conan 2 dependency manifest (pinned)
@@ -235,9 +234,8 @@ just test-cpp-3dgame-base
 This will:
 1. Generate a test project in a temp directory
 2. Verify all expected files are created
-3. Verify CLAUDE.md symlink is correct
-4. Run `just init`, `just run`, `just ci`, `just ci-quiet`, and `just destroy`
-5. Clean up temp directory
+3. Run `just init`, `just run`, `just ci`, `just ci-quiet`, and `just destroy`
+4. Clean up temp directory
 
 ## Updating Generated Projects
 

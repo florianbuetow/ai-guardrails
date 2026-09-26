@@ -140,8 +140,7 @@ class MmixTemplateTest(unittest.TestCase):
         self.assertTrue((project / ".copier-answers.yml").is_file())
         self.assertTrue((project / ".git" / "hooks" / "pre-commit").is_file())
         self.assertTrue(os.access(project / ".git" / "hooks" / "pre-commit", os.X_OK))
-        self.assertTrue((project / "CLAUDE.md").is_symlink())
-        self.assertEqual(os.readlink(project / "CLAUDE.md"), "AGENTS.md")
+        self.assertFalse(os.path.lexists(project / "CLAUDE.md"))
 
         for command in (
             ["just", "build"],

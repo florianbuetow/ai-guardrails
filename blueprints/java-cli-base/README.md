@@ -42,7 +42,6 @@ blueprints/java-cli-base/
     ├── justfile.template
     ├── README.md.template
     ├── AGENTS.md.template
-    ├── CLAUDE.md -> AGENTS.md         # Symlink (created via _tasks)
     ├── .cursor/
     │   └── commands/
     │       └── doc-statemachine.md    # Cursor AI command for state machine diagrams
@@ -147,9 +146,8 @@ just test-java-cli-base
 This will:
 1. Generate a test project in a temp directory
 2. Verify all files are created
-3. Verify CLAUDE.md symlink is correct
-4. Run `just init`, `just run`, `just ci`, `just ci-quiet`, `just destroy` in the generated project
-5. Clean up temp directory
+3. Run `just init`, `just run`, `just ci`, `just ci-quiet`, `just destroy` in the generated project
+4. Clean up temp directory
 
 ## Updating Generated Projects
 

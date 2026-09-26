@@ -5,7 +5,6 @@ _answers_file: .copier-answers.yml
 _exclude:
   - ".git"
   - "reports/"
-  - "CLAUDE.md"
 _skip_if_exists:
   - "src/"
   - "test/"
@@ -21,7 +20,6 @@ _message_after_copy: |
     just run
     just ci
 _tasks:
-  - "ln -s AGENTS.md CLAUDE.md"
   - "git init -q"
   - "mkdir -p .git/hooks && printf '%s\n' '#!/bin/sh' 'set -eu' 'just ci-quiet' > .git/hooks/pre-commit"
 project_name:

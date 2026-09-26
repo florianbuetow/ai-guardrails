@@ -200,8 +200,7 @@ static int walk(const char *directory, GPaths *paths) {
             (void)snprintf(path, size, "%s/%s", directory, name);
 #ifdef _WIN32
         is_directory = (info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
-        if ((info.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) != 0 &&
-            strcmp(path, "CLAUDE.md") != 0)
+        if ((info.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) != 0)
             result = g_error("unexpected symbolic link or reparse point: %s", path);
 #else
         if (lstat(path, &info) != 0) {
@@ -210,7 +209,7 @@ static int walk(const char *directory, GPaths *paths) {
             break;
         }
         is_directory = S_ISDIR(info.st_mode);
-        if (S_ISLNK(info.st_mode) && strcmp(path, "CLAUDE.md") != 0)
+        if (S_ISLNK(info.st_mode))
             result = g_error("unexpected symbolic link: %s", path);
 #endif
         if (result == 0)

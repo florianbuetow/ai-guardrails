@@ -26,7 +26,7 @@ ROLE
 ==================================================
 Produce a minimal but clean project skeleton:
 - Complete directory tree structure
-- Full contents of all files (pyproject.toml, justfile, AGENTS.md, CLAUDE.md, src/main.py)
+- Full contents of all files (pyproject.toml, justfile, AGENTS.md, src/main.py)
 - No placeholders - everything must be directly runnable
 - All instructions are strict requirements, especially regarding "uv" usage
 
@@ -56,7 +56,6 @@ project-name/
 ├── justfile
 ├── README.md
 ├── AGENTS.md
-├── CLAUDE.md
 ├── src/
 │   └── main.py
 ├── scripts/        # Optional utility scripts
@@ -157,7 +156,6 @@ project-name/
 ├── pyproject.toml          # Project dependencies and metadata
 ├── justfile                # Build and run commands
 ├── AGENTS.md               # AI agent development rules
-├── CLAUDE.md               # Claude Code compatibility (redirects to AGENTS.md)
 ├── README.md               # This file
 ├── src/                    # Source code
 │   └── main.py            # Main entry point
@@ -178,11 +176,9 @@ project-name/
    - Command-line options
 
 ==================================================
-AGENTS.md and CLAUDE.md
+AGENTS.md
 ==================================================
-Create two files:
-
-1. **AGENTS.md** - Main AI agent development rules file with:
+Create **AGENTS.md**, the AI agent development rules file, with:
 
 Required sections:
 1. **Testing rules**:
@@ -217,13 +213,6 @@ Format:
 - Bullet lists for easy scanning
 - Be explicit about forbidden patterns
 
-2. **CLAUDE.md** - Simple redirect file:
-```markdown
-# CLAUDE.md
-
-You must read and follow [AGENTS.md](AGENTS.md)
-```
-
 ==================================================
 OUTPUT FORMAT
 ==================================================
@@ -236,7 +225,6 @@ Return in this order:
    - justfile
    - README.md
    - AGENTS.md
-   - CLAUDE.md
    - src/main.py
    - Any other files
 

@@ -12,7 +12,6 @@ _exclude:
   - "node_modules"
   - "dist"
   - ".git"
-  - "CLAUDE.md"  # Exclude symlink, create it via task instead
 
 # Skip if exists (never overwrite these on update)
 _skip_if_exists:
@@ -36,9 +35,7 @@ _message_after_copy: |
     just run     # Start the Vite dev server
 
 # Post-generation tasks
-# ln -sf so `copier update` (which re-runs tasks) does not fail on the existing link
 _tasks:
-  - "ln -sf AGENTS.md CLAUDE.md"
   - "git init -q"
   - "mkdir -p .git/hooks && printf '%s\n' '#!/usr/bin/env sh' 'set -e' 'just ci-quiet' > .git/hooks/pre-commit"
   - "bash scripts/bootstrap-vite.sh"

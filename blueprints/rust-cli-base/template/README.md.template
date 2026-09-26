@@ -13,7 +13,6 @@
 ├── .gitignore              # Git ignore patterns
 ├── justfile                # Task runner with build/test/validation commands
 ├── AGENTS.md               # AI agent development rules
-├── CLAUDE.md               # Claude Code compatibility (symlink to AGENTS.md)
 ├── README.md               # This file
 ├── src/                    # Source code
 │   ├── main.rs             # Application entry point
