@@ -20,13 +20,18 @@ INSTALLER = REPO_ROOT / "project-setup" / "setup-project-ai-docs-claude.sh"
 SETUP_PROJECT = REPO_ROOT / "project-setup" / "setup-project.sh"
 DOCS_IGNORED_WARNING = "docs/ is git-ignored. None of your documentation would ever be committed to git."
 PARTIALLY_IGNORED_WARNING = "files in docs/ are git-ignored and would never be committed to git"
-ARCHITECTURE_IGNORED_WARNING = "ARCHITECTURE.md is git-ignored. It would never be committed to git."
+AGENTS_SKILL = ".agents/skills/doc-gardening/SKILL.md"
+CLAUDE_SKILL = ".claude/skills/doc-gardening/SKILL.md"
+ROOT_FILES = ("ARCHITECTURE.md", AGENTS_SKILL, CLAUDE_SKILL)
 LINK_TARGET = re.compile(r"\]\(([^)]+)\)")
-# The knowledge-base layout from OpenAI's "Harness engineering" article.
+# The knowledge-base layout from OpenAI's "Harness engineering" article, plus the
+# doc-gardening skill where Codex and Claude Code discover skills.
 EXPECTED_LAYOUT = {
     Path(path)
     for path in (
         "ARCHITECTURE.md",
+        AGENTS_SKILL,
+        CLAUDE_SKILL,
         "docs/README.md",
         "docs/design-docs/index.md",
         "docs/design-docs/core-beliefs.md",
@@ -52,8 +57,20 @@ MAPPED_PATHS = {
 }
 
 
+def ignored_warning(path: str) -> str:
+    return f"{path} is git-ignored. It would never be committed to git."
+
+
 def relative_files(root: Path) -> set[Path]:
     return {path.relative_to(root) for path in root.rglob("*") if path.is_file()}
+
+
+def skill_parts(path: Path) -> tuple[dict[str, str], str]:
+    text = path.read_text(encoding="utf-8")
+    opening, header, body = text.split("---\n", 2)
+    if opening:
+        raise AssertionError(f"{path} does not start with a frontmatter block")
+    return dict(line.split(": ", 1) for line in header.splitlines()), body
 
 
 def empty_directories(root: Path) -> list[Path]:
@@ -119,8 +136,29 @@ class AiDocsInstallerTests(unittest.TestCase):
         self.assertIsNone(shutil.which("git", path=str(bin_dir)))
         return str(bin_dir)
 
-    def test_template_matches_the_article_layout(self) -> None:
+    def test_template_matches_the_expected_layout(self) -> None:
         self.assertEqual(EXPECTED_LAYOUT, relative_files(TEMPLATE_DIR))
+
+    def test_claude_skill_points_to_the_shared_skill(self) -> None:
+        shared_header, shared_body = skill_parts(TEMPLATE_DIR / AGENTS_SKILL)
+        claude_header, claude_body = skill_parts(TEMPLATE_DIR / CLAUDE_SKILL)
+        self.assertEqual({"name", "description"}, set(shared_header))
+        self.assertEqual(shared_header, claude_header)
+        self.assertIn(f"`{AGENTS_SKILL}`", claude_body)
+        self.assertIn("## 4. Missing capabilities", shared_body)
+
+    def test_keeps_existing_agent_directories(self) -> None:
+        workdir = self.new_workdir("project")
+        settings = workdir / ".claude" / "settings.json"
+        other_skill = workdir / ".agents" / "skills" / "other" / "SKILL.md"
+        for path in (settings, other_skill):
+            path.parent.mkdir(parents=True)
+            path.write_text("keep\n", encoding="utf-8")
+        self.install(workdir, [], self.env, 0)
+        self.assertEqual("keep\n", settings.read_text(encoding="utf-8"))
+        self.assertEqual("keep\n", other_skill.read_text(encoding="utf-8"))
+        self.assertTrue((workdir / AGENTS_SKILL).is_file())
+        self.assertTrue((workdir / CLAUDE_SKILL).is_file())
 
     def test_installs_the_layout_and_creates_agents_md_outside_git(self) -> None:
         workdir = self.new_workdir("project")
@@ -207,6 +245,33 @@ class AiDocsInstallerTests(unittest.TestCase):
         self.assertEqual("keep\n", (workdir / "ARCHITECTURE.md").read_text(encoding="utf-8"))
         self.assertEqual("keep\n", (workdir / "AGENTS.md").read_text(encoding="utf-8"))
 
+    def test_refuses_an_existing_skill_without_changes(self) -> None:
+        for index, skill in enumerate((AGENTS_SKILL, CLAUDE_SKILL)):
+            with self.subTest(skill=skill):
+                workdir = self.new_workdir(f"skill-{index}")
+                existing = workdir / skill
+                existing.parent.mkdir(parents=True)
+                existing.write_text("keep\n", encoding="utf-8")
+                output = self.install(workdir, [], self.env, 1)
+                self.assertIn(f"{Path(skill).parent.as_posix()} already exists; nothing was changed", output)
+                self.assertEqual({Path(skill)}, relative_files(workdir))
+
+    def test_refuses_skill_parents_that_are_not_real_directories(self) -> None:
+        outside = self.root / "outside"
+        outside.mkdir()
+        cases = ((".claude", "symlink", "is a symlink"), (".agents", "file", "is not a directory"))
+        for index, (name, kind, message) in enumerate(cases):
+            with self.subTest(path=name, kind=kind):
+                workdir = self.new_workdir(f"parent-{index}")
+                if kind == "symlink":
+                    (workdir / name).symlink_to(outside)
+                else:
+                    (workdir / name).write_text("keep\n", encoding="utf-8")
+                output = self.install(workdir, [], self.env, 1)
+                self.assertIn(f"{name} {message}; nothing was changed", output)
+                self.assertEqual([name], [entry.name for entry in workdir.iterdir()])
+        self.assertEqual([], list(outside.iterdir()))
+
     def test_refuses_an_agents_md_that_is_not_a_file(self) -> None:
         workdir = self.new_workdir("project")
         (workdir / "AGENTS.md").mkdir()
@@ -255,14 +320,25 @@ class AiDocsInstallerTests(unittest.TestCase):
     def test_rolls_back_when_copier_fails(self) -> None:
         workdir = self.new_workdir("project")
         (workdir / "AGENTS.md").write_text("keep\n", encoding="utf-8")
+        settings = workdir / ".claude" / "settings.json"
+        settings.parent.mkdir()
+        settings.write_text("keep\n", encoding="utf-8")
         fake_bin = self.root / "fake-bin"
         fake_bin.mkdir()
         fake_copier = fake_bin / "copier"
-        fake_copier.write_text("#!/bin/sh\nmkdir docs\n: > docs/partial.md\n: > ARCHITECTURE.md\nexit 7\n", encoding="utf-8")
+        fake_copier.write_text(
+            "#!/bin/sh\n"
+            "mkdir -p docs .agents/skills/doc-gardening .claude/skills/doc-gardening\n"
+            f": > docs/partial.md\n: > ARCHITECTURE.md\n: > {AGENTS_SKILL}\n: > {CLAUDE_SKILL}\n"
+            "exit 7\n",
+            encoding="utf-8",
+        )
         fake_copier.chmod(0o755)
         output = self.install(workdir, [], {**self.env, "PATH": f"{fake_bin}{os.pathsep}{self.env['PATH']}"}, 7)
         self.assertIn("the changes were rolled back", output)
-        self.assertEqual(["AGENTS.md"], [entry.name for entry in workdir.iterdir()])
+        self.assertEqual({Path("AGENTS.md"), Path(".claude/settings.json")}, relative_files(workdir))
+        self.assertEqual([".claude"], [entry.name for entry in workdir.iterdir() if entry.is_dir()])
+        self.assertEqual(["settings.json"], [entry.name for entry in settings.parent.iterdir()])
         self.assertEqual("keep\n", (workdir / "AGENTS.md").read_text(encoding="utf-8"))
 
     def test_rolls_back_when_agents_md_cannot_be_written(self) -> None:
@@ -291,21 +367,24 @@ class AiDocsInstallerTests(unittest.TestCase):
         workdir = self.new_workdir("project")
         self.git(workdir, "init", "-q")
         output = self.install(workdir, [], self.env, 0)
-        self.assertIn("docs/ and ARCHITECTURE.md are not git-ignored", output)
+        self.assertIn("docs/, ARCHITECTURE.md, and the doc-gardening skill are not git-ignored", output)
         self.assertNotIn(DOCS_IGNORED_WARNING, output)
-        self.assertNotIn(ARCHITECTURE_IGNORED_WARNING, output)
+        for path in ROOT_FILES:
+            self.assertNotIn(ignored_warning(path), output)
 
     def test_warns_and_fails_when_gitignore_ignores_the_documentation(self) -> None:
-        # (pattern, ignored files in docs/, ARCHITECTURE.md ignored); *.md leaves the two .gitkeep files.
+        # (pattern, ignored files in docs/, ignored files outside docs/); *.md leaves the two .gitkeep files.
         cases = (
-            ("docs/", DOCS_FILE_COUNT, False),
-            ("/docs", DOCS_FILE_COUNT, False),
-            ("docs/*", DOCS_FILE_COUNT, False),
-            ("docs/**", DOCS_FILE_COUNT, False),
-            ("*.md", DOCS_FILE_COUNT - 2, True),
-            ("ARCHITECTURE.md", 0, True),
+            ("docs/", DOCS_FILE_COUNT, ()),
+            ("/docs", DOCS_FILE_COUNT, ()),
+            ("docs/*", DOCS_FILE_COUNT, ()),
+            ("docs/**", DOCS_FILE_COUNT, ()),
+            ("*.md", DOCS_FILE_COUNT - 2, ROOT_FILES),
+            ("ARCHITECTURE.md", 0, ("ARCHITECTURE.md",)),
+            (".claude/", 0, (CLAUDE_SKILL,)),
+            (".agents/", 0, (AGENTS_SKILL,)),
         )
-        for index, (pattern, ignored_docs, architecture_ignored) in enumerate(cases):
+        for index, (pattern, ignored_docs, ignored_root_files) in enumerate(cases):
             with self.subTest(pattern=pattern):
                 workdir = self.new_workdir(f"ignored-{index}")
                 self.git(workdir, "init", "-q")
@@ -314,7 +393,8 @@ class AiDocsInstallerTests(unittest.TestCase):
                 partial_warning = f"{ignored_docs} of {DOCS_FILE_COUNT} {PARTIALLY_IGNORED_WARNING}"
                 self.assertEqual(ignored_docs == DOCS_FILE_COUNT, DOCS_IGNORED_WARNING in output, output)
                 self.assertEqual(0 < ignored_docs < DOCS_FILE_COUNT, partial_warning in output, output)
-                self.assertEqual(architecture_ignored, ARCHITECTURE_IGNORED_WARNING in output, output)
+                for path in ROOT_FILES:
+                    self.assertEqual(path in ignored_root_files, ignored_warning(path) in output, output)
                 self.assertIn(f".gitignore:1:{pattern}", output)
                 self.assertTrue((workdir / "docs" / "PLANS.md").is_file(), output)
 

@@ -13,13 +13,18 @@ newaidocs
 Without the alias, run `/path/to/ai-guardrails/project-setup/setup-project-ai-docs-claude.sh`
 from the project directory. It takes no arguments and:
 
-- exits with code 1, changing nothing, when `docs` or `ARCHITECTURE.md` already
-  exists, when a `CLAUDE.md` exists (agent instructions belong in a real `AGENTS.md`
-  only), when `AGENTS.md` is a symlink, not a regular file, or not writable, or when
-  the directory is not writable;
+- exits with code 1, changing nothing, when `docs`, `ARCHITECTURE.md`, or either
+  doc-gardening skill directory already exists; when a `CLAUDE.md` exists (agent
+  instructions belong in a real `AGENTS.md` only); when `AGENTS.md` is a symlink, not a
+  regular file, or not writable; when `.agents`, `.claude`, or their `skills`
+  directories are symlinks or not directories; or when the directory is not writable;
 - copies [`template/`](template/) into the current directory: `docs/`, whose
   [`README.md`](template/docs/README.md) explains the layout as the article describes
-  it, and a root `ARCHITECTURE.md` for the project's code map;
+  it; a root `ARCHITECTURE.md` for the project's code map; and the doc-gardening skill
+  in [`.agents/skills/doc-gardening/`](template/.agents/skills/doc-gardening/SKILL.md),
+  where Codex finds it, with a pointer in
+  [`.claude/skills/doc-gardening/`](template/.claude/skills/doc-gardening/SKILL.md)
+  for Claude Code;
 - appends [`agents-section.md`](agents-section.md) to `AGENTS.md`, creating the file if
   it is missing. That section maps every folder and file with its purpose and when to
   read or update it;

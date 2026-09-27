@@ -218,6 +218,8 @@ __marimo__/
 
 # Claude Code
 .claude/
+# The ai-docs template ships a Claude Code skill that projects must receive
+!blueprints/ai-docs/template/.claude/
 
 # Beads issue tracker
 .beads/

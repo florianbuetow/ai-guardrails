@@ -1,6 +1,7 @@
 #!/bin/bash
-# Install the ai-docs template into the current directory: docs/ and
-# ARCHITECTURE.md, plus a Documentation section in AGENTS.md that explains them.
+# Install the ai-docs template into the current directory: docs/, ARCHITECTURE.md,
+# and the doc-gardening skill, plus a Documentation section in AGENTS.md that
+# explains them.
 
 set -euo pipefail
 
@@ -8,6 +9,9 @@ DOCS_DIR="docs"
 ARCHITECTURE_FILE="ARCHITECTURE.md"
 AGENTS_FILE="AGENTS.md"
 CLAUDE_FILE="CLAUDE.md"
+# Codex discovers skills in .agents/skills and Claude Code in .claude/skills.
+AGENTS_SKILL_DIR=".agents/skills/doc-gardening"
+CLAUDE_SKILL_DIR=".claude/skills/doc-gardening"
 SCRIPT_NAME="$(basename "$0")"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BLUEPRINT_PATH="$(cd "$SCRIPT_DIR/.." && pwd)/blueprints/ai-docs"
@@ -38,9 +42,20 @@ if [ ! -f "$AGENTS_SECTION" ]; then
 fi
 
 # Check everything before changing anything, so a refusal leaves no trace.
-for path in "$DOCS_DIR" "$ARCHITECTURE_FILE"; do
+for path in "$DOCS_DIR" "$ARCHITECTURE_FILE" "$AGENTS_SKILL_DIR" "$CLAUDE_SKILL_DIR"; do
   if [ -e "$path" ] || [ -L "$path" ]; then
     fail "$PWD/$path already exists; nothing was changed"
+  fi
+done
+
+# The skills are written into these directories, so they must be real directories
+# inside the project, not symlinks that could lead outside it.
+for path in .agents .agents/skills .claude .claude/skills; do
+  if [ -L "$path" ]; then
+    fail "$PWD/$path is a symlink; nothing was changed"
+  fi
+  if [ -e "$path" ] && [ ! -d "$path" ]; then
+    fail "$PWD/$path is not a directory; nothing was changed"
   fi
 done
 
@@ -81,12 +96,21 @@ if [ -f "$AGENTS_FILE" ]; then
 fi
 installation_complete=false
 
+# Remember which paths this run creates, so that a rollback removes exactly those
+# and keeps directories such as an existing .claude/ untouched.
+created_paths=()
+for path in "$DOCS_DIR" "$ARCHITECTURE_FILE" .agents .agents/skills "$AGENTS_SKILL_DIR" \
+  .claude .claude/skills "$CLAUDE_SKILL_DIR"; do
+  if [ ! -e "$path" ]; then
+    created_paths+=("$path")
+  fi
+done
+
 # Undo a half-finished installation so that a failed run can simply be retried.
-# The checks above proved that docs/ and ARCHITECTURE.md did not exist before.
 finish() {
   local status=$?
   if [ "$installation_complete" = false ]; then
-    rm -rf "$DOCS_DIR" "$ARCHITECTURE_FILE"
+    rm -rf "${created_paths[@]}"
     if [ "$agents_existed" = true ]; then
       if ! cmp -s "$agents_backup" "$AGENTS_FILE"; then
         cat "$agents_backup" > "$AGENTS_FILE"
@@ -102,7 +126,7 @@ finish() {
 trap finish EXIT
 
 copier copy "$BLUEPRINT_PATH" .
-printf '\033[32m✓ Created %s/ and %s in %s\033[0m\n' "$DOCS_DIR" "$ARCHITECTURE_FILE" "$PWD"
+printf '\033[32m✓ Created %s/, %s, and the doc-gardening skill in %s\033[0m\n' "$DOCS_DIR" "$ARCHITECTURE_FILE" "$PWD"
 
 if [ -s "$AGENTS_FILE" ]; then
   if [ -n "$(tail -c 1 "$AGENTS_FILE")" ]; then
@@ -142,7 +166,8 @@ fi
 # Check every installed file, not only the directory: patterns such as docs/*
 # or *.md ignore all documents while leaving docs itself unmatched.
 docs_files="$(find "$DOCS_DIR" -type f)"
-if ignored_files="$(printf '%s\n%s\n' "$docs_files" "$ARCHITECTURE_FILE" | git check-ignore --stdin)"; then
+other_files="$(printf '%s\n' "$ARCHITECTURE_FILE" "$AGENTS_SKILL_DIR/SKILL.md" "$CLAUDE_SKILL_DIR/SKILL.md")"
+if ignored_files="$(printf '%s\n%s\n' "$docs_files" "$other_files" | git check-ignore --stdin)"; then
   docs_total="$(awk 'END { print NR }' <<< "$docs_files")"
   docs_ignored="$(awk -v prefix="$DOCS_DIR/" 'index($0, prefix) == 1 { count++ } END { print count + 0 }' <<< "$ignored_files")"
   if [ "$docs_ignored" -eq "$docs_total" ]; then
@@ -152,9 +177,11 @@ if ignored_files="$(printf '%s\n%s\n' "$docs_files" "$ARCHITECTURE_FILE" | git c
       "$docs_ignored" "$docs_total" "$DOCS_DIR"
     grep "^$DOCS_DIR/" <<< "$ignored_files" | sed 's/^/  /'
   fi
-  if grep -qxF "$ARCHITECTURE_FILE" <<< "$ignored_files"; then
-    printf '\033[31m⚠ Warning: %s is git-ignored. It would never be committed to git.\033[0m\n' "$ARCHITECTURE_FILE"
-  fi
+  while IFS= read -r path; do
+    if grep -qxF "$path" <<< "$ignored_files"; then
+      printf '\033[31m⚠ Warning: %s is git-ignored. It would never be committed to git.\033[0m\n' "$path"
+    fi
+  done <<< "$other_files"
   printf 'Matching ignore rules:\n'
   printf '%s\n' "$ignored_files" | git check-ignore --stdin --verbose | cut -f1 | sort -u | sed 's/^/  /'
   exit 1
@@ -165,4 +192,4 @@ else
   fi
 fi
 
-printf '\033[32m✓ %s/ and %s are not git-ignored\033[0m\n' "$DOCS_DIR" "$ARCHITECTURE_FILE"
+printf '\033[32m✓ %s/, %s, and the doc-gardening skill are not git-ignored\033[0m\n' "$DOCS_DIR" "$ARCHITECTURE_FILE"

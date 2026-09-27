@@ -16,8 +16,8 @@ it, what each part is for, and how to use it.
 - **Progressive disclosure.** An agent starts from the small, stable map and is shown
   where to look next, instead of being handed everything at once.
 - **Checked, not hoped for.** Continuous integration should verify that the knowledge
-  base is current, cross-linked, and correctly structured, and a recurring doc-gardening
-  pass should find documents that no longer match the code and fix them.
+  base is current, cross-linked, and correctly structured, and the doc-gardening skill
+  should run regularly to find documents that no longer match the code and fix them.
 - **Taste becomes documentation or tooling.** Lessons from reviews, refactors, and bugs
   are written down here. When a written rule is not enough, it becomes a linter or a
   test.
@@ -28,6 +28,10 @@ it, what each part is for, and how to use it.
 
     AGENTS.md                       Short map loaded into every agent's context
     ARCHITECTURE.md                 Top-level map of the code's domains and layering
+    .agents/skills/doc-gardening/
+    └── SKILL.md                    Doc-gardening skill: checks the docs against the code
+    .claude/skills/doc-gardening/
+    └── SKILL.md                    Makes the same skill available in Claude Code
     docs/
     ├── README.md                   This file
     ├── design-docs/
@@ -58,6 +62,11 @@ it, what each part is for, and how to use it.
   every document here with when to read and update it.
 - **`ARCHITECTURE.md`** maps the project's code: its domains, how packages are layered,
   and which dependency directions are allowed. It does not describe this documentation.
+- **`.agents/skills/doc-gardening/SKILL.md`** is the doc-gardening skill. It checks the
+  knowledge base against the code, fixes documentation that drifted, records code that
+  breaks the core beliefs as debt, updates quality grades, and proposes missing tools,
+  guardrails, and documents. Codex finds it in `.agents/skills/`; Claude Code finds
+  `.claude/skills/doc-gardening/SKILL.md`, which points to the same file.
 - **`design-docs/`** holds design documentation, catalogued in `index.md` with each
   document's verification status so readers can tell current decisions from history.
   `core-beliefs.md` defines the agent-first operating principles behind every decision.
@@ -101,4 +110,8 @@ it, what each part is for, and how to use it.
    `QUALITY_SCORE.md` when a review or cleanup changes a grade.
 7. Keep the knowledge base checkable: add checks to the project's continuous
    integration that every document is listed in its index and that relative links
-   resolve, and run a doc-gardening pass regularly.
+   resolve.
+8. Run the doc-gardening skill regularly: `$doc-gardening` in Codex, `/doc-gardening` in
+   Claude Code. When you finish an execution plan or a larger change, or the user wraps
+   up a session, remind the user to run it and offer to run it in a subagent, so its
+   work stays out of the current context.

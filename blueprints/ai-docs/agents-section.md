@@ -27,6 +27,8 @@ organized this way.
 | [docs/QUALITY_SCORE.md](docs/QUALITY_SCORE.md) | Quality grade per product domain and layer | You choose what to improve next | A review or cleanup changes a grade |
 | [docs/RELIABILITY.md](docs/RELIABILITY.md) | Measurable reliability requirements | You change runtime behavior, performance, or error handling | A requirement or target changes |
 | [docs/SECURITY.md](docs/SECURITY.md) | Security rules and threat model | You handle input, secrets, authentication, or dependencies | A rule or threat changes |
+| [.agents/skills/doc-gardening/SKILL.md](.agents/skills/doc-gardening/SKILL.md) | Doc-gardening skill: checks the knowledge base against the code and fixes drift | You run doc gardening | The documentation rules or layout change |
+| [.claude/skills/doc-gardening/SKILL.md](.claude/skills/doc-gardening/SKILL.md) | Makes the doc-gardening skill available in Claude Code; points to the file above | Never; follow the file above | The skill's description changes: keep both descriptions identical |
 
 ### Working with the documentation
 
@@ -45,7 +47,11 @@ organized this way.
 - Write down what reviews, bugs, and discussions teach. When a rule matters enough to
   fail the build, enforce it with a test or linter instead of prose.
 - Keep the knowledge base checkable: the project's CI should verify that every document
-  is listed in its index and that relative links resolve, and a recurring
-  doc-gardening pass should fix documents that no longer match the code.
+  is listed in its index and that relative links resolve.
+- Run the doc-gardening skill (`$doc-gardening` in Codex, `/doc-gardening` in Claude
+  Code) to find and fix documentation that no longer matches the code.
+- When you finish an execution plan or a change that touched several documents or code
+  areas, or when the user wraps up a session, remind the user to run doc gardening and
+  offer to run it in a subagent, so its work stays out of the current context.
 - Link to the one place a fact is recorded instead of repeating it.
 - Keep this map current when you add, rename, or remove a document.
