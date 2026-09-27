@@ -14,7 +14,8 @@ Without the alias, run `/path/to/ai-guardrails/project-setup/setup-project-ai-do
 from the project directory. It takes no arguments and:
 
 - exits with code 1, changing nothing, when `docs` or `ARCHITECTURE.md` already
-  exists, when `AGENTS.md` is a symlink, not a regular file, or not writable, or when
+  exists, when a `CLAUDE.md` exists (agent instructions belong in a real `AGENTS.md`
+  only), when `AGENTS.md` is a symlink, not a regular file, or not writable, or when
   the directory is not writable;
 - copies [`template/`](template/) into the current directory: `docs/`, whose
   [`README.md`](template/docs/README.md) explains the layout as the article describes

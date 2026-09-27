@@ -288,7 +288,8 @@ cd ~/projects/my-awesome-project
 newaidocs    # or: /path/to/ai-guardrails/project-setup/setup-project-ai-docs-claude.sh
 ```
 
-It exits with code 1 without changing anything when `docs` or `ARCHITECTURE.md` already exists.
+It exits with code 1 without changing anything when `docs` or `ARCHITECTURE.md` already exists,
+or when the project has a `CLAUDE.md` or a symlinked `AGENTS.md`.
 After installing, it exits with code 1 and a warning when git would ignore the new files.
 
 ## Development

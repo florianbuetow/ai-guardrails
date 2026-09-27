@@ -7,6 +7,7 @@ set -euo pipefail
 DOCS_DIR="docs"
 ARCHITECTURE_FILE="ARCHITECTURE.md"
 AGENTS_FILE="AGENTS.md"
+CLAUDE_FILE="CLAUDE.md"
 SCRIPT_NAME="$(basename "$0")"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BLUEPRINT_PATH="$(cd "$SCRIPT_DIR/.." && pwd)/blueprints/ai-docs"
@@ -43,7 +44,12 @@ for path in "$DOCS_DIR" "$ARCHITECTURE_FILE"; do
   fi
 done
 
-# A symlink could point outside the project, so only a regular file is edited.
+# Agent instructions live only in a real AGENTS.md: never in a CLAUDE.md, and
+# never behind a symlink, which could also point outside the project.
+if [ -e "$CLAUDE_FILE" ] || [ -L "$CLAUDE_FILE" ]; then
+  fail "$PWD/$CLAUDE_FILE exists; agent instructions belong in $AGENTS_FILE only. Nothing was changed"
+fi
+
 if [ -L "$AGENTS_FILE" ]; then
   fail "$PWD/$AGENTS_FILE is a symlink; nothing was changed"
 fi
@@ -82,7 +88,9 @@ finish() {
   if [ "$installation_complete" = false ]; then
     rm -rf "$DOCS_DIR" "$ARCHITECTURE_FILE"
     if [ "$agents_existed" = true ]; then
-      cat "$agents_backup" > "$AGENTS_FILE"
+      if ! cmp -s "$agents_backup" "$AGENTS_FILE"; then
+        cat "$agents_backup" > "$AGENTS_FILE"
+      fi
     else
       rm -f "$AGENTS_FILE"
     fi
@@ -96,7 +104,7 @@ trap finish EXIT
 copier copy "$BLUEPRINT_PATH" .
 printf '\033[32m✓ Created %s/ and %s in %s\033[0m\n' "$DOCS_DIR" "$ARCHITECTURE_FILE" "$PWD"
 
-if [ "$agents_existed" = true ]; then
+if [ -s "$AGENTS_FILE" ]; then
   if [ -n "$(tail -c 1 "$AGENTS_FILE")" ]; then
     printf '\n' >> "$AGENTS_FILE"
   fi
@@ -106,7 +114,7 @@ if [ "$agents_existed" = true ]; then
 else
   printf '# AGENTS.md\n\n' > "$AGENTS_FILE"
   cat "$AGENTS_SECTION" >> "$AGENTS_FILE"
-  printf '\033[32m✓ Created %s with the Documentation section\033[0m\n' "$AGENTS_FILE"
+  printf '\033[32m✓ Wrote %s with the Documentation section\033[0m\n' "$AGENTS_FILE"
 fi
 installation_complete=true
 

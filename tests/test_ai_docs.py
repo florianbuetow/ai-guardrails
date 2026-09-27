@@ -128,8 +128,15 @@ class AiDocsInstallerTests(unittest.TestCase):
         self.assertEqual(EXPECTED_LAYOUT | {Path("AGENTS.md")}, relative_files(workdir))
         self.assertEqual([], empty_directories(workdir))
         self.assertEqual(f"# AGENTS.md\n\n{AGENTS_SECTION}", (workdir / "AGENTS.md").read_text(encoding="utf-8"))
-        self.assertIn("Created AGENTS.md with the Documentation section", output)
+        self.assertIn("Wrote AGENTS.md with the Documentation section", output)
         self.assertIn("not inside a git work tree; skipped the git-ignore check", output)
+
+    def test_fills_an_empty_agents_md_like_a_missing_one(self) -> None:
+        workdir = self.new_workdir("project")
+        (workdir / "AGENTS.md").write_text("", encoding="utf-8")
+        output = self.install(workdir, [], self.env, 0)
+        self.assertEqual(f"# AGENTS.md\n\n{AGENTS_SECTION}", (workdir / "AGENTS.md").read_text(encoding="utf-8"))
+        self.assertIn("Wrote AGENTS.md with the Documentation section", output)
 
     def test_appends_the_section_to_an_existing_agents_md(self) -> None:
         for index, existing in enumerate(("# Rules\n\nBe precise.\n", "# Rules\n\nBe precise.")):
@@ -221,6 +228,21 @@ class AiDocsInstallerTests(unittest.TestCase):
         self.assertEqual("keep\n", shared.read_text(encoding="utf-8"))
         self.assertFalse(missing.exists())
 
+    def test_refuses_a_claude_md_without_changes(self) -> None:
+        for index, linked in enumerate((False, True)):
+            with self.subTest(symlink=linked):
+                workdir = self.new_workdir(f"claude-{index}")
+                (workdir / "AGENTS.md").write_text("keep\n", encoding="utf-8")
+                claude = workdir / "CLAUDE.md"
+                if linked:
+                    claude.symlink_to("AGENTS.md")
+                else:
+                    claude.write_text("keep\n", encoding="utf-8")
+                output = self.install(workdir, [], self.env, 1)
+                self.assertIn("CLAUDE.md exists; agent instructions belong in AGENTS.md only", output)
+                self.assertEqual(["AGENTS.md", "CLAUDE.md"], sorted(entry.name for entry in workdir.iterdir()))
+                self.assertEqual("keep\n", (workdir / "AGENTS.md").read_text(encoding="utf-8"))
+
     def test_refuses_a_read_only_agents_md_without_changes(self) -> None:
         workdir = self.new_workdir("project")
         agents = workdir / "AGENTS.md"
@@ -238,7 +260,24 @@ class AiDocsInstallerTests(unittest.TestCase):
         fake_copier = fake_bin / "copier"
         fake_copier.write_text("#!/bin/sh\nmkdir docs\n: > docs/partial.md\n: > ARCHITECTURE.md\nexit 7\n", encoding="utf-8")
         fake_copier.chmod(0o755)
-        self.install(workdir, [], {**self.env, "PATH": f"{fake_bin}{os.pathsep}{self.env['PATH']}"}, 7)
+        output = self.install(workdir, [], {**self.env, "PATH": f"{fake_bin}{os.pathsep}{self.env['PATH']}"}, 7)
+        self.assertIn("the changes were rolled back", output)
+        self.assertEqual(["AGENTS.md"], [entry.name for entry in workdir.iterdir()])
+        self.assertEqual("keep\n", (workdir / "AGENTS.md").read_text(encoding="utf-8"))
+
+    def test_rolls_back_when_agents_md_cannot_be_written(self) -> None:
+        workdir = self.new_workdir("project")
+        (workdir / "AGENTS.md").write_text("keep\n", encoding="utf-8")
+        real_copier = shutil.which("copier", path=self.env["PATH"])
+        self.assertIsNotNone(real_copier)
+        fake_bin = self.root / "fake-bin"
+        fake_bin.mkdir()
+        # Render for real, then make AGENTS.md read-only before the installer appends to it.
+        wrapper = fake_bin / "copier"
+        wrapper.write_text(f'#!/bin/sh\n"{real_copier}" "$@" || exit $?\nchmod 444 AGENTS.md\n', encoding="utf-8")
+        wrapper.chmod(0o755)
+        output = self.install(workdir, [], {**self.env, "PATH": f"{fake_bin}{os.pathsep}{self.env['PATH']}"}, 1)
+        self.assertIn("the changes were rolled back", output)
         self.assertEqual(["AGENTS.md"], [entry.name for entry in workdir.iterdir()])
         self.assertEqual("keep\n", (workdir / "AGENTS.md").read_text(encoding="utf-8"))
 
