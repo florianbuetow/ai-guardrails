@@ -56,6 +56,12 @@ if [ ! -d "$TEMPLATE_PATH" ]; then
   exit 1
 fi
 
+# ai-docs adds docs/ to an existing directory instead of creating a project
+if [ "$TEMPLATE_NAME" = "ai-docs" ]; then
+  printf "%bError: ai-docs is not a project template; run setup-project-ai-docs-claude.sh (alias: newaidocs) inside the target directory%b\n" "$RED" "$NC"
+  exit 1
+fi
+
 # Check for copier
 if ! command -v copier >/dev/null 2>&1; then
   echo -e "${RED}Error: copier is not installed${NC}"

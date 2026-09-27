@@ -119,7 +119,8 @@ help:
 	@printf "  %-40s %s\n" "test-shellscripts-base-linux" "Run shell scripts tests in a Linux container"
 	@printf "  %-40s %s\n" "test-arm64-macos-cli-base" "Run ARM64 macOS assembly baseline + violation tests"
 	@printf "  %-40s %s\n" "test-mmix-cli-base" "Run MMIX assembly baseline + violation tests"
-	@printf "  %-40s %s\n" "test-create" "Run just create for all templates"
+	@printf "  %-40s %s\n" "test-ai-docs" "Run AI docs installer tests"
+	@printf "  %-40s %s\n" "test-create" "Run just create for all project templates"
 	@printf "  %-40s %s\n" "ci" "Run all checks + all template tests (quiet)"
 	@printf "  %-40s %s\n" "ci-verbose" "Run all checks + all template tests (verbose)"
 	@echo ""
@@ -622,7 +623,13 @@ test-mmix-cli-base:
 	@python3 tests/test_mmix.py && printf "\033[32m✓ mmix-cli-base tests passed\033[0m\n" || { printf "\033[31m✗ mmix-cli-base tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
-# Test just create for all templates
+# Run AI docs installer tests
+test-ai-docs:
+	@echo ""
+	@./tests/run-tests.sh ai-docs && printf "\033[32m✓ ai-docs tests passed\033[0m\n" || { printf "\033[31m✗ ai-docs tests failed\033[0m\n"; exit 1; }
+	@echo ""
+
+# Test just create for all project templates
 test-create:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -648,6 +655,11 @@ test-create:
     trap 'rm -rf "$tmp_dir"' EXIT
     for template_path in blueprints/*/; do
         template="$(basename "$template_path")"
+        # ai-docs adds docs/ to an existing directory and has no project CI;
+        # test-ai-docs covers it.
+        if [ "$template" = "ai-docs" ]; then
+            continue
+        fi
         shortname="${template%-base}"
         target_dir="$tmp_dir/$shortname"
         if [ "$quiet_progress" = "1" ]; then

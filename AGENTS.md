@@ -5,7 +5,7 @@ This file provides guidance to AI agents and AI-assisted development tools when 
 
 ## Repository Overview
 
-This repository contains Copier templates for Python, Java, Go, Elixir, C++, Rust, Kotlin, Scala, Clojure, TypeScript (React), TypeScript MCP servers, Node.js TypeScript CLIs, portable shell scripts, ARM64 macOS assembly, and MMIX assembly that enforce strict validation guardrails on AI-generated code — catching antipatterns, suppressing silent defaults, and providing immediate feedback so AI agents write better, more maintainable code from the start.
+This repository contains Copier templates for Python, Java, Go, Elixir, C++, Rust, Kotlin, Scala, Clojure, TypeScript (React), TypeScript MCP servers, Node.js TypeScript CLIs, portable shell scripts, ARM64 macOS assembly, and MMIX assembly that enforce strict validation guardrails on AI-generated code — catching antipatterns, suppressing silent defaults, and providing immediate feedback so AI agents write better, more maintainable code from the start. The language-independent `ai-docs` template adds an agent-oriented knowledge base (`docs/`, `ARCHITECTURE.md`, and an `AGENTS.md` section mapping them) to an existing project.
 
 ## Core Coding Principles
 
@@ -190,6 +190,16 @@ Before running a violation, confirm that its resolved recipe (`check` or the `co
 - Generated-project prerequisites are Git, `just`, and a C compiler (GCC/Clang on Unix, MSVC on Windows); Copier is needed only to render the blueprint
 - One C `mmix-guard` driver owns validation, declarative tests, exact capability allowlists, vendor hashing, and coverage (80% minimum); generated validation never downloads dependencies
 
+### The AI Docs Template (`blueprints/ai-docs`)
+
+- Language-independent knowledge base following the layout in OpenAI's harness engineering article; adds files to the current directory instead of creating a project
+- Installed by `project-setup/setup-project-ai-docs-claude.sh` (alias `newaidocs`), which takes no arguments; `just create ai-docs` is rejected
+- Renders `template/` into the current directory: `docs/` plus a root `ARCHITECTURE.md`, which maps the project's code only
+- Appends `agents-section.md` to `AGENTS.md` (creating it if missing): the section teaches agents the purpose of every folder and file and when to read or update it; `docs/` has no separate README
+- Exits 1 without changing anything when `docs` or `ARCHITECTURE.md` exists, or `AGENTS.md` exists but is not a regular file
+- After installing, when git is installed and the directory is inside a git work tree, runs `git check-ignore` on every file in `docs/` and on `ARCHITECTURE.md`; if git ignores any, it prints a warning with the matching ignore rules and exits 1
+- Tested by `just test-ai-docs` (`tests/test_ai_docs.py`), which also pins the layout and checks that the `AGENTS.md` section maps every `docs/` entry; `just test-create` skips it because it has no project CI
+
 All templates emphasize creating immediately runnable projects with no placeholders, comprehensive CI pipelines, and AGENTS.md files for AI agent guidance.
 
 After changing a template, render a fresh project and inspect generated paths for duplicate trees, empty leftover directories, and unrendered template syntax before broader validation.
@@ -209,7 +219,7 @@ These rules apply to all justfiles — in this repository and in all generated t
 
 - `just ci` — Run all repo-level checks (codespell, semgrep, shellcheck) + all template tests
 - `just test` — Run baseline + violation tests for all templates
-- `just test-<language>` — Run tests for one template family (python-cli-base, java-cli-base, go-cli-base, elixir-otp-base, cpp-cli-base, cpp-3dgame-base, rust-cli-base, kotlin-cli-base, scala-cli-base, clojure-cli-base, react-vite-typescript-base, mcp-server-typescript-base, node-typescript-cli-base, shellscripts-base, arm64-macos-cli-base, mmix-cli-base)
+- `just test-<language>` — Run tests for one template family (python-cli-base, java-cli-base, go-cli-base, elixir-otp-base, cpp-cli-base, cpp-3dgame-base, rust-cli-base, kotlin-cli-base, scala-cli-base, clojure-cli-base, react-vite-typescript-base, mcp-server-typescript-base, node-typescript-cli-base, shellscripts-base, arm64-macos-cli-base, mmix-cli-base, ai-docs)
 - `just check` — Verify required tools are installed
 - `just create <template> <target-dir>` — Scaffold a new project from a blueprint
 

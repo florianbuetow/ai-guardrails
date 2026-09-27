@@ -11,7 +11,7 @@ REPO_URL="https://github.com/florianbuetow/ai-guardrails.git"
 TEMPLATES_DIR="$HOME/scripts/ai-guardrails"
 SETUP_DIR="$TEMPLATES_DIR/project-setup"
 
-# Alias name -> setup script (one entry per supported language)
+# Alias name -> setup script (one entry per template)
 ALIASES=(
   "newpy:setup-project-python-cli-base-claude.sh"
   "newjava:setup-project-java-cli-base-claude.sh"
@@ -29,6 +29,7 @@ ALIASES=(
   "newshell:setup-project-shellscripts-base-claude.sh"
   "newarm64:setup-project-arm64-macos-cli-base-claude.sh"
   "newmmix:setup-project-mmix-cli-base-claude.sh"
+  "newaidocs:setup-project-ai-docs-claude.sh"
 )
 UPDATE_ALIAS="alias update-templates='cd ~/scripts/ai-guardrails && git pull && cd - > /dev/null'"
 
@@ -169,7 +170,10 @@ printf "     newshell my-project     # Portable shell scripts\n"
 printf "     newarm64 my-project     # ARM64 macOS assembly CLI\n"
 printf "     newmmix my-project      # MMIX assembly CLI\n"
 echo ""
-echo "  3. Update templates to latest version:"
+printf "  3. Add the AI knowledge base to the project in the current directory:\n"
+printf "     newaidocs               # docs/, ARCHITECTURE.md, AGENTS.md section\n"
+echo ""
+echo "  4. Update templates to latest version:"
 echo "     update-templates"
 echo ""
 echo "Or simply open a new terminal window."

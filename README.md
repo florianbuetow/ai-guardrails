@@ -179,6 +179,7 @@ just run 4
 | [**shellscripts-base**](blueprints/shellscripts-base/) | POSIX shell | Portable shell projects with [ShellCheck](https://www.shellcheck.net/), [shfmt](https://github.com/mvdan/sh), [checkbashisms](https://tracker.debian.org/pkg/devscripts), Bash, dash, BusyBox ash, ksh, zsh, [Semgrep](https://semgrep.dev/), [codespell](https://github.com/codespell-project/codespell), [Bats](https://github.com/bats-core/bats-core), [ShellSpec](https://shellspec.info/), and [kcov](https://github.com/SimonKagstrom/kcov) |
 | [**arm64-macos-cli-base**](blueprints/arm64-macos-cli-base/) | ARM64 assembly (Apple Silicon) | Hand-written assembly CLIs with the [Clang integrated assembler](https://clang.llvm.org/docs/index.html), [llvm-objdump](https://llvm.org/docs/CommandGuide/llvm-objdump.html), [FileCheck](https://llvm.org/docs/CommandGuide/FileCheck.html), [llvm-readobj](https://llvm.org/docs/CommandGuide/llvm-readobj.html), [llvm-mca](https://llvm.org/docs/CommandGuide/llvm-mca.html), [Semgrep](https://semgrep.dev/), `nm`/`otool`/`lipo`/`codesign` binary validation, and assembly unit tests |
 | [**mmix-cli-base**](blueprints/mmix-cli-base/) | MMIX assembly | Self-contained MMIX CLIs with vendored, pinned MMIXware (`mmixal`, `mmix`, `mmotype`), one cross-platform C guard/CI driver, exact capability allowlists, vendor hashes, MMIX unit tests, declarative CLI/state tests, 80% instruction coverage, and no validation-time network access |
+| [**ai-docs**](blueprints/ai-docs/) | Any | Agent-oriented knowledge base (`docs/`, `ARCHITECTURE.md`, and a map of both in `AGENTS.md`) added to an existing project with `newaidocs`, following OpenAI's [harness engineering](https://openai.com/index/harness-engineering/) layout; refuses to overwrite existing files, and fails with a warning when git would ignore them |
 
 ## Validation Tools by Language
 
@@ -276,6 +277,20 @@ just init
 just run
 ```
 
+### Adding AI Docs to an Existing Project
+
+The `ai-docs` template adds a knowledge base to the current directory instead of creating a
+project: `docs/`, a root `ARCHITECTURE.md`, and a Documentation section in `AGENTS.md` that
+teaches agents what each folder and file is for:
+
+```bash
+cd ~/projects/my-awesome-project
+newaidocs    # or: /path/to/ai-guardrails/project-setup/setup-project-ai-docs-claude.sh
+```
+
+It exits with code 1 without changing anything when `docs` or `ARCHITECTURE.md` already exists.
+After installing, it exits with code 1 and a warning when git would ignore the new files.
+
 ## Development
 
 ### Run Tests
@@ -300,7 +315,8 @@ just test-shellscripts-base           # Run shell scripts baseline + violation t
 just test-shellscripts-base-linux     # Run shell scripts tests in a Linux container
 just test-arm64-macos-cli-base        # Run ARM64 macOS assembly baseline + violation tests
 just test-mmix-cli-base               # Run MMIX assembly baseline + violation tests
-just test-create                      # Smoke-test `just create` for every template, then run its CI
+just test-ai-docs                     # Run AI docs installer tests
+just test-create                      # Smoke-test `just create` for every project template, then run its CI
 just ci                               # Full repo CI suite, quiet: prints start/done per step, details only on failure
 just ci-verbose                       # Full repo CI suite, verbose: streams the full output of every step
 ```
@@ -360,7 +376,8 @@ ai-guardrails/
 │   ├── node-typescript-cli-base/            # Node.js TypeScript CLI template
 │   ├── shellscripts-base/                   # Portable shell script template
 │   ├── arm64-macos-cli-base/                # ARM64 macOS assembly CLI template
-│   └── mmix-cli-base/                       # MMIX assembly CLI template
+│   ├── mmix-cli-base/                       # MMIX assembly CLI template
+│   └── ai-docs/                             # AI knowledge base template (adds docs/ to a project)
 ├── tests/
 │   ├── run-tests.sh                         # Unified test entry point
 │   ├── lib/                                 # Shared test helpers and runner logic
