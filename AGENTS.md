@@ -195,12 +195,13 @@ Before running a violation, confirm that its resolved recipe (`check` or the `co
 - Language-independent knowledge base following the layout in OpenAI's harness engineering article; adds files to the current directory instead of creating a project
 - Installed by `project-setup/setup-project-ai-docs-claude.sh` (alias `newaidocs`), which takes no arguments; `just create ai-docs` is rejected
 - Renders `template/` into the current directory: `docs/` plus a root `ARCHITECTURE.md`, which maps the project's code only
-- Appends `agents-section.md` to `AGENTS.md` (creating it if missing): the section teaches agents the purpose of every folder and file and when to read or update it; `docs/` has no separate README
-- Exits 1 without changing anything when `docs` or `ARCHITECTURE.md` exists, or `AGENTS.md` exists but is not a regular file
-- After installing, when git is installed and the directory is inside a git work tree, runs `git check-ignore` on every file in `docs/` and on `ARCHITECTURE.md`; if git ignores any, it prints a warning with the matching ignore rules and exits 1
-- Tested by `just test-ai-docs` (`tests/test_ai_docs.py`), which also pins the layout and checks that the `AGENTS.md` section maps every `docs/` entry; `just test-create` skips it because it has no project CI
+- `docs/README.md` explains the layout, its principles, and the workflow, derived from the article
+- Appends `agents-section.md` to `AGENTS.md` (creating it if missing): the section maps every folder and file with its purpose and when to read or update it
+- Exits 1 without changing anything when `docs` or `ARCHITECTURE.md` exists, when `AGENTS.md` is a symlink, not a regular file, or not writable, or when the directory is not writable; if rendering or the `AGENTS.md` update fails, it rolls back its changes
+- After installing, when git is installed and the directory is inside a git work tree, runs `git check-ignore` on every file in `docs/` and on `ARCHITECTURE.md`; if git ignores any, it prints a warning (all of `docs/`, or the ignored files) with the matching ignore rules and exits 1. Git failures other than "not a git repository" exit 1 instead of skipping the check
+- Tested by `just test-ai-docs` (`tests/test_ai_docs.py`), which also pins the layout and checks that the `AGENTS.md` section and `docs/README.md` cover every installed path; `just test-create` skips it because it has no project CI
 
-All templates emphasize creating immediately runnable projects with no placeholders, comprehensive CI pipelines, and AGENTS.md files for AI agent guidance.
+All project templates emphasize creating immediately runnable projects with no placeholders, comprehensive CI pipelines, and AGENTS.md files for AI agent guidance. `ai-docs` is the exception: it installs documentation skeletons whose HTML comments tell the project what to fill in.
 
 After changing a template, render a fresh project and inspect generated paths for duplicate trees, empty leftover directories, and unrendered template syntax before broader validation.
 

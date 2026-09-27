@@ -6,7 +6,7 @@ current facts without reading the underlying code.
 
 Never edit a generated document by hand: change its source and regenerate it. Start
 every generated file with a line naming the command that produced it, and list it
-below.
+below. This index is the one file in the folder that is maintained by hand.
 
 | File | Source | Regenerate with |
 |------|--------|-----------------|

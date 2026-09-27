@@ -683,7 +683,7 @@ test-create:
             rm -rf "$target_dir"
         fi
     done
-    printf "\033[32m✓ test-create passed for all templates\033[0m\n"
+    printf "\033[32m✓ test-create passed for all project templates\033[0m\n"
     echo ""
 
 # Run all checks and all template tests

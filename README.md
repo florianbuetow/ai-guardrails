@@ -183,7 +183,7 @@ just run 4
 
 ## Validation Tools by Language
 
-Every template runs the same CI check categories via `just ci`. The table below shows which tool handles each check for each language.
+Every project template runs the same CI check categories via `just ci`. The table below shows which tool handles each check for each language.
 
 | Check | Python | Java | Go | Elixir | C++ | C++ 3D Game | Rust | Kotlin | Scala | Clojure | React/Vite/TypeScript | TypeScript MCP | Node.js TypeScript CLI | Shell scripts | ARM64 macOS assembly |
 |-------|--------|------|----|--------|-----|-------------|------|--------|-------|---------|-----------------------|----------------|------------------------|---------------| ---------------------- |
@@ -280,8 +280,8 @@ just run
 ### Adding AI Docs to an Existing Project
 
 The `ai-docs` template adds a knowledge base to the current directory instead of creating a
-project: `docs/`, a root `ARCHITECTURE.md`, and a Documentation section in `AGENTS.md` that
-teaches agents what each folder and file is for:
+project: `docs/` (with a `README.md` that explains the layout), a root `ARCHITECTURE.md`, and a
+Documentation section in `AGENTS.md` that teaches agents what each folder and file is for:
 
 ```bash
 cd ~/projects/my-awesome-project
@@ -334,7 +334,7 @@ Each language suite now runs two phases:
 
 This verifies both directions of the guardrails: valid generated projects pass, and known-bad patterns are rejected.
 
-`just test-create` adds a repo-level smoke test on top: it runs `just create` for every template, then `just ci` inside each generated project, exercising the scaffolding path end to end. It is also part of the repository's own `just ci-verbose`.
+`just test-create` adds a repo-level smoke test on top: it runs `just create` for every project template (all but `ai-docs`), then `just ci` inside each generated project, exercising the scaffolding path end to end. It is also part of the repository's own `just ci-verbose`.
 
 ### Inspecting Template Dependencies
 

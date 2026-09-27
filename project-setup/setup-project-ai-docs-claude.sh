@@ -43,8 +43,21 @@ for path in "$DOCS_DIR" "$ARCHITECTURE_FILE"; do
   fi
 done
 
-if { [ -e "$AGENTS_FILE" ] || [ -L "$AGENTS_FILE" ]; } && [ ! -f "$AGENTS_FILE" ]; then
+# A symlink could point outside the project, so only a regular file is edited.
+if [ -L "$AGENTS_FILE" ]; then
+  fail "$PWD/$AGENTS_FILE is a symlink; nothing was changed"
+fi
+
+if [ -e "$AGENTS_FILE" ] && [ ! -f "$AGENTS_FILE" ]; then
   fail "$PWD/$AGENTS_FILE is not a regular file; nothing was changed"
+fi
+
+if [ -e "$AGENTS_FILE" ] && [ ! -w "$AGENTS_FILE" ]; then
+  fail "$PWD/$AGENTS_FILE is not writable; nothing was changed"
+fi
+
+if [ ! -w . ]; then
+  fail "$PWD is not writable; nothing was changed"
 fi
 
 if ! command -v copier >/dev/null 2>&1; then
@@ -53,10 +66,37 @@ if ! command -v copier >/dev/null 2>&1; then
   exit 1
 fi
 
+work_dir="$(mktemp -d)"
+agents_backup="$work_dir/AGENTS.md.orig"
+agents_existed=false
+if [ -f "$AGENTS_FILE" ]; then
+  agents_existed=true
+  cp "$AGENTS_FILE" "$agents_backup"
+fi
+installation_complete=false
+
+# Undo a half-finished installation so that a failed run can simply be retried.
+# The checks above proved that docs/ and ARCHITECTURE.md did not exist before.
+finish() {
+  local status=$?
+  if [ "$installation_complete" = false ]; then
+    rm -rf "$DOCS_DIR" "$ARCHITECTURE_FILE"
+    if [ "$agents_existed" = true ]; then
+      cat "$agents_backup" > "$AGENTS_FILE"
+    else
+      rm -f "$AGENTS_FILE"
+    fi
+    printf '\033[31m✗ Installation failed; the changes were rolled back\033[0m\n'
+  fi
+  rm -rf "$work_dir"
+  exit "$status"
+}
+trap finish EXIT
+
 copier copy "$BLUEPRINT_PATH" .
 printf '\033[32m✓ Created %s/ and %s in %s\033[0m\n' "$DOCS_DIR" "$ARCHITECTURE_FILE" "$PWD"
 
-if [ -f "$AGENTS_FILE" ]; then
+if [ "$agents_existed" = true ]; then
   if [ -n "$(tail -c 1 "$AGENTS_FILE")" ]; then
     printf '\n' >> "$AGENTS_FILE"
   fi
@@ -68,23 +108,41 @@ else
   cat "$AGENTS_SECTION" >> "$AGENTS_FILE"
   printf '\033[32m✓ Created %s with the Documentation section\033[0m\n' "$AGENTS_FILE"
 fi
+installation_complete=true
 
 if ! command -v git >/dev/null 2>&1; then
   warn "git is not installed; skipped the git-ignore check"
   exit 0
 fi
 
-if ! inside_work_tree="$(git rev-parse --is-inside-work-tree 2>&1)" || [ "$inside_work_tree" != "true" ]; then
+# Read git's answer from stdout only, and tell "not a repository" apart from
+# real git failures, which must not silently skip the check.
+git_errors="$work_dir/git-errors"
+if inside_work_tree="$(LC_ALL=C git rev-parse --is-inside-work-tree 2>"$git_errors")"; then
+  if [ "$inside_work_tree" != "true" ]; then
+    warn "$PWD is not inside a git work tree; skipped the git-ignore check"
+    exit 0
+  fi
+elif grep -q "not a git repository" "$git_errors"; then
   warn "$PWD is not inside a git work tree; skipped the git-ignore check"
   exit 0
+else
+  cat "$git_errors"
+  fail "git rev-parse failed, so the git-ignore check could not run"
 fi
 
 # Check every installed file, not only the directory: patterns such as docs/*
 # or *.md ignore all documents while leaving docs itself unmatched.
 docs_files="$(find "$DOCS_DIR" -type f)"
 if ignored_files="$(printf '%s\n%s\n' "$docs_files" "$ARCHITECTURE_FILE" | git check-ignore --stdin)"; then
-  if grep -q "^$DOCS_DIR/" <<< "$ignored_files"; then
+  docs_total="$(awk 'END { print NR }' <<< "$docs_files")"
+  docs_ignored="$(awk -v prefix="$DOCS_DIR/" 'index($0, prefix) == 1 { count++ } END { print count + 0 }' <<< "$ignored_files")"
+  if [ "$docs_ignored" -eq "$docs_total" ]; then
     printf '\033[31m⚠ Warning: %s/ is git-ignored. None of your documentation would ever be committed to git.\033[0m\n' "$DOCS_DIR"
+  elif [ "$docs_ignored" -gt 0 ]; then
+    printf '\033[31m⚠ Warning: %s of %s files in %s/ are git-ignored and would never be committed to git:\033[0m\n' \
+      "$docs_ignored" "$docs_total" "$DOCS_DIR"
+    grep "^$DOCS_DIR/" <<< "$ignored_files" | sed 's/^/  /'
   fi
   if grep -qxF "$ARCHITECTURE_FILE" <<< "$ignored_files"; then
     printf '\033[31m⚠ Warning: %s is git-ignored. It would never be committed to git.\033[0m\n' "$ARCHITECTURE_FILE"

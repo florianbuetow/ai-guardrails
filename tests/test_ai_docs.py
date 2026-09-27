@@ -19,6 +19,7 @@ AGENTS_SECTION = (BLUEPRINT_DIR / "agents-section.md").read_text(encoding="utf-8
 INSTALLER = REPO_ROOT / "project-setup" / "setup-project-ai-docs-claude.sh"
 SETUP_PROJECT = REPO_ROOT / "project-setup" / "setup-project.sh"
 DOCS_IGNORED_WARNING = "docs/ is git-ignored. None of your documentation would ever be committed to git."
+PARTIALLY_IGNORED_WARNING = "files in docs/ are git-ignored and would never be committed to git"
 ARCHITECTURE_IGNORED_WARNING = "ARCHITECTURE.md is git-ignored. It would never be committed to git."
 LINK_TARGET = re.compile(r"\]\(([^)]+)\)")
 # The knowledge-base layout from OpenAI's "Harness engineering" article.
@@ -26,6 +27,7 @@ EXPECTED_LAYOUT = {
     Path(path)
     for path in (
         "ARCHITECTURE.md",
+        "docs/README.md",
         "docs/design-docs/index.md",
         "docs/design-docs/core-beliefs.md",
         "docs/exec-plans/active/.gitkeep",
@@ -42,6 +44,11 @@ EXPECTED_LAYOUT = {
         "docs/RELIABILITY.md",
         "docs/SECURITY.md",
     )
+}
+DOCS_FILE_COUNT = sum(1 for path in EXPECTED_LAYOUT if path.parts[0] == "docs")
+# Every meaningful path the AGENTS.md section must map; .gitkeep stands for its directory.
+MAPPED_PATHS = {
+    f"{path.parent.as_posix()}/" if path.name == ".gitkeep" else path.as_posix() for path in EXPECTED_LAYOUT
 }
 
 
@@ -64,9 +71,10 @@ class AiDocsInstallerTests(unittest.TestCase):
         self.global_excludes = self.root / "global-excludes"
         self.global_excludes.write_text("", encoding="utf-8")
         # Stop git from finding a repository above the temporary directory and
-        # from applying the developer's own configuration or ignore rules.
+        # from applying the developer's own configuration, ignore rules, or
+        # repository variables such as GIT_DIR.
         self.env = {
-            **os.environ,
+            **{key: value for key, value in os.environ.items() if not key.startswith("GIT_")},
             "GIT_CEILING_DIRECTORIES": str(self.root),
             "GIT_CONFIG_NOSYSTEM": "1",
             "GIT_CONFIG_GLOBAL": os.devnull,
@@ -135,13 +143,15 @@ class AiDocsInstallerTests(unittest.TestCase):
                 )
                 self.assertIn("Added the Documentation section to AGENTS.md", output)
 
-    def test_agents_section_maps_every_installed_entry(self) -> None:
-        targets = {target.split("/")[0] for target in LINK_TARGET.findall(AGENTS_SECTION)}
-        docs_targets = {
-            target.split("/")[1] for target in LINK_TARGET.findall(AGENTS_SECTION) if target.startswith("docs/")
-        }
-        self.assertIn("ARCHITECTURE.md", targets)
-        self.assertEqual({entry.name for entry in (TEMPLATE_DIR / "docs").iterdir()}, docs_targets)
+    def test_agents_section_maps_every_installed_path(self) -> None:
+        self.assertEqual(MAPPED_PATHS, set(LINK_TARGET.findall(AGENTS_SECTION)))
+
+    def test_docs_readme_describes_every_installed_path(self) -> None:
+        readme = (TEMPLATE_DIR / "docs" / "README.md").read_text(encoding="utf-8")
+        undescribed = sorted(
+            path for path in MAPPED_PATHS if f"{Path(path).name}{'/' if path.endswith('/') else ''}" not in readme
+        )
+        self.assertEqual([], undescribed)
 
     def test_relative_links_resolve(self) -> None:
         workdir = self.new_workdir("project")
@@ -197,6 +207,41 @@ class AiDocsInstallerTests(unittest.TestCase):
         self.assertIn("AGENTS.md is not a regular file; nothing was changed", output)
         self.assertEqual(["AGENTS.md"], [entry.name for entry in workdir.iterdir()])
 
+    def test_refuses_a_symlinked_agents_md_without_changes(self) -> None:
+        shared = self.root / "shared-agents.md"
+        shared.write_text("keep\n", encoding="utf-8")
+        missing = self.root / "missing-agents.md"
+        for index, target in enumerate((shared, missing)):
+            with self.subTest(target=target.name):
+                workdir = self.new_workdir(f"symlink-{index}")
+                (workdir / "AGENTS.md").symlink_to(target)
+                output = self.install(workdir, [], self.env, 1)
+                self.assertIn("AGENTS.md is a symlink; nothing was changed", output)
+                self.assertEqual(["AGENTS.md"], [entry.name for entry in workdir.iterdir()])
+        self.assertEqual("keep\n", shared.read_text(encoding="utf-8"))
+        self.assertFalse(missing.exists())
+
+    def test_refuses_a_read_only_agents_md_without_changes(self) -> None:
+        workdir = self.new_workdir("project")
+        agents = workdir / "AGENTS.md"
+        agents.write_text("keep\n", encoding="utf-8")
+        agents.chmod(0o444)
+        output = self.install(workdir, [], self.env, 1)
+        self.assertIn("AGENTS.md is not writable; nothing was changed", output)
+        self.assertEqual({Path("AGENTS.md")}, relative_files(workdir))
+
+    def test_rolls_back_when_copier_fails(self) -> None:
+        workdir = self.new_workdir("project")
+        (workdir / "AGENTS.md").write_text("keep\n", encoding="utf-8")
+        fake_bin = self.root / "fake-bin"
+        fake_bin.mkdir()
+        fake_copier = fake_bin / "copier"
+        fake_copier.write_text("#!/bin/sh\nmkdir docs\n: > docs/partial.md\n: > ARCHITECTURE.md\nexit 7\n", encoding="utf-8")
+        fake_copier.chmod(0o755)
+        self.install(workdir, [], {**self.env, "PATH": f"{fake_bin}{os.pathsep}{self.env['PATH']}"}, 7)
+        self.assertEqual(["AGENTS.md"], [entry.name for entry in workdir.iterdir()])
+        self.assertEqual("keep\n", (workdir / "AGENTS.md").read_text(encoding="utf-8"))
+
     def test_rejects_arguments(self) -> None:
         workdir = self.new_workdir("project")
         output = self.install(workdir, ["my-project"], self.env, 1)
@@ -212,24 +257,59 @@ class AiDocsInstallerTests(unittest.TestCase):
         self.assertNotIn(ARCHITECTURE_IGNORED_WARNING, output)
 
     def test_warns_and_fails_when_gitignore_ignores_the_documentation(self) -> None:
+        # (pattern, ignored files in docs/, ARCHITECTURE.md ignored); *.md leaves the two .gitkeep files.
         cases = (
-            ("docs/", True, False),
-            ("/docs", True, False),
-            ("docs/*", True, False),
-            ("docs/**", True, False),
-            ("*.md", True, True),
-            ("ARCHITECTURE.md", False, True),
+            ("docs/", DOCS_FILE_COUNT, False),
+            ("/docs", DOCS_FILE_COUNT, False),
+            ("docs/*", DOCS_FILE_COUNT, False),
+            ("docs/**", DOCS_FILE_COUNT, False),
+            ("*.md", DOCS_FILE_COUNT - 2, True),
+            ("ARCHITECTURE.md", 0, True),
         )
-        for index, (pattern, docs_ignored, architecture_ignored) in enumerate(cases):
+        for index, (pattern, ignored_docs, architecture_ignored) in enumerate(cases):
             with self.subTest(pattern=pattern):
                 workdir = self.new_workdir(f"ignored-{index}")
                 self.git(workdir, "init", "-q")
                 (workdir / ".gitignore").write_text(f"{pattern}\n", encoding="utf-8")
                 output = self.install(workdir, [], self.env, 1)
-                self.assertEqual(docs_ignored, DOCS_IGNORED_WARNING in output, output)
+                partial_warning = f"{ignored_docs} of {DOCS_FILE_COUNT} {PARTIALLY_IGNORED_WARNING}"
+                self.assertEqual(ignored_docs == DOCS_FILE_COUNT, DOCS_IGNORED_WARNING in output, output)
+                self.assertEqual(0 < ignored_docs < DOCS_FILE_COUNT, partial_warning in output, output)
                 self.assertEqual(architecture_ignored, ARCHITECTURE_IGNORED_WARNING in output, output)
                 self.assertIn(f".gitignore:1:{pattern}", output)
                 self.assertTrue((workdir / "docs" / "PLANS.md").is_file(), output)
+
+    def test_lists_partially_ignored_documentation(self) -> None:
+        cases = (
+            ("docs/PLANS.md\n", 1, "  docs/PLANS.md", "  docs/SECURITY.md"),
+            ("docs/*\n!docs/PLANS.md\n", DOCS_FILE_COUNT - 1, "  docs/SECURITY.md", "  docs/PLANS.md"),
+        )
+        for index, (rules, ignored_docs, listed, not_listed) in enumerate(cases):
+            with self.subTest(rules=rules):
+                workdir = self.new_workdir(f"partial-{index}")
+                self.git(workdir, "init", "-q")
+                (workdir / ".gitignore").write_text(rules, encoding="utf-8")
+                output = self.install(workdir, [], self.env, 1)
+                lines = output.splitlines()
+                self.assertIn(f"{ignored_docs} of {DOCS_FILE_COUNT} {PARTIALLY_IGNORED_WARNING}", output)
+                self.assertNotIn(DOCS_IGNORED_WARNING, output)
+                self.assertIn(listed, lines)
+                self.assertNotIn(not_listed, lines)
+
+    def test_git_trace_output_does_not_skip_the_ignore_check(self) -> None:
+        workdir = self.new_workdir("project")
+        self.git(workdir, "init", "-q")
+        (workdir / ".gitignore").write_text("docs/\n", encoding="utf-8")
+        output = self.install(workdir, [], {**self.env, "GIT_TRACE": "1"}, 1)
+        self.assertIn(DOCS_IGNORED_WARNING, output)
+
+    def test_fails_when_git_cannot_read_the_repository(self) -> None:
+        workdir = self.new_workdir("project")
+        self.git(workdir, "init", "-q")
+        (workdir / ".git" / "config").write_text("[core\n", encoding="utf-8")
+        output = self.install(workdir, [], self.env, 1)
+        self.assertIn("bad config line 1", output)
+        self.assertIn("git rev-parse failed", output)
 
     def test_warns_and_fails_when_global_excludes_ignore_docs(self) -> None:
         workdir = self.new_workdir("project")

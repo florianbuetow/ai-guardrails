@@ -1,7 +1,7 @@
 # Plans
 
-How work is planned in this repository. Plans are checked in, so any agent can pick up
-the work from the repository alone.
+How work is planned in this repository. Execution plans are checked in, so any agent can
+pick up complex work from the repository alone.
 
 ## Choosing a plan
 
