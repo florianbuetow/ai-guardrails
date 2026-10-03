@@ -1,4 +1,3 @@
-set positional-arguments
 set windows-shell := ["powershell.exe", "-NoProfile", "-Command"]
 bootstrap := if os() == "windows" {
     "powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/bootstrap.ps1"
@@ -71,21 +70,25 @@ ci:
     @{{ '{{ bootstrap }}' }} ci
 
 [unix]
+[positional-arguments]
 run *args:
     @sh tools/bootstrap.sh run "$@"
 
 [windows]
 [script("powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File")]
+[positional-arguments]
 run *args:
     & .\tools\bootstrap.ps1 run @args
     exit $LASTEXITCODE
 
 [unix]
+[positional-arguments]
 debug *args:
     @sh tools/bootstrap.sh debug "$@"
 
 [windows]
 [script("powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File")]
+[positional-arguments]
 debug *args:
     & .\tools\bootstrap.ps1 debug @args
     exit $LASTEXITCODE
