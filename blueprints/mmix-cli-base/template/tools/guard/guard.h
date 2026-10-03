@@ -4,8 +4,10 @@
 #include <stdint.h>
 #ifdef _WIN32
 #define G_EXE ".exe"
+#define G_NULL_DEVICE "NUL"
 #else
 #define G_EXE ""
+#define G_NULL_DEVICE "/dev/null"
 #endif
 #define G_ASSEMBLER "build/bin/mmixal" G_EXE
 #define G_SIMULATOR "build/bin/mmix" G_EXE

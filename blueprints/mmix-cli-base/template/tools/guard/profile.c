@@ -702,7 +702,7 @@ static int run_profile_test(const char *test_path, const AddressSet *listing, Ad
     g_config_free(&config);
     return g_internal("coverage output path formatting failed");
   }
-  result = g_run(arguments, *input == '\0' ? "build/tmp/empty" : input, output, errors, &status,
+  result = g_run(arguments, *input == '\0' ? G_NULL_DEVICE : input, output, errors, &status,
                  PROFILE_TIMEOUT);
   free(arguments);
   if (result != 0) {

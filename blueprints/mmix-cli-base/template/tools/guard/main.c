@@ -33,7 +33,7 @@ static int workspace(void) {
         if (result != 0)
             return result;
     }
-    return g_write("build/tmp/empty", "", 0);
+    return 0;
 }
 static int initialize(void) {
     const char *const git_init[] = {"git", "init", "-q", NULL};
@@ -118,7 +118,7 @@ int g_selftest(void) {
             g_config_free(&config);
             return g_error("malformed config accepted");
         }
-        result = g_run(child, "build/tmp/empty", "build/tmp/process-test.out",
+        result = g_run(child, G_NULL_DEVICE, "build/tmp/process-test.out",
                        "build/tmp/process-test.err", &status, 5);
         if (result != 0)
             return result;
@@ -151,7 +151,7 @@ int g_selftest(void) {
                 g_config_free(&exits);
                 return g_internal("malformed process exit fixture");
             }
-            result = g_run(args, "build/tmp/empty", "build/tmp/process-exit.out",
+            result = g_run(args, G_NULL_DEVICE, "build/tmp/process-exit.out",
                            "build/tmp/process-exit.err", &status, 5);
             if (result != 0 || status != (int)expected) {
                 g_config_free(&exits);
@@ -164,10 +164,10 @@ int g_selftest(void) {
         int status;
         const char *missing[] = {"build/tools/missing-tool" G_EXE, NULL};
         const char *slow[] = {"build/tools/mmix-guard" G_EXE, "process-wait", NULL};
-        if (g_run(missing, "build/tmp/empty", "build/tmp/process-exit.out",
+        if (g_run(missing, G_NULL_DEVICE, "build/tmp/process-exit.out",
                   "build/tmp/process-exit.err", &status, 1) != 2)
             return g_error("missing child executable did not fail closed");
-        if (g_run(slow, "build/tmp/empty", "build/tmp/process-exit.out",
+        if (g_run(slow, G_NULL_DEVICE, "build/tmp/process-exit.out",
                   "build/tmp/process-exit.err", &status, 1) != 2)
             return g_error("child timeout did not fail closed");
     }
@@ -250,7 +250,7 @@ static int pipeline(int quiet) {
         int status, result;
         (void)snprintf(output, sizeof output, "build/ci/%s.out", names[i]);
         (void)snprintf(errors, sizeof errors, "build/ci/%s.err", names[i]);
-        result = g_run(args, "build/tmp/empty", output, errors, &status, 600);
+        result = g_run(args, G_NULL_DEVICE, output, errors, &status, 600);
         if (result != 0)
             return result;
         if (!quiet || status != 0) {

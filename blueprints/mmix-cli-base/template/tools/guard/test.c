@@ -191,7 +191,7 @@ static int run_cli_test(const char *path, const GConfig *config) {
         free(arguments);
         return 2;
     }
-    result = g_run(arguments, *input == '\0' ? "build/tmp/empty" : input, output, errors, &status,
+    result = g_run(arguments, *input == '\0' ? G_NULL_DEVICE : input, output, errors, &status,
                    TEST_TIMEOUT);
     free(arguments);
     if (result != 0) {
@@ -566,7 +566,7 @@ static int run_unit(const char *path) {
     arguments[1] = "-q";
     arguments[2] = object;
     arguments[3] = NULL;
-    if (g_run(arguments, "build/tmp/empty", output, errors, &status, TEST_TIMEOUT) != 0) {
+    if (g_run(arguments, G_NULL_DEVICE, output, errors, &status, TEST_TIMEOUT) != 0) {
         return 2;
     }
     if (status != 0) {
