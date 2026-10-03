@@ -255,6 +255,9 @@ static int parse_object_data(const unsigned char *data, size_t size) {
     }
     memcpy(line, data + start, end - start);
     line[end - start] = '\0';
+    if (end > start && line[end - start - 1U] == '\r') {
+      line[end - start - 1U] = '\0';
+    }
     if (strncmp(line, "g255: ", 6U) == 0) {
       if (strlen(line + 6U) != 16U || hex_exact(line + 6U, 16U, &entry) != 0) {
         free(line);
@@ -759,6 +762,35 @@ int g_coverage_all(void) {
   return result;
 }
 
+static int parse_crlf_object_fixture(const unsigned char *data, size_t size) {
+  unsigned char *crlf;
+  size_t breaks = 0U;
+  size_t written = 0U;
+  size_t index;
+  int result;
+  for (index = 0U; index < size; ++index) {
+    if (data[index] == '\n') {
+      ++breaks;
+    }
+  }
+  if (size == 0U || breaks > SIZE_MAX - size) {
+    return g_internal("invalid object fixture size");
+  }
+  crlf = (unsigned char *)malloc(size + breaks);
+  if (crlf == NULL) {
+    return g_internal("out of memory constructing CRLF object fixture");
+  }
+  for (index = 0U; index < size; ++index) {
+    if (data[index] == '\n') {
+      crlf[written++] = '\r';
+    }
+    crlf[written++] = data[index];
+  }
+  result = parse_object_data(crlf, written);
+  free(crlf);
+  return result;
+}
+
 int g_profile_selftest(void) {
   static const char *const rejected[] = {"tools/guard/fixtures/profile-malformed.txt",
                                          "tools/guard/fixtures/profile-invalid-hex.txt",
@@ -819,6 +851,9 @@ int g_profile_selftest(void) {
   result = g_read("tools/guard/fixtures/object-valid.txt", &data, &size);
   if (result == 0) {
     result = parse_object_data(data, size);
+  }
+  if (result == 0) {
+    result = parse_crlf_object_fixture(data, size);
   }
   free(data);
   data = NULL;
