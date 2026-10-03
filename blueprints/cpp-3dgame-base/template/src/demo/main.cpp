@@ -82,22 +82,26 @@ constexpr std::array<Vertex, 6> make_face(const std::array<std::array<float, 3>,
 }
 
 constexpr std::array<Vertex, 36> make_cube_vertices() {
-    constexpr std::array<std::array<std::array<float, 3>, 4>, 6> faces{{
-        {{{-0.5F, -0.5F, 0.5F}, {0.5F, -0.5F, 0.5F}, {0.5F, 0.5F, 0.5F}, {-0.5F, 0.5F, 0.5F}}},
-        {{{0.5F, -0.5F, -0.5F}, {-0.5F, -0.5F, -0.5F}, {-0.5F, 0.5F, -0.5F}, {0.5F, 0.5F, -0.5F}}},
-        {{{-0.5F, -0.5F, -0.5F}, {-0.5F, -0.5F, 0.5F}, {-0.5F, 0.5F, 0.5F}, {-0.5F, 0.5F, -0.5F}}},
-        {{{0.5F, -0.5F, 0.5F}, {0.5F, -0.5F, -0.5F}, {0.5F, 0.5F, -0.5F}, {0.5F, 0.5F, 0.5F}}},
-        {{{-0.5F, 0.5F, 0.5F}, {0.5F, 0.5F, 0.5F}, {0.5F, 0.5F, -0.5F}, {-0.5F, 0.5F, -0.5F}}},
-        {{{-0.5F, -0.5F, -0.5F}, {0.5F, -0.5F, -0.5F}, {0.5F, -0.5F, 0.5F}, {-0.5F, -0.5F, 0.5F}}},
-    }};
-    constexpr std::array<std::array<float, 3>, 6> colors{{
-        {0.9F, 0.2F, 0.2F},
-        {0.2F, 0.9F, 0.2F},
-        {0.2F, 0.3F, 0.9F},
-        {0.9F, 0.9F, 0.2F},
-        {0.9F, 0.2F, 0.9F},
-        {0.2F, 0.9F, 0.9F},
-    }};
+    constexpr std::array<std::array<std::array<float, 3>, 4>, 6> faces{
+        {
+            {{{-0.5F, -0.5F, 0.5F}, {0.5F, -0.5F, 0.5F}, {0.5F, 0.5F, 0.5F}, {-0.5F, 0.5F, 0.5F}}},
+            {{{0.5F, -0.5F, -0.5F}, {-0.5F, -0.5F, -0.5F}, {-0.5F, 0.5F, -0.5F}, {0.5F, 0.5F, -0.5F}}},
+            {{{-0.5F, -0.5F, -0.5F}, {-0.5F, -0.5F, 0.5F}, {-0.5F, 0.5F, 0.5F}, {-0.5F, 0.5F, -0.5F}}},
+            {{{0.5F, -0.5F, 0.5F}, {0.5F, -0.5F, -0.5F}, {0.5F, 0.5F, -0.5F}, {0.5F, 0.5F, 0.5F}}},
+            {{{-0.5F, 0.5F, 0.5F}, {0.5F, 0.5F, 0.5F}, {0.5F, 0.5F, -0.5F}, {-0.5F, 0.5F, -0.5F}}},
+            {{{-0.5F, -0.5F, -0.5F}, {0.5F, -0.5F, -0.5F}, {0.5F, -0.5F, 0.5F}, {-0.5F, -0.5F, 0.5F}}},
+        },
+    };
+    constexpr std::array<std::array<float, 3>, 6> colors{
+        {
+            {0.9F, 0.2F, 0.2F},
+            {0.2F, 0.9F, 0.2F},
+            {0.2F, 0.3F, 0.9F},
+            {0.9F, 0.9F, 0.2F},
+            {0.9F, 0.2F, 0.9F},
+            {0.2F, 0.9F, 0.9F},
+        },
+    };
     std::array<Vertex, 36> vertices{};
     for (std::size_t face_index = 0; face_index < faces.size(); ++face_index) {
         const std::array<Vertex, 6> face = make_face(faces.at(face_index), colors.at(face_index));
@@ -271,8 +275,10 @@ class DemoApp {
         }
         auto swapchain_result =
             vkb::SwapchainBuilder{device_}
-                .set_desired_format(VkSurfaceFormatKHR{.format = VK_FORMAT_B8G8R8A8_UNORM,
-                                                       .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR})
+                .set_desired_format(VkSurfaceFormatKHR{
+                    .format = VK_FORMAT_B8G8R8A8_UNORM,
+                    .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR,
+                })
                 .set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)
                 .set_desired_extent(static_cast<std::uint32_t>(pixel_width), static_cast<std::uint32_t>(pixel_height))
                 .set_old_swapchain(swapchain_)
@@ -346,46 +352,50 @@ class DemoApp {
         vk_check(vkCreatePipelineLayout(device_.device, &layout_info, nullptr, &pipeline_layout_),
                  "vkCreatePipelineLayout");
 
-        const std::array<VkPipelineShaderStageCreateInfo, 2> stages{{
-            VkPipelineShaderStageCreateInfo{
-                .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-                .pNext = nullptr,
-                .flags = 0,
-                .stage = VK_SHADER_STAGE_VERTEX_BIT,
-                .module = vertex_module,
-                .pName = "main",
-                .pSpecializationInfo = nullptr,
+        const std::array<VkPipelineShaderStageCreateInfo, 2> stages{
+            {
+                VkPipelineShaderStageCreateInfo{
+                    .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                    .pNext = nullptr,
+                    .flags = 0,
+                    .stage = VK_SHADER_STAGE_VERTEX_BIT,
+                    .module = vertex_module,
+                    .pName = "main",
+                    .pSpecializationInfo = nullptr,
+                },
+                VkPipelineShaderStageCreateInfo{
+                    .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                    .pNext = nullptr,
+                    .flags = 0,
+                    .stage = VK_SHADER_STAGE_FRAGMENT_BIT,
+                    .module = fragment_module,
+                    .pName = "main",
+                    .pSpecializationInfo = nullptr,
+                },
             },
-            VkPipelineShaderStageCreateInfo{
-                .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-                .pNext = nullptr,
-                .flags = 0,
-                .stage = VK_SHADER_STAGE_FRAGMENT_BIT,
-                .module = fragment_module,
-                .pName = "main",
-                .pSpecializationInfo = nullptr,
-            },
-        }};
+        };
 
         VkVertexInputBindingDescription binding{};
         binding.binding = 0;
         binding.stride = sizeof(Vertex);
         binding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-        const std::array<VkVertexInputAttributeDescription, 2> attributes{{
-            VkVertexInputAttributeDescription{
-                .location = 0,
-                .binding = 0,
-                .format = VK_FORMAT_R32G32B32_SFLOAT,
-                .offset = offsetof(Vertex, position),
+        const std::array<VkVertexInputAttributeDescription, 2> attributes{
+            {
+                VkVertexInputAttributeDescription{
+                    .location = 0,
+                    .binding = 0,
+                    .format = VK_FORMAT_R32G32B32_SFLOAT,
+                    .offset = offsetof(Vertex, position),
+                },
+                VkVertexInputAttributeDescription{
+                    .location = 1,
+                    .binding = 0,
+                    .format = VK_FORMAT_R32G32B32_SFLOAT,
+                    .offset = offsetof(Vertex, color),
+                },
             },
-            VkVertexInputAttributeDescription{
-                .location = 1,
-                .binding = 0,
-                .format = VK_FORMAT_R32G32B32_SFLOAT,
-                .offset = offsetof(Vertex, color),
-            },
-        }};
+        };
 
         VkPipelineVertexInputStateCreateInfo vertex_input{};
         vertex_input.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;

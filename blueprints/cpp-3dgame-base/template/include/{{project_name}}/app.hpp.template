@@ -1,12 +1,12 @@
 #ifndef {{project_name | upper | replace('-', '_')}}_APP_HPP
 #define {{project_name | upper | replace('-', '_')}}_APP_HPP
 
-#include <string>
+#include <string_view>
 
 namespace {{project_name | replace('-', '_')}} {
 
 /// Returns the application greeting message.
-auto greet() -> std::string;
+auto greet() -> std::string_view;
 
 /// Runs the main application logic.
 auto run() -> int;
