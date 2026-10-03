@@ -46,7 +46,27 @@ foreach ($path in @('build', 'build/tools', 'build/tools/mmix-guard.exe')) {
 New-Item -ItemType Directory -Force build/tools | Out-Null
 $sources = @(Get-ChildItem tools/guard/*.c | ForEach-Object { $_.FullName })
 if ($sources.Count -eq 0) { throw 'Missing local guard source' }
-& $compiler.Source /nologo /std:c11 /W4 /WX /TC /Febuild/tools/mmix-guard.exe /Fobuild/tools/ @sources
-if ($LASTEXITCODE -ne 0) { exit 1 }
+$compilerArgs = @('/nologo', '/std:c11', '/W4', '/WX', '/TC',
+    '/Febuild/tools/mmix-guard.exe', '/Fobuild/tools/') + $sources
+$compilerOutput = [System.IO.Path]::GetTempFileName()
+try {
+    $savedErrorActionPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = 'Continue'
+        & $compiler.Source @compilerArgs *> $compilerOutput
+        $compilerStatus = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $savedErrorActionPreference
+    }
+    if ($compilerStatus -ne 0) {
+        $compilerDiagnostics = [System.IO.File]::ReadAllText($compilerOutput)
+    }
+} finally {
+    Remove-Item -LiteralPath $compilerOutput -Force
+}
+if ($compilerStatus -ne 0) {
+    [Console]::Error.Write($compilerDiagnostics)
+    exit 1
+}
 & ./build/tools/mmix-guard.exe $Command @Remaining
 exit $LASTEXITCODE
