@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory=$true, Position=0)][string]$Command,
-    [Parameter(ValueFromRemainingArguments=$true)][string[]]$Remaining
+    [Parameter(ValueFromRemainingArguments=$true)][string[]]$Remaining = @()
 )
 $ErrorActionPreference = 'Stop'
 if ($Command -eq 'destroy') {
