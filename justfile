@@ -289,6 +289,7 @@ code-semgrep:
 	@echo ""
 	@printf "\033[0;34m=== Running Semgrep Static Analysis ===\033[0m\n"
 	@semgrep --config config/semgrep/ --error \
+		--metrics=off --disable-version-check \
 		--exclude='tests' \
 		--exclude='violations' \
 		. \

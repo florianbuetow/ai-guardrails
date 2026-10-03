@@ -1,12 +1,12 @@
 #include "test-cpp-project/app.hpp"
 
-#include <string>
+#include <string_view>
 
 // Recieve the mesage and proccess it
 
 namespace test_cpp_project {
 
-auto greet() -> std::string {
+auto greet() -> std::string_view {
     return "Hello from test-cpp-project!";
 }
 

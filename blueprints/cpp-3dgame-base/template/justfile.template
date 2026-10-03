@@ -579,15 +579,48 @@ code-deptry:
         printf "\033[0;31m✗ No source files found in src/\033[0m\n"
         exit 1
     fi
-    # IWYU exits non-zero even when code is clean; capture output and
-    # let the grep check below decide pass/fail. The mapping file teaches
-    # IWYU the public spellings for glm's private implementation headers
-    # and the macOS SDK-private <_stdio.h>.
-    if ! IWYU_OUTPUT="$($IWYU_CMD -p build/debug $SOURCES -- -Xiwyu --no_fwd_decls \
-        -Xiwyu --mapping_file="$PWD/config/iwyu/mappings.imp" 2>&1)"; then
-        :
+    IWYU_PLATFORM_ARGS=()
+    if [ "$(uname -s)" = "Darwin" ]; then
+        LLVM_BIN="$(just _llvm-bin)"
+        LLVM_HEADERS="$(dirname "$LLVM_BIN")/include/c++/v1"
+        if [ ! -d "$LLVM_HEADERS" ]; then
+            printf "\033[0;31m✗ LLVM C++ headers not found: %s\033[0m\n" "$LLVM_HEADERS" >&2
+            exit 1
+        fi
+        SDK_PATH="$(xcrun --show-sdk-path)"
+        if [ ! -d "$SDK_PATH" ]; then
+            printf "\033[0;31m✗ macOS SDK not found: %s\033[0m\n" "$SDK_PATH" >&2
+            exit 1
+        fi
+        IWYU_PLATFORM_ARGS=(-stdlib++-isystem "$LLVM_HEADERS" "--sysroot=$SDK_PATH")
+    fi
+    # The mapping file gives IWYU public spellings for private headers.
+    # IWYU returns 2 for include suggestions; other failures are scanner errors.
+    if IWYU_OUTPUT="$("$IWYU_CMD" -p build/debug $SOURCES -- "${IWYU_PLATFORM_ARGS[@]}" \
+        -Xiwyu --no_fwd_decls -Xiwyu --mapping_file="$PWD/config/iwyu/mappings.imp" \
+        -Xiwyu --error=2 2>&1)"; then
+        IWYU_STATUS=0
+    else
+        IWYU_STATUS=$?
     fi
     printf "%s\n" "$IWYU_OUTPUT"
+    if printf "%s\n" "$IWYU_OUTPUT" | grep -Eq '(^|[[:space:]])(fatal )?error:'; then
+        printf "\033[0;31m✗ IWYU reported a scanner error\033[0m\n" >&2
+        exit 1
+    fi
+    if [ "$IWYU_STATUS" -ne 0 ] && [ "$IWYU_STATUS" -ne 2 ]; then
+        printf "\033[0;31m✗ IWYU exited with status %s\033[0m\n" "$IWYU_STATUS" >&2
+        exit 1
+    fi
+    if printf "%s\n" "$IWYU_OUTPUT" | awk '
+        / should add these lines:$/ { in_additions = 1; next }
+        in_additions && /^$/ { in_additions = 0 }
+        in_additions && NF { found = 1 }
+        END { exit found ? 0 : 1 }
+    '; then
+        printf "\033[0;31m✗ Missing direct includes found (see IWYU output above)\033[0m\n"
+        exit 1
+    fi
     # <ios> is the one known IWYU/clang-tidy conflict: include-cleaner
     # requires it for std::ios/std::streamsize while IWYU's libc++ mapping
     # credits <fstream> and wants it removed. include-cleaner wins; this is

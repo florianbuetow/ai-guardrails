@@ -28,7 +28,12 @@ defmodule {{module_name}}.MixProject do
     [
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:sobelow, "~> 0.15", only: [:dev, :test], runtime: false},
+      # Sobelow's lockfile warning fix is not in a Hex release yet.
+      {:sobelow,
+       git: "https://github.com/sobelow/sobelow.git",
+       ref: "ce7bc9ef6d8e39e2684128b76c84cb098d5fa9c2",
+       only: [:dev, :test],
+       runtime: false},
       {:ex_arch_unit, "~> 0.1.0", only: [:dev, :test], runtime: false}
     ]
   end

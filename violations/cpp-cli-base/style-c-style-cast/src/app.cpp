@@ -1,17 +1,16 @@
 #include "test-cpp-project/app.hpp"
 
-#include <string>
+#include <string_view>
 
 namespace test_cpp_project {
 
-auto greet() -> std::string {
-    double pi = 3.14159;
-    int truncated = (int)pi;
-    return "Hello from test-cpp-project! " + std::to_string(truncated);
+auto greet() -> std::string_view {
+    return "Hello from test-cpp-project!";
 }
 
 auto run() -> int {
-    return 0;
+    double pi = 3.14159;
+    return (int)pi;
 }
 
 }  // namespace test_cpp_project

@@ -46,8 +46,10 @@
 #include <ios>
 #include <iterator>
 #include <print>
+#include <ratio>
 #include <span>
 #include <stdexcept>
+#include <string>
 #include <string_view>
 #include <system_error>
 #include <tracy/Tracy.hpp>
@@ -335,7 +337,8 @@ class DemoApp {
         const std::filesystem::path shader_dir = executable_dir() / "shaders";
         const std::vector<std::uint32_t> vertex_spirv = load_spirv_file(shader_dir / "cube.vert.spv");
         const std::vector<std::uint32_t> fragment_spirv = load_spirv_file(shader_dir / "cube.frag.spv");
-        std::println("demo: loaded DXC-compiled shaders from {}", shader_dir.string());
+        const std::string shader_directory = shader_dir.string();
+        std::println("demo: loaded DXC-compiled shaders from {}", shader_directory);
 
         VkShaderModule vertex_module = create_shader_module(vertex_spirv, "vertex");
         VkShaderModule fragment_module = create_shader_module(fragment_spirv, "fragment");
@@ -571,7 +574,8 @@ class DemoApp {
             }
 
             const clock::time_point now = clock::now();
-            const float delta_seconds = std::chrono::duration<float>(now - last_frame).count();
+            const float delta_seconds =
+                std::chrono::duration<float, std::ratio<1>>(now - last_frame).count();
             last_frame = now;
 
             if (auto_rotate_ && !dragging_) {
@@ -588,7 +592,8 @@ class DemoApp {
             FrameMark;
 
             if (auto_quit_seconds > 0) {
-                const float elapsed_seconds = std::chrono::duration<float>(now - start_time).count();
+                const float elapsed_seconds =
+                    std::chrono::duration<float, std::ratio<1>>(now - start_time).count();
                 if (elapsed_seconds >= static_cast<float>(auto_quit_seconds)) {
                     running = false;
                 }

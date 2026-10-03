@@ -35,6 +35,21 @@ validate_baseline_output() {
     fi
 }
 
+validate_violation_output() {
+    local violation_name="$1"
+    local check_output="$2"
+
+    if [ "$violation_name" != "audit-vulnerable-dep" ]; then
+        return 0
+    fi
+
+    if ! printf "%s\n" "$check_output" | grep -F "plug 1.7.2 - EEF-CVE-2026-8468 (HIGH)" >/dev/null; then
+        log_fail "$LANG_NAME audit violation failed without the expected Plug advisory"
+        printf "%s\n" "$check_output"
+        return 1
+    fi
+}
+
 post_baseline_tests() {
     local project_dir="$1"
     local output

@@ -112,6 +112,9 @@ run_language_tests() {
     if declare -F validate_baseline_output >/dev/null; then
         unset -f validate_baseline_output
     fi
+    if declare -F validate_violation_output >/dev/null; then
+        unset -f validate_violation_output
+    fi
 
     # shellcheck source=/dev/null
     source "$LANG_CONFIG_FILE"
@@ -220,6 +223,13 @@ run_language_tests() {
             cleanup_dir "$temp_dir"
             return 1
         }
+
+        if declare -F validate_violation_output >/dev/null &&
+            ! validate_violation_output "$violation_name" "$check_output"; then
+            restore_violation "$violation_dir" "$project_dir" "$backup_dir"
+            cleanup_dir "$temp_dir"
+            return 1
+        fi
 
         log_pass "Violation '$violation_name' correctly detected"
         passed_tests=$((passed_tests + 1))

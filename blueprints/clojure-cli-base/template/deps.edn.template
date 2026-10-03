@@ -2,7 +2,7 @@
              "clojars" {:url "https://repo.clojars.org/"}}
  :paths ["src/main/clojure" "resources"]
  :deps {org.clojure/clojure {:mvn/version "1.12.6"}
-        metosin/malli {:mvn/version "0.20.1"}}
+        metosin/malli {:mvn/version "0.20.2"}}
  :aliases
  {:run {:main-opts ["-m" "{{namespace_name}}.cli.main"]}
   :test {:extra-paths ["test/clojure"]
@@ -16,7 +16,7 @@
               :main-opts ["-m" "{{namespace_name}}.contracts.contract-check"]}
   :build {:deps {io.github.clojure/tools.build {:mvn/version "0.10.14"}}
           :ns-default build}
-  :cljfmt {:replace-deps {dev.weavejester/cljfmt {:mvn/version "0.16.5"}}
+  :cljfmt {:replace-deps {dev.weavejester/cljfmt {:mvn/version "0.16.6"}}
            :main-opts ["-m" "cljfmt.main"]}
   :clj-kondo {:replace-deps {clj-kondo/clj-kondo {:mvn/version "2026.08.04"}}
               :main-opts ["-m" "clj-kondo.main"]}
