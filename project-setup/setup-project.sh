@@ -114,6 +114,9 @@ case "$TEMPLATE_NAME" in
   cpp-3dgame-base)
     PROJECT_DESCRIPTION="A C++ 3D game application"
     ;;
+  raspberry-pi-cpp-base)
+    PROJECT_DESCRIPTION="A 64-bit Raspberry Pi C++ application"
+    ;;
   rust-cli-base)
     PROJECT_DESCRIPTION="A Rust CLI application"
     ;;

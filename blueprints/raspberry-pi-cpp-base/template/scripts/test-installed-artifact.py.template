@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+"""Verify the installed executable independently of the build tree."""
+
+from __future__ import annotations
+
+import argparse
+import subprocess
+from pathlib import Path
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--prefix", required=True, type=Path)
+    return parser.parse_args()
+
+
+def main() -> int:
+    arguments = parse_args()
+    binary = arguments.prefix / "bin" / "{{project_name}}"
+    if not binary.is_file():
+        raise SystemExit(f"installed binary does not exist: {binary}")
+
+    result = subprocess.run(
+        [binary],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise SystemExit(f"installed binary exited with {result.returncode}")
+    if result.stdout != "Hello, world!\n":
+        raise SystemExit(f"unexpected stdout: {result.stdout!r}")
+    if result.stderr:
+        raise SystemExit(f"unexpected stderr: {result.stderr!r}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

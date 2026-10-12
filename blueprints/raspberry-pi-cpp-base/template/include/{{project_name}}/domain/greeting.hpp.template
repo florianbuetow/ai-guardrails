@@ -1,0 +1,13 @@
+#ifndef TEST_RASPBERRY_PI_CPP_DOMAIN_GREETING_HPP
+#define TEST_RASPBERRY_PI_CPP_DOMAIN_GREETING_HPP
+
+#include <string_view>
+
+namespace {{project_name | replace('-', '_')}}::domain {
+
+/// Returns the application's immutable greeting.
+[[nodiscard]] auto greeting() noexcept -> std::string_view;
+
+}  // namespace {{project_name | replace('-', '_')}}::domain
+
+#endif  // TEST_RASPBERRY_PI_CPP_DOMAIN_GREETING_HPP

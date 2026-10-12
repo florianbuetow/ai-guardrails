@@ -1,0 +1,24 @@
+rules:
+  - id: raspberry-pi-cpp.no-checker-suppression
+    languages: [generic]
+    severity: ERROR
+    message: Fix checker findings instead of suppressing them.
+    pattern-regex: '(?i)(NOLINT(NEXTLINE|BEGIN|END)?|cppcheck-suppress|IWYU pragma:\s*(keep|export)|GCOVR?_EXCL|LCOV_EXCL|flawfinder:\s*ignore|gitleaks:\s*allow|clang-format\s+(off|on)|codespell:\s*ignore|(?://|#)\s*nosem(grep)?)'
+    paths:
+      include: ["**/*.cpp", "**/*.hpp", "**/*.h", "**/*.cc", "**/*.cxx", "**/*.py", "**/*.sh"]
+
+  - id: raspberry-pi-cpp.no-diagnostic-disable
+    languages: [generic]
+    severity: ERROR
+    message: Do not disable compiler diagnostics. Fix the warning.
+    pattern-regex: '#\s*pragma\s+(GCC|clang)\s+diagnostic\s+(ignored|push|pop)|#\s*pragma\s+warning\s*\(\s*disable'
+    paths:
+      include: ["**/*.cpp", "**/*.hpp", "**/*.h", "**/*.cc", "**/*.cxx", "**/*.py", "**/*.sh"]
+
+  - id: raspberry-pi-cpp.no-shellcheck-disable
+    languages: [generic]
+    severity: ERROR
+    message: Fix ShellCheck findings instead of suppressing them.
+    pattern-regex: '#\s*shellcheck\s+disable='
+    paths:
+      include: ["**/*.sh", "**/*.bash"]

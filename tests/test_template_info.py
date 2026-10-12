@@ -126,6 +126,14 @@ class TemplateInfoTests(unittest.TestCase):
         self.assertEqual("github-tags", googletest.latest_registry)
         self.assertEqual("https://github.com/google/googletest.git", googletest.latest_identifier)
 
+    def test_raspberry_pi_system_googletest_is_in_dependency_inventory(self) -> None:
+        manifest = REPO_ROOT / "blueprints/raspberry-pi-cpp-base/template/CMakeLists.txt.template"
+        dependencies = template_info.parse_cmake_manifest(manifest)
+        googletest = dependency_by_name(dependencies, "googletest")
+        self.assertEqual(">=1.15", googletest.spec)
+        self.assertEqual("CMake system packages", googletest.group)
+        self.assertEqual("https://github.com/google/googletest.git", googletest.latest_identifier)
+
     def test_clojars_coordinate_parser_requires_group_and_artifact(self) -> None:
         self.assertEqual(
             ("metosin", "malli"),

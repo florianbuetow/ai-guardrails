@@ -1,0 +1,77 @@
+# {{project_name}}
+
+{{project_description}}
+
+A C++20 Hello World application targeting 64-bit Raspberry Pi OS Trixie.
+
+## Develop from an Apple Silicon Mac
+
+Install `just` and a Docker CLI connected to an ARM64 Linux daemon. Docker Desktop
+is not required; Colima is supported. Keep this project in a directory shared
+with the daemon (normally your home directory).
+
+```sh
+just container-init
+just container-ci
+just container-run
+just container-artifact
+```
+
+`container-build` builds the development image; `container-shell` opens an
+interactive shell. All commands force `linux/arm64`. The image uses a pinned
+Debian base and dated apt archive, with GCC 14, LLVM 19, GoogleTest, a hash-locked Semgrep environment, and the
+validation tools. Network access is needed while building the image; application
+builds do not fetch dependencies. `container-artifact` builds a separate runtime
+image containing the installed executable and its runtime libraries, then checks
+its output. The runtime runs without root privileges.
+
+## Develop on the Pi
+
+The same development container runs on the Pi. Alternatively install the tools
+listed in the Dockerfile natively, including its pinned Semgrep environment, and
+put LLVM 19 binaries on PATH. `just check` fails if tools or the supported compiler
+majors are missing. Then run `just init`, `just ci`, and `just run`.
+
+The executable prints exactly `Hello, world!` followed by a newline. Extra
+arguments are usage errors. An output failure is a runtime error. Exit codes are
+0 for success, 1 for runtime failure, and 2 for usage error. Run the executable
+directly when stdout must contain only the result; `just` adds workflow status.
+
+## Structure
+
+- `src/cli/`: command-line boundary and process exit status.
+- `src/application/`: application operation and explicit output dependency.
+- `src/domain/`: pure greeting value.
+- `include/`: self-contained declaration-only public headers; implementations live in compiled sources.
+- `tests/`: GoogleTest unit tests and header compilation checks.
+- `scripts/`: validation and CLI/installed-artifact tests.
+- `config/`: local policy rules and spelling vocabulary.
+
+## Validation
+
+`just ci` checks prerequisites first and fails on the first failed gate:
+formatting, clang-tidy, cppcheck, Flawfinder, local Semgrep policies, secrets,
+shell scripts, spelling, architecture/source inventory, GCC/Clang debug and
+release tests, sanitizers, coverage, ELF hardening, and installed artifacts.
+`ci-quiet` runs the identical sequence with concise output. CI never reformats
+source. Use `code-format` explicitly to format it.
+
+Coverage enforces {{coverage_threshold}}% separately for project lines, functions,
+and branches; zero branch opportunities are reported honestly. Empty tests,
+skipped tests, missing reports, missing source coverage, and orphan source files
+fail. Coverage runs use LLVM source instrumentation, and HTML is written under
+`reports/coverage-html/`. `code-memcheck` runs Valgrind separately. `debug` opens
+GDB; `strace` and LLVM disassembly tools are available in the image.
+
+The compiler target is explicitly `armv8-a`; never use `-march=native` for Pi
+artifacts built on a Mac. CMake probes `<arm_neon.h>` support. The starter has no
+SIMD kernel: add intrinsics only to a dedicated implementation with scalar
+reference tests when measured application work warrants them. Define overflow,
+vector-tail, alignment, and floating-point behavior first. Do not enable global
+fast-math. Add bounded libFuzzer tests once there is a parser or data boundary;
+do not claim fuzz or mutation coverage for this constant-output application.
+
+A Linux container does not validate Raspberry Pi peripherals, kernel-specific
+behavior, or performance. Test deployment on the actual Pi, and benchmark only
+on a named stable Pi runner. The container base and target OS must have compatible
+runtime libraries; ARM64 alone is not a deployment guarantee.

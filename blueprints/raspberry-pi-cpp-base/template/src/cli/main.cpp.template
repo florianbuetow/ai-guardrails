@@ -1,0 +1,19 @@
+#include <cstddef>
+#include <iostream>
+#include <span>
+
+#include "{{project_name}}/application/application.hpp"
+
+auto main(int argc, char** argv) -> int {
+    const std::span<char*> arguments(argv, static_cast<std::size_t>(argc));
+    if (arguments.size() != 1) {
+        std::cerr << "error: this command does not accept arguments\n";
+        return 2;
+    }
+
+    const int result = {{project_name | replace('-', '_')}}::application::run(std::cout);
+    if (result != 0) {
+        std::cerr << "error: failed to write output\n";
+    }
+    return result;
+}

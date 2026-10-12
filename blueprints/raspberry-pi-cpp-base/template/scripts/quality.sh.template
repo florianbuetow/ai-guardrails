@@ -1,0 +1,134 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if [ "$#" -ne 1 ]; then
+    printf 'Usage: %s <check-name>\n' "$0" >&2
+    exit 1
+fi
+project='{{project_name}}'
+case "$1" in
+    check)
+        if [ "$(uname -s)" != Linux ] || [ "$(uname -m)" != aarch64 ]; then
+            printf 'Native validation requires ARM64 Linux. Use just container-ci on macOS.\n' >&2
+            exit 1
+        fi
+        for tool in gcc g++ clang++ clang-tidy clang-format llvm-cov llvm-profdata cmake ninja just python3 semgrep cppcheck flawfinder codespell shellcheck shfmt gitleaks readelf git; do
+            command -v "$tool" >/dev/null
+        done
+        test "$(gcc -dumpversion | cut -d. -f1)" = 14
+        clang++ --version | head -1 | grep -E 'version 19\.'
+        ;;
+    init)
+        if [ ! -d .git ]; then git init -q; fi
+        test -f .git/hooks/pre-commit
+        chmod +x .git/hooks/pre-commit
+        mkdir -p reports
+        ;;
+    format | format-check)
+        mapfile -t sources < <(find src include tests -type f \( -name '*.cpp' -o -name '*.hpp' \) | sort)
+        test -n "${sources[*]}"
+        if [ "$1" = format ]; then
+            clang-format -i "${sources[@]}"
+        else
+            clang-format --dry-run --Werror "${sources[@]}"
+        fi
+        ;;
+    style)
+        cmake --preset clang-debug
+        cmake --build --preset clang-debug
+        mapfile -t sources < <(find src -type f -name '*.cpp' | sort)
+        test -n "${sources[*]}"
+        clang-tidy -p build/clang-debug "${sources[@]}"
+        ;;
+    static)
+        cmake --preset gcc-debug
+        cppcheck --library=googletest --project=build/gcc-debug/compile_commands.json --enable=warning,style,performance,portability --error-exitcode=1 --std=c++20 --check-level=exhaustive
+        ;;
+    security)
+        flawfinder --minlevel=1 --error-level=1 src include
+        ;;
+    semgrep)
+        mkdir -p reports/semgrep
+        SEMGREP_LOG_FILE="$(pwd)/reports/semgrep/scan.log" \
+        SEMGREP_SETTINGS_FILE="$(pwd)/reports/semgrep/settings.yml" \
+        SEMGREP_VERSION_CACHE_PATH="$(pwd)/reports/semgrep/version" \
+            semgrep --config config/semgrep --error --disable-nosem --metrics=off --disable-version-check --no-git-ignore src include tests scripts
+        ;;
+    secrets)
+        if suppressed=$(grep -RlE 'gitleaks:[[:space:]]*allow' src include tests scripts config README.md AGENTS.md); then
+            printf 'Secret-check suppression is forbidden: %s\n' "$suppressed" >&2
+            exit 1
+        else
+            status=$?
+            if [ "$status" -ne 1 ]; then exit "$status"; fi
+        fi
+        gitleaks detect --no-git --source . --config .gitleaks.toml --no-banner --redact --verbose
+        ;;
+    shell)
+        mapfile -t scripts < <(find scripts -type f -name '*.sh' | sort)
+        test -n "${scripts[*]}"
+        shellcheck "${scripts[@]}"
+        shfmt -d -i 4 -ci "${scripts[@]}"
+        ;;
+    spell)
+        codespell src include tests scripts config README.md AGENTS.md --ignore-words=config/codespell/ignore.txt
+        ;;
+    architecture)
+        python3 scripts/checkers_test.py
+        cmake --preset clang-debug
+        python3 scripts/check-source-inventory.py build/clang-debug/compile_commands.json
+        python3 scripts/check-architecture.py build/clang-debug/compile_commands.json
+        ;;
+    test)
+        mkdir -p reports
+        for preset in gcc-debug gcc-release clang-debug clang-release; do
+            cmake --preset "$preset"
+            cmake --build --preset "$preset"
+            ctest --preset "$preset" --no-tests=error --output-junit "$(pwd)/reports/$preset.xml"
+            python3 scripts/check-test-report.py "reports/$preset.xml"
+        done
+        ;;
+    sanitize)
+        mkdir -p reports
+        cmake --preset sanitize
+        cmake --build --preset sanitize
+        ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 UBSAN_OPTIONS=halt_on_error=1 ctest --preset sanitize --no-tests=error --output-junit "$(pwd)/reports/sanitize.xml"
+        python3 scripts/check-test-report.py reports/sanitize.xml
+        ;;
+    coverage)
+        mkdir -p reports
+        cmake --preset coverage
+        cmake --build --preset coverage
+        find build/coverage -name '*.profraw' -delete
+        ctest --preset coverage --no-tests=error --output-junit "$(pwd)/reports/coverage.xml"
+        python3 scripts/check-test-report.py reports/coverage.xml
+        mapfile -t profiles < <(find build/coverage -name '*.profraw' -print | sort)
+        test -n "${profiles[*]}"
+        llvm-profdata merge -sparse "${profiles[@]}" -o reports/coverage.profdata
+        llvm-cov export "build/coverage/${project}_unit_tests" -object "build/coverage/$project" -instr-profile=reports/coverage.profdata >reports/coverage.json
+        python3 scripts/coverage.py reports/coverage.json "{{coverage_threshold}}"
+        llvm-cov show "build/coverage/${project}_unit_tests" -object "build/coverage/$project" -instr-profile=reports/coverage.profdata -format=html -output-dir=reports/coverage-html
+        ;;
+    binary)
+        cmake --preset gcc-release
+        cmake --build --preset gcc-release
+        bash scripts/check-elf.sh "build/gcc-release/$project"
+        ;;
+    artifact)
+        cmake --preset gcc-release
+        cmake --build --preset gcc-release
+        rm -rf build/install
+        cmake --install build/gcc-release --prefix "$(pwd)/build/install"
+        python3 scripts/test-installed-artifact.py --prefix "$(pwd)/build/install"
+        ;;
+    memcheck)
+        command -v valgrind >/dev/null
+        cmake --preset gcc-debug
+        cmake --build --preset gcc-debug
+        valgrind --error-exitcode=1 --leak-check=full --errors-for-leak-kinds=all "build/gcc-debug/${project}_unit_tests"
+        valgrind --error-exitcode=1 --leak-check=full --errors-for-leak-kinds=all "build/gcc-debug/$project"
+        ;;
+    *)
+        printf 'Unknown check: %s\n' "$1" >&2
+        exit 1
+        ;;
+esac

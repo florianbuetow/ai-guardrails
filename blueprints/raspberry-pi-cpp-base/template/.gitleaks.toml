@@ -1,0 +1,12 @@
+title = "Raspberry Pi C++ gitleaks configuration"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Generated build and report artifacts"
+paths = [
+  '''(^|/)build/''',
+  '''(^|/)reports/''',
+  '''(^|/)\.cache/''',
+]

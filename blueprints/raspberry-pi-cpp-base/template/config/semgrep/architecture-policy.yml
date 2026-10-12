@@ -1,0 +1,67 @@
+rules:
+  - id: raspberry-pi-cpp.no-core-environment-access
+    languages: [generic]
+    severity: ERROR
+    message: Domain and application code must receive configuration through typed interfaces.
+    pattern-regex: '\b(getenv|secure_getenv|setenv|unsetenv|putenv)\s*\('
+    paths:
+      include:
+        - "/src/domain/*.cpp"
+        - "/src/domain/**/*.cpp"
+        - "/src/application/*.cpp"
+        - "/src/application/**/*.cpp"
+        - "/include/**/domain/*.hpp"
+        - "/include/**/domain/**/*.hpp"
+        - "/include/**/application/*.hpp"
+        - "/include/**/application/**/*.hpp"
+
+  - id: raspberry-pi-cpp.no-core-io
+    languages: [generic]
+    severity: ERROR
+    message: Domain and application code must not perform console or file I/O.
+    pattern-regex: '(std::(cin|cout|cerr|clog|ifstream|ofstream|fstream)|<(iostream|fstream)>)'
+    paths:
+      include:
+        - "/src/domain/*.cpp"
+        - "/src/domain/**/*.cpp"
+        - "/src/application/*.cpp"
+        - "/src/application/**/*.cpp"
+        - "/include/**/domain/*.hpp"
+        - "/include/**/domain/**/*.hpp"
+        - "/include/**/application/*.hpp"
+        - "/include/**/application/**/*.hpp"
+
+  - id: raspberry-pi-cpp.no-shell-or-process-exec
+    languages: [generic]
+    severity: ERROR
+    message: Production code must not launch shells or child processes.
+    pattern-regex: '\b(system|popen|pclose|execl|execle|execlp|execv|execve|execvp|fork|vfork|posix_spawn)\s*\('
+    paths:
+      include: ["/src/*.cpp", "/src/**/*.cpp", "/include/*.hpp", "/include/**/*.hpp"]
+
+  - id: raspberry-pi-cpp.no-production-stubs
+    languages: [generic]
+    severity: ERROR
+    message: Remove production placeholders and implement the behavior.
+    pattern-regex: '(?i)\b(TODO|FIXME|XXX|not[ _-]?implemented|placeholder|stub)\b'
+    paths:
+      include: ["/src/*.cpp", "/src/**/*.cpp", "/include/*.hpp", "/include/**/*.hpp"]
+
+  - id: raspberry-pi-cpp.neon-only-in-simd
+    languages: [generic]
+    severity: ERROR
+    message: Keep NEON intrinsics behind the src/simd implementation boundary.
+    pattern-regex: '(<arm_neon\.h>|\bv(create|combine|get|set|ld|st|add|sub|mul|mla|mls|dup|ext|zip|uzp|trn|rev|reinterpret|cvt|q)[a-zA-Z0-9_]*_[su]\d+\s*\()'
+    paths:
+      include: ["/src/*.cpp", "/src/**/*.cpp", "/include/*.hpp", "/include/**/*.hpp"]
+      exclude: ["/src/simd/*.cpp", "/src/simd/**/*.cpp"]
+
+
+  - id: raspberry-pi-cpp.no-header-function-bodies
+    languages: [cpp]
+    severity: ERROR
+    message: Keep executable implementations in compiled source files so coverage cannot omit unused inline behavior.
+    pattern: |
+      $RET $FUNC(...) { ... }
+    paths:
+      include: ["/include/*.hpp", "/include/**/*.hpp"]

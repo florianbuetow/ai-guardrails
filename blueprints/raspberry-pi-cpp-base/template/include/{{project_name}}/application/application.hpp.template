@@ -1,0 +1,13 @@
+#ifndef TEST_RASPBERRY_PI_CPP_APPLICATION_APPLICATION_HPP
+#define TEST_RASPBERRY_PI_CPP_APPLICATION_APPLICATION_HPP
+
+#include <iosfwd>
+
+namespace {{project_name | replace('-', '_')}}::application {
+
+/// Writes the greeting and returns zero, or one if the output stream fails.
+auto run(std::ostream& output) -> int;
+
+}  // namespace {{project_name | replace('-', '_')}}::application
+
+#endif  // TEST_RASPBERRY_PI_CPP_APPLICATION_APPLICATION_HPP

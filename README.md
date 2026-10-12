@@ -60,6 +60,19 @@ just init
 just run
 ```
 
+**Raspberry Pi C++:**
+
+```bash
+just create raspberry-pi-cpp-base my-pi-project
+cd my-pi-project
+just container-init
+just container-run
+```
+
+This template targets 64-bit Raspberry Pi OS and supports development from
+Apple Silicon through its Debian Trixie `linux/arm64` container. Hardware
+behavior and performance measurements still run on the Raspberry Pi.
+
 **Rust CLI:**
 
 ```bash
@@ -169,6 +182,7 @@ just run 4
 | [**elixir-otp-base**](blueprints/elixir-otp-base/) | Elixir 1.17+ | OTP apps with [Credo](https://github.com/rrrene/credo), [Dialyxir](https://github.com/jeremyjh/dialyxir), [Sobelow](https://github.com/nccgroup/sobelow), [mix_audit](https://github.com/mirego/mix_audit), [ExUnit](https://hexdocs.pm/ex_unit/) |
 | [**cpp-cli-base**](blueprints/cpp-cli-base/) | C++23 | CLI apps with [CMake](https://cmake.org/), [clang-format](https://clang.llvm.org/docs/ClangFormat.html), [clang-tidy](https://clang.llvm.org/extra/clang-tidy/), [cppcheck](https://github.com/danmar/cppcheck), [flawfinder](https://github.com/david-a-wheeler/flawfinder), [GoogleTest](https://github.com/google/googletest) |
 | [**cpp-3dgame-base**](blueprints/cpp-3dgame-base/) | C++23 | 3D game apps with [CMake](https://cmake.org/), [clang-format](https://clang.llvm.org/docs/ClangFormat.html), [clang-tidy](https://clang.llvm.org/extra/clang-tidy/), [cppcheck](https://github.com/danmar/cppcheck), [flawfinder](https://github.com/david-a-wheeler/flawfinder), [GoogleTest](https://github.com/google/googletest) |
+| [**raspberry-pi-cpp-base**](blueprints/raspberry-pi-cpp-base/) | C++20, Linux ARM64 | Raspberry Pi apps with GCC and Clang builds, CMake/Ninja, Docker, NEON-ready interfaces, architecture checks, static analysis, sanitizers, coverage, CLI and installed-artifact tests |
 | [**rust-cli-base**](blueprints/rust-cli-base/) | Rust 2024 | CLI apps with [clippy](https://github.com/rust-lang/rust-clippy), [cargo-geiger](https://github.com/geiger-rs/cargo-geiger), [cargo-machete](https://github.com/bnjbvr/cargo-machete), [cargo-deny](https://github.com/EmbarkStudios/cargo-deny), [cargo-nextest](https://github.com/nextest-rs/nextest), [grcov](https://github.com/mozilla/grcov) |
 | [**kotlin-cli-base**](blueprints/kotlin-cli-base/) | Kotlin 2.1+ | CLI apps with [Gradle](https://gradle.org/), [ktlint](https://pinterest.github.io/ktlint/), [detekt](https://detekt.dev/), [Kover](https://github.com/Kotlin/kotlinx-kover), [Konsist](https://docs.konsist.lemonappdev.com/), [JUnit 5](https://junit.org/) |
 | [**scala-cli-base**](blueprints/scala-cli-base/) | Scala 3.3 LTS | CLI apps with [sbt](https://www.scala-sbt.org/), [Scalafmt](https://scalameta.org/scalafmt/), [Scalafix](https://scalacenter.github.io/scalafix/), [WartRemover](https://www.wartremover.org/), [MUnit](https://scalameta.org/munit/), [ArchUnit](https://www.archunit.org/), and [scoverage](https://github.com/scoverage/sbt-scoverage) |
@@ -239,7 +253,7 @@ Use these plugins after scaffolding a project with AI Guardrails to maintain cod
 - **copier** - Template engine ([installation guide](https://copier.readthedocs.io/))
 
 Each template has its own language-specific prerequisites. See the template READMEs for details:
-[Python](blueprints/python-cli-base/) | [Java](blueprints/java-cli-base/) | [Go](blueprints/go-cli-base/) | [Elixir](blueprints/elixir-otp-base/) | [C++](blueprints/cpp-cli-base/) | [C++ 3D Game](blueprints/cpp-3dgame-base/) | [Rust](blueprints/rust-cli-base/) | [Kotlin](blueprints/kotlin-cli-base/) | [Scala](blueprints/scala-cli-base/) | [Clojure](blueprints/clojure-cli-base/) | [React/Vite/TypeScript](blueprints/react-vite-typescript-base/) | [TypeScript MCP](blueprints/mcp-server-typescript-base/) | [Node.js TypeScript CLI](blueprints/node-typescript-cli-base/) | [Shell scripts](blueprints/shellscripts-base/) | [ARM64 macOS assembly](blueprints/arm64-macos-cli-base/) | [MMIX assembly](blueprints/mmix-cli-base/)
+[Python](blueprints/python-cli-base/) | [Java](blueprints/java-cli-base/) | [Go](blueprints/go-cli-base/) | [Elixir](blueprints/elixir-otp-base/) | [C++](blueprints/cpp-cli-base/) | [C++ 3D Game](blueprints/cpp-3dgame-base/) | [Raspberry Pi C++](blueprints/raspberry-pi-cpp-base/) | [Rust](blueprints/rust-cli-base/) | [Kotlin](blueprints/kotlin-cli-base/) | [Scala](blueprints/scala-cli-base/) | [Clojure](blueprints/clojure-cli-base/) | [React/Vite/TypeScript](blueprints/react-vite-typescript-base/) | [TypeScript MCP](blueprints/mcp-server-typescript-base/) | [Node.js TypeScript CLI](blueprints/node-typescript-cli-base/) | [Shell scripts](blueprints/shellscripts-base/) | [ARM64 macOS assembly](blueprints/arm64-macos-cli-base/) | [MMIX assembly](blueprints/mmix-cli-base/)
 
 ## Installation
 
@@ -265,7 +279,7 @@ just run
 ```
 
 The `just create` command takes two arguments:
-1. Template name (e.g., `python-cli-base`, `java-cli-base`, `go-cli-base`, `elixir-otp-base`, `cpp-cli-base`, `cpp-3dgame-base`, `rust-cli-base`, `kotlin-cli-base`, `scala-cli-base`, `clojure-cli-base`, `react-vite-typescript-base`, `mcp-server-typescript-base`, `node-typescript-cli-base`, `shellscripts-base`, `arm64-macos-cli-base`, or `mmix-cli-base`)
+1. Template name (e.g., `python-cli-base`, `java-cli-base`, `go-cli-base`, `elixir-otp-base`, `cpp-cli-base`, `cpp-3dgame-base`, `raspberry-pi-cpp-base`, `rust-cli-base`, `kotlin-cli-base`, `scala-cli-base`, `clojure-cli-base`, `react-vite-typescript-base`, `mcp-server-typescript-base`, `node-typescript-cli-base`, `shellscripts-base`, `arm64-macos-cli-base`, or `mmix-cli-base`)
 2. Target directory (absolute or relative path where the project will be created)
 
 **Method 2: Using Copier directly**
@@ -316,6 +330,8 @@ just test-node-typescript-cli-base    # Run Node.js TypeScript CLI baseline + vi
 just test-shellscripts-base           # Run shell scripts baseline + violation tests
 just test-shellscripts-base-linux     # Run shell scripts tests in a Linux container
 just test-arm64-macos-cli-base        # Run ARM64 macOS assembly baseline + violation tests
+just test-raspberry-pi-cpp-contracts  # Validate rendered Pi template contracts without Docker
+just test-raspberry-pi-cpp-base       # Run Pi C++ CI and violations in Linux ARM64 containers
 just test-mmix-cli-base               # Run MMIX assembly baseline + violation tests
 just test-ai-docs                     # Run AI docs installer tests
 just test-create                      # Smoke-test `just create` for every project template, then run its CI
@@ -323,8 +339,13 @@ just ci                               # Full repo CI suite, quiet: prints start/
 just ci-verbose                       # Full repo CI suite, verbose: streams the full output of every step
 ```
 
+The Raspberry Pi suite requires a running Docker daemon with `linux/arm64`
+support. Its rendered test project is bind-mounted into the container, so set
+`TMPDIR` to a host directory shared with Docker when the daemon cannot mount the
+operating system's default temporary directory (for example, with Colima).
+
 `just ci` and `just ci-verbose` run the exact same steps (`check`, `test-prerequisites`,
-`test-shellscripts-base-contracts`, `code-spell`, `code-semgrep`, `code-shellcheck`,
+`test-shellscripts-base-contracts`, `test-raspberry-pi-cpp-contracts`, `code-spell`, `code-semgrep`, `code-shellcheck`,
 `test-info`, `test`, `test-create`) and only
 differ in output verbosity. `ci` announces the start and completion of each step
 with a checkmark, suppressing per-step details unless a step fails (then it prints
@@ -369,6 +390,7 @@ ai-guardrails/
 │   ├── elixir-otp-base/                     # Elixir OTP template
 │   ├── cpp-cli-base/                        # C++ CLI template
 │   ├── cpp-3dgame-base/                     # C++ 3D game template
+│   ├── raspberry-pi-cpp-base/               # 64-bit Raspberry Pi C++ template
 │   ├── rust-cli-base/                       # Rust CLI template
 │   ├── kotlin-cli-base/                     # Kotlin CLI template
 │   ├── scala-cli-base/                      # Scala CLI template
@@ -382,6 +404,7 @@ ai-guardrails/
 │   └── ai-docs/                             # AI knowledge base template (adds docs/ to a project)
 ├── tests/
 │   ├── run-tests.sh                         # Unified test entry point
+│   ├── test_raspberry_pi_cpp.py              # Linux ARM64 container runner and render contracts
 │   ├── lib/                                 # Shared test helpers and runner logic
 │   │   ├── helpers.sh
 │   │   └── runner.sh
@@ -409,6 +432,7 @@ ai-guardrails/
 │   ├── elixir-otp-base/
 │   ├── cpp-cli-base/
 │   ├── cpp-3dgame-base/
+│   ├── raspberry-pi-cpp-base/
 │   ├── rust-cli-base/
 │   ├── kotlin-cli-base/
 │   ├── scala-cli-base/

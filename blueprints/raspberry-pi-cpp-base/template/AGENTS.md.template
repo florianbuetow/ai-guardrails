@@ -1,0 +1,27 @@
+# Agent instructions
+
+This is a minimal C++20 Raspberry Pi Linux ARM64 Hello World application.
+Read README.md for build, container, test, and deployment workflows.
+
+- Use `just` recipes. Run `just ci` in native ARM64 Linux or `just container-ci`
+  from a host connected to Docker. Missing tools and failed checks are errors.
+- Keep the dependency direction CLI -> application -> domain. Domain code has no
+  filesystem, process environment, hardware, network, or output dependencies.
+- Use explicit input validation and error propagation. Never silently substitute
+  configuration values, catch and ignore failures, or invoke a shell.
+- Prefer RAII, standard containers, and explicit ownership. No raw allocation,
+  unchecked C casts, checker suppressions, skipped tests, or placeholder bodies.
+- Keep public headers self-contained and declaration-only. Put implementations
+  in compiled sources so coverage includes them. Every source and test belongs
+  to the build.
+- Keep GCC and Clang debug/release tests passing. Preserve CLI exit codes and
+  exact stdout; diagnostics belong on stderr.
+- Use `code-format` explicitly; CI checks formatting without modifying files.
+- The baseline is `armv8-a`. Never add `-march=native` or global fast-math.
+- NEON is available, but Hello World needs no vector code. Future SIMD belongs
+  behind an ordinary typed interface, with scalar differential tests and real-Pi
+  benchmarks. Do not add artificial fuzzing or mutation gates without a target.
+- Add a regression test with behavior changes and a violation fixture when
+  extending a guardrail. Never weaken checks to make a change pass.
+- Do not claim a container test proves Raspberry Pi hardware compatibility or
+  performance. Keep peripheral and timing checks on the actual target machine.

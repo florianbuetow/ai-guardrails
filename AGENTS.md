@@ -115,6 +115,15 @@ Before running a violation, confirm that its resolved recipe (`check` or the `co
 - Validation: clang-format, clang-tidy, cppcheck, flawfinder, Infer, IWYU, semgrep, codespell, GoogleTest, ASan/UBSan, lcov coverage
 - Conventions: Justfile workflow, CMakePresets.json (Conan toolchains), strict compiler warnings, LLVM/Clang only
 
+### The Raspberry Pi C++ Template (`blueprints/raspberry-pi-cpp-base`)
+
+- C++20 Linux userspace application targeting 64-bit Raspberry Pi OS on AArch64
+- Develops natively on a Raspberry Pi or in the generated Debian Trixie `linux/arm64` Docker environment on Apple Silicon
+- Architecture: `cli -> application -> domain`; Raspberry Pi hardware and NEON implementations stay behind ordinary C++ interfaces
+- Validation: GCC and Clang debug/release builds, clang-format, clang-tidy with include-cleaner, cppcheck, Flawfinder, Semgrep, Gitleaks, codespell, ShellCheck, shfmt, ASan/UBSan, GoogleTest, coverage, ELF hardening checks, CLI black-box tests, and installed-artifact tests
+- The starter is a small `Hello, world!` application. Performance checks require real Raspberry Pi hardware and remain outside ordinary CI
+- Repository tests use `tests/test_raspberry_pi_cpp.py` to render the template, run its CI in Linux ARM64 Docker, execute the runtime image, and inject targeted violation overlays
+
 ### The Kotlin CLI Template (`blueprints/kotlin-cli-base`)
 
 - Kotlin 2.1+ on the JVM (toolchain 21+) with Gradle Kotlin DSL
@@ -221,7 +230,7 @@ These rules apply to all justfiles — in this repository and in all generated t
 
 - `just ci` — Run all repo-level checks (codespell, semgrep, shellcheck) + all template tests
 - `just test` — Run baseline + violation tests for all templates
-- `just test-<language>` — Run tests for one template family (python-cli-base, java-cli-base, go-cli-base, elixir-otp-base, cpp-cli-base, cpp-3dgame-base, rust-cli-base, kotlin-cli-base, scala-cli-base, clojure-cli-base, react-vite-typescript-base, mcp-server-typescript-base, node-typescript-cli-base, shellscripts-base, arm64-macos-cli-base, mmix-cli-base, ai-docs)
+- `just test-<language>` — Run tests for one template family (python-cli-base, java-cli-base, go-cli-base, elixir-otp-base, cpp-cli-base, cpp-3dgame-base, raspberry-pi-cpp-base, rust-cli-base, kotlin-cli-base, scala-cli-base, clojure-cli-base, react-vite-typescript-base, mcp-server-typescript-base, node-typescript-cli-base, shellscripts-base, arm64-macos-cli-base, mmix-cli-base, ai-docs)
 - `just check` — Verify required tools are installed
 - `just create <template> <target-dir>` — Scaffold a new project from a blueprint
 

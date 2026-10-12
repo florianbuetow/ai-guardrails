@@ -1,0 +1,113 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 25,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "generator": "Ninja",
+            "cacheVariables": {
+                "BUILD_TESTING": "ON"
+            }
+        },
+        {
+            "name": "gcc-debug",
+            "inherits": "base",
+            "binaryDir": "${sourceDir}/build/gcc-debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_COMPILER": "g++"
+            }
+        },
+        {
+            "name": "gcc-release",
+            "inherits": "base",
+            "binaryDir": "${sourceDir}/build/gcc-release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_COMPILER": "g++"
+            }
+        },
+        {
+            "name": "clang-debug",
+            "inherits": "base",
+            "binaryDir": "${sourceDir}/build/clang-debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_COMPILER": "clang++"
+            }
+        },
+        {
+            "name": "clang-release",
+            "inherits": "base",
+            "binaryDir": "${sourceDir}/build/clang-release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_COMPILER": "clang++"
+            }
+        },
+        {
+            "name": "sanitize",
+            "inherits": "clang-debug",
+            "binaryDir": "${sourceDir}/build/sanitize",
+            "cacheVariables": {
+                "ENABLE_SANITIZERS": "ON"
+            }
+        },
+        {
+            "name": "coverage",
+            "inherits": "clang-debug",
+            "binaryDir": "${sourceDir}/build/coverage",
+            "cacheVariables": {
+                "ENABLE_COVERAGE": "ON"
+            }
+        }
+    ],
+    "buildPresets": [
+        { "name": "gcc-debug", "configurePreset": "gcc-debug" },
+        { "name": "gcc-release", "configurePreset": "gcc-release" },
+        { "name": "clang-debug", "configurePreset": "clang-debug" },
+        { "name": "clang-release", "configurePreset": "clang-release" },
+        { "name": "sanitize", "configurePreset": "sanitize" },
+        { "name": "coverage", "configurePreset": "coverage" }
+    ],
+    "testPresets": [
+        {
+            "name": "gcc-debug",
+            "configurePreset": "gcc-debug",
+            "output": { "outputOnFailure": true, "verbosity": "verbose" }
+        },
+        {
+            "name": "gcc-release",
+            "configurePreset": "gcc-release",
+            "output": { "outputOnFailure": true, "verbosity": "verbose" }
+        },
+        {
+            "name": "clang-debug",
+            "configurePreset": "clang-debug",
+            "output": { "outputOnFailure": true, "verbosity": "verbose" }
+        },
+        {
+            "name": "clang-release",
+            "configurePreset": "clang-release",
+            "output": { "outputOnFailure": true, "verbosity": "verbose" }
+        },
+        {
+            "name": "sanitize",
+            "configurePreset": "sanitize",
+            "output": { "outputOnFailure": true, "verbosity": "verbose" }
+        },
+        {
+            "name": "coverage",
+            "configurePreset": "coverage",
+            "environment": {
+                "LLVM_PROFILE_FILE": "${sourceDir}/build/coverage/default-%p.profraw"
+            },
+            "output": { "outputOnFailure": true, "verbosity": "verbose" }
+        }
+    ]
+}

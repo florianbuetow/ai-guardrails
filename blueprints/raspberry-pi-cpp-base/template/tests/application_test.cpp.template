@@ -1,0 +1,37 @@
+#include "{{project_name}}/application/application.hpp"
+
+#include <gtest/gtest.h>
+
+#include <ostream>
+#include <sstream>
+#include <streambuf>
+
+namespace {{project_name | replace('-', '_')}}::application::test {
+namespace {
+
+class FailingStreamBuffer final : public std::streambuf {
+   protected:
+    auto overflow(int_type) -> int_type override { return traits_type::eof(); }
+};
+
+TEST(ApplicationTest, WritesGreetingAndReturnsSuccess) {
+    std::ostringstream output;
+
+    const int result = run(output);
+
+    EXPECT_EQ(result, 0);
+    EXPECT_EQ(output.str(), "Hello, world!\n");
+}
+
+TEST(ApplicationTest, ReturnsFailureWhenOutputFails) {
+    FailingStreamBuffer buffer;
+    std::ostream output(&buffer);
+
+    const int result = run(output);
+
+    EXPECT_EQ(result, 1);
+    EXPECT_TRUE(output.fail());
+}
+
+}  // namespace
+}  // namespace {{project_name | replace('-', '_')}}::application::test

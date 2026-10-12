@@ -1,0 +1,15 @@
+#include "{{project_name}}/application/application.hpp"
+
+#include <ostream>
+
+#include "{{project_name}}/domain/greeting.hpp"
+
+namespace {{project_name | replace('-', '_')}}::application {
+
+auto run(std::ostream& output) -> int {
+    output << domain::greeting() << '\n';
+    output.flush();
+    return output ? 0 : 1;
+}
+
+}  // namespace {{project_name | replace('-', '_')}}::application
