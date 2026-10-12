@@ -1,6 +1,6 @@
 {
   "coveragePercent": 80,
-  "coverageTargets": ["AppDomain.framework", "AppApplication.framework", "AppInfrastructure.framework", "AppUI.framework"],
+  "coverageTargets": ["AppUI.framework"],
   "performanceIterations": 10,
   "performanceRegressionPercent": 20,
   "propertyCases": 200,

@@ -86,10 +86,8 @@ func verifyGraph(_ path: String) throws {
     }
     let targets = try require(spec, "targets", as: [String: [String: Any]].self)
     let allowed: [String: Set<String>] = [
-        "AppDomain": [], "AppApplication": ["AppDomain"],
-        "AppInfrastructure": ["AppDomain", "AppApplication"],
-        "AppUI": ["AppApplication"],
-        "App": ["AppDomain", "AppApplication", "AppInfrastructure", "AppUI"],
+        "AppUI": [],
+        "App": ["AppUI"],
     ]
     let expectedTargets = Set(allowed.keys).union(["AppTests", "AppUITests", "PerformanceTests"])
     guard Set(targets.keys) == expectedTargets else {

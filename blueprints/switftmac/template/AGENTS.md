@@ -10,11 +10,10 @@ files or files inside .tools/, build/ or Tools/Guardrails/.build/.
 - No forced unwrap/cast/try, discarded errors, empty catches or silent defaults.
 - No checker suppression, unchecked Sendable, unsafe actor-isolation bypasses,
   skipped tests, expected failures or automatic snapshot acceptance in CI.
-- AppUI -> AppApplication -> AppDomain. AppInfrastructure implements application
-  interfaces. App is the composition root.
-- Domain and application code receive effects through interfaces. Required input
-  is validated explicitly. A new workspace is an explicit lifecycle state, not
-  recovery from corrupt persisted data.
+- App imports AppUI. AppUI imports SwiftUI only. No other source modules belong in
+  the starter application.
+- Keep the starter interface exact: one window with centered `Hello World!` text
+  and uses the standard red title-bar button to close the window.
 - Every selected tool is installed and configured by `just init`. A missing tool
   or failed scanner is an error. Never turn a missing prerequisite into a skip.
 - Run `just code-format` deliberately, then `just ci`. CI checks formatting without
@@ -26,8 +25,8 @@ files or files inside .tools/, build/ or Tools/Guardrails/.build/.
 
 ## Files
 
-Sources/ contains app modules. Tests/ contains logic, property, snapshot and view
-inspection tests. UITests/ exercises the running app and measures launch time.
+Sources/ contains the App and AppUI modules. Tests/ contains unit, snapshot and
+view inspection tests. UITests/ exercises the running app and measures launch time.
 Tools/Guardrails/ owns custom SwiftSyntax analysis. scripts/ owns CLI orchestration
 and strict report validation. config/ contains pinned tool downloads and policies.
 Documentation/ contains the DocC guide. .githooks/pre-commit invokes the same CI as

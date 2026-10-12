@@ -1,1 +1,0 @@
-ready(name: Studio, count: 0)

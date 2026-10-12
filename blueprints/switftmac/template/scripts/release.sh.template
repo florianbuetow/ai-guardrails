@@ -8,7 +8,7 @@ if [ -z "${SIGNING_IDENTITY-}" ] || [ -z "${NOTARY_PROFILE-}" ]; then
 fi
 # A release always passes the same local gates before credentials are used.
 just ci
-bash scripts/xcode.sh archive -configuration Release -archivePath "build/{{project_name}}.xcarchive" \
+bash scripts/xcode.sh Release archive -archivePath "build/{{project_name}}.xcarchive" \
     CODE_SIGN_IDENTITY="$SIGNING_IDENTITY" ENABLE_HARDENED_RUNTIME=YES
 app="build/{{project_name}}.xcarchive/Products/Applications/{{project_name}}.app"
 codesign --verify --strict --verbose=2 "$app"

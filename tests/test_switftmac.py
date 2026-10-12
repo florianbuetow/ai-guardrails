@@ -151,7 +151,7 @@ class SwiftMacTemplateTests(unittest.TestCase):
             },
             "targets": {
                 **targets,
-                "AppTests": {"dependencies": []},
+                "AppTests": {"dependencies": [{"target": "AppUI"}]},
                 "AppUITests": {"dependencies": [{"target": "App"}]},
                 "PerformanceTests": {"dependencies": [{"target": "App"}]},
             },
@@ -230,6 +230,15 @@ class SwiftMacTemplateTests(unittest.TestCase):
             self.assertTrue((project / "scripts" / "check-tools.sh").is_file())
             self.assertTrue((project / "config" / "performance.schema.json").is_file())
             self.assertFalse((project / "fixture-app").exists(), "Copier rendered a duplicate project tree")
+            self.assertEqual(
+                ["App", "AppUI"],
+                sorted(path.name for path in (project / "Sources").iterdir() if path.is_dir()),
+            )
+            project_spec = (project / "project.yml").read_text(encoding="utf-8")
+            for removed_module in ("AppDomain", "AppApplication", "AppInfrastructure"):
+                self.assertNotIn(removed_module, project_spec)
+            quality = json.loads((project / "config" / "quality.json").read_text(encoding="utf-8"))
+            self.assertEqual(["AppUI.framework"], quality["coverageTargets"])
 
             native_tools = {
                 line.split("\t", 1)[0]
@@ -264,6 +273,44 @@ class SwiftMacTemplateTests(unittest.TestCase):
                     contents = contents.replace(just_parameter, b"")
                 self.assertNotIn(b"{{", contents, f"unrendered template expression in {path}")
                 self.assertNotIn(b"{%", contents, f"unrendered template statement in {path}")
+
+    def test_xcode_wrapper_passes_one_explicit_configuration(self) -> None:
+        wrapper = TEMPLATE / "template" / "scripts" / "xcode.sh"
+        with tempfile.TemporaryDirectory(prefix="switftmac-xcode-arguments-") as temporary_directory:
+            project = Path(temporary_directory)
+            (project / "scripts").mkdir()
+            (project / "scripts" / "check-tools.sh").write_text("#!/bin/bash\nexit 0\n")
+            (project / "scripts" / "environment.sh").write_text(
+                'export PATH="$PWD/.tools/bin:$PATH"\n'
+            )
+            tools = project / ".tools" / "bin"
+            tools.mkdir(parents=True)
+            for name, contents in {
+                "xcodegen": "#!/bin/sh\nexit 0\n",
+                "xcodebuild": '#!/bin/sh\nprintf "%s\\n" "$@" > arguments.txt\n',
+            }.items():
+                executable = tools / name
+                executable.write_text(contents)
+                executable.chmod(0o755)
+            lock = project / "config" / "App" / "Package.resolved"
+            lock.parent.mkdir(parents=True)
+            lock.write_text('{"pins": []}\n')
+
+            for configuration, action in (("Debug", "build"), ("Release", "archive")):
+                with self.subTest(configuration=configuration):
+                    result = run(["bash", str(wrapper), configuration, action], project)
+                    self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+                    arguments = (project / "arguments.txt").read_text().splitlines()
+                    self.assertEqual(1, arguments.count("-configuration"))
+                    self.assertEqual(configuration, arguments[arguments.index("-configuration") + 1])
+                    self.assertEqual(action, arguments[-1])
+                    copied_lock = project / "App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"
+                    self.assertEqual(lock.read_bytes(), copied_lock.read_bytes())
+
+            for arguments in ([], ["Debug"], ["Unknown", "build"]):
+                with self.subTest(arguments=arguments):
+                    result = run(["bash", str(wrapper), *arguments], project)
+                    self.assertNotEqual(0, result.returncode)
 
     def test_host_preflight_pins_the_approved_platform_and_toolchain(self) -> None:
         check_host = (TEMPLATE / "template" / "scripts" / "check-host.sh").read_text(encoding="utf-8")
@@ -407,15 +454,10 @@ generate_project {shlex.quote(temporary_directory)}
                 self.assertNotEqual(0, result.returncode, result.stdout + result.stderr)
 
     def test_result_verifier_rejects_missing_and_low_coverage_targets(self) -> None:
-        quality = {"coveragePercent": 80.0, "coverageTargets": ["AppDomain", "AppApplication"]}
+        quality = {"coveragePercent": 80.0, "coverageTargets": ["AppUI"]}
         invalid_reports = (
-            {"targets": [{"name": "AppDomain", "executableLines": 10, "coveredLines": 10}]},
-            {
-                "targets": [
-                    {"name": "AppDomain", "executableLines": 10, "coveredLines": 7},
-                    {"name": "AppApplication", "executableLines": 10, "coveredLines": 10},
-                ]
-            },
+            {"targets": []},
+            {"targets": [{"name": "AppUI", "executableLines": 10, "coveredLines": 7}]},
         )
         for report in invalid_reports:
             with self.subTest(report=report):
@@ -424,29 +466,17 @@ generate_project {shlex.quote(temporary_directory)}
 
     def test_result_verifier_rejects_missing_and_forbidden_graph_edges(self) -> None:
         valid_targets: dict[str, object] = {
-            "AppDomain": {"dependencies": []},
-            "AppApplication": {"dependencies": [{"target": "AppDomain"}]},
-            "AppInfrastructure": {
-                "dependencies": [{"target": "AppDomain"}, {"target": "AppApplication"}]
-            },
-            "AppUI": {"dependencies": [{"target": "AppApplication"}]},
-            "App": {
-                "dependencies": [
-                    {"target": "AppDomain"},
-                    {"target": "AppApplication"},
-                    {"target": "AppInfrastructure"},
-                    {"target": "AppUI"},
-                ]
-            },
+            "AppUI": {"dependencies": []},
+            "App": {"dependencies": [{"target": "AppUI"}]},
         }
         missing = dict(valid_targets)
-        missing.pop("AppDomain")
+        missing.pop("AppUI")
         forbidden = dict(valid_targets)
-        forbidden["AppDomain"] = {"dependencies": [{"target": "AppUI"}]}
+        forbidden["AppUI"] = {"dependencies": [{"target": "App"}]}
         extra = dict(valid_targets)
         extra["UnscannedModule"] = {"dependencies": []}
         malformed = dict(valid_targets)
-        malformed["AppDomain"] = {"dependencies": [{"framework": "Unexpected.framework"}]}
+        malformed["AppUI"] = {"dependencies": [{"framework": "Unexpected.framework"}]}
 
         for report in (
             self.graph_report(missing), self.graph_report(forbidden),
@@ -457,7 +487,7 @@ generate_project {shlex.quote(temporary_directory)}
                 self.assertNotEqual(0, result.returncode, result.stdout + result.stderr)
 
     def test_scanner_report_requires_actual_successful_scanning(self) -> None:
-        valid = {"paths": {"scanned": ["Sources/AppDomain/Workspace.swift"]}, "results": [], "errors": []}
+        valid = {"paths": {"scanned": ["Sources/AppUI/ContentView.swift"]}, "results": [], "errors": []}
         result = self.run_verifier("scanner", valid)
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         reports = (
@@ -499,8 +529,8 @@ generate_project {shlex.quote(temporary_directory)}
 
         coverage = self.run_verifier(
             "coverage",
-            {"targets": [{"name": "AppDomain", "executableLines": 10, "coveredLines": 8}]},
-            {"coveragePercent": 80.0, "coverageTargets": ["AppDomain"]},
+            {"targets": [{"name": "AppUI", "executableLines": 10, "coveredLines": 8}]},
+            {"coveragePercent": 80.0, "coverageTargets": ["AppUI"]},
         )
         self.assertEqual(0, coverage.returncode, coverage.stdout + coverage.stderr)
 
@@ -508,20 +538,8 @@ generate_project {shlex.quote(temporary_directory)}
             "graph",
             self.graph_report(
                 {
-                    "AppDomain": {"dependencies": []},
-                    "AppApplication": {"dependencies": [{"target": "AppDomain"}]},
-                    "AppInfrastructure": {
-                        "dependencies": [{"target": "AppDomain"}, {"target": "AppApplication"}]
-                    },
-                    "AppUI": {"dependencies": [{"target": "AppApplication"}]},
-                    "App": {
-                        "dependencies": [
-                            {"target": "AppDomain"},
-                            {"target": "AppApplication"},
-                            {"target": "AppInfrastructure"},
-                            {"target": "AppUI"},
-                        ]
-                    },
+                    "AppUI": {"dependencies": []},
+                    "App": {"dependencies": [{"target": "AppUI"}]},
                 }
             ),
         )

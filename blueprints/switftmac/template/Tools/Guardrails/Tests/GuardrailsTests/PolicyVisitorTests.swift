@@ -7,55 +7,43 @@ import Testing
 
 @Suite("SwiftSyntax architecture policy")
 struct PolicyVisitorTests {
-    @Test("allows pure Foundation value operations in core modules")
-    func allowsValueOperations() {
+    @Test("allows the AppUI import boundary")
+    func allowsAppUIImports() {
         let source = """
-            import Foundation
+            import SwiftUI
 
-            struct DomainFailure: LocalizedError {
-                let errorDescription: String?
-            }
-
-            func normalized(_ value: String) -> String {
-                value.trimmingCharacters(in: .whitespacesAndNewlines)
+            struct Greeting: View {
+                var body: some View { Text("Hello World!") }
             }
             """
 
         #expect(findings(in: source).isEmpty)
     }
 
-    @Test("rejects explicit and inferred Foundation file reads in core modules")
-    func rejectsFileReads() {
+    @Test("rejects imports outside the AppUI boundary")
+    func rejectsForbiddenImport() {
         let source = """
             import Foundation
-
-            func explicitRead(_ url: URL) throws -> Data {
-                try Data(contentsOf: url)
-            }
-
-            func inferredRead(_ url: URL) throws -> Data {
-                try .init(contentsOf: url)
-            }
             """
 
-        let violations = findings(in: source).filter { $0.contains("[architecture.effects]") }
-        #expect(violations.count == 2)
+        #expect(findings(in: source).contains { $0.contains("[architecture.import]") })
     }
 
-    @Test("rejects direct and aliased effect types in core modules")
-    func rejectsEffectTypes() {
+    @Test("rejects silent defaults, discarded errors, and checker suppression")
+    func rejectsPolicyBypasses() {
         let source = """
-            import Foundation
-
-            typealias HiddenFiles = FileManager
-
-            func standardFiles() -> FileManager {
-                FileManager.default
+            // swiftlint:disable force_unwrapping
+            func greeting(_ value: String? = nil) -> String {
+                _ = try? riskyOperation()
+                return value ?? "Hello World!"
             }
             """
 
-        let violations = findings(in: source).filter { $0.contains("[architecture.effects]") }
-        #expect(violations.count >= 2)
+        let violations = findings(in: source)
+        #expect(violations.contains { $0.contains("[checks.no-suppression]") })
+        #expect(violations.contains { $0.contains("[errors.explicit]") })
+        #expect(violations.contains { $0.contains("[values.explicit]") })
+        #expect(violations.contains { $0.contains("[values.no-fallback]") })
     }
 
     @Test("accepts the declared source modules and rejects an extra module")
@@ -65,7 +53,7 @@ struct PolicyVisitorTests {
         let sources = root.appending(path: "Sources", directoryHint: .isDirectory)
         try FileManager.default.createDirectory(
             at: sources, withIntermediateDirectories: true, attributes: nil)
-        for module in ["App", "AppApplication", "AppDomain", "AppInfrastructure", "AppUI"] {
+        for module in ["App", "AppUI"] {
             try FileManager.default.createDirectory(
                 at: sources.appending(path: module, directoryHint: .isDirectory),
                 withIntermediateDirectories: false,
@@ -96,8 +84,7 @@ struct PolicyVisitorTests {
         let visitor = PolicyVisitor(
             path: "Fixture.swift",
             tree: tree,
-            allowedImports: ["Foundation", "Swift"],
-            isCore: true
+            allowedImports: ["SwiftUI"]
         )
         visitor.walk(tree)
         return visitor.findings

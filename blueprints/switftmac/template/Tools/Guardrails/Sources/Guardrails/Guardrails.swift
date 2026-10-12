@@ -10,24 +10,15 @@ enum PolicyFailure: Error {
 }
 
 final class PolicyVisitor: SyntaxVisitor {
-    private static let effectTypes: Set<String> = [
-        "DispatchIO", "FileHandle", "FileManager", "InputStream", "NSFileHandle", "NSFileManager",
-        "NSInputStream", "NSOutputStream", "OutputStream", "Process", "ProcessInfo", "URLSession",
-        "UserDefaults",
-    ]
-    private static let fileContentTypes: Set<String> = ["Data", "NSData", "NSString", "String"]
-
     let path: String
     let locations: SourceLocationConverter
     let allowedImports: Set<String>
-    let isCore: Bool
     var findings: [String] = []
 
-    init(path: String, tree: SourceFileSyntax, allowedImports: Set<String>, isCore: Bool) {
+    init(path: String, tree: SourceFileSyntax, allowedImports: Set<String>) {
         self.path = path
         locations = SourceLocationConverter(fileName: path, tree: tree)
         self.allowedImports = allowedImports
-        self.isCore = isCore
         super.init(viewMode: .sourceAccurate)
     }
 
@@ -48,36 +39,6 @@ final class PolicyVisitor: SyntaxVisitor {
         if node.questionOrExclamationMark != nil {
             report(
                 node, "errors.explicit", "Propagate or handle errors; do not discard or force them")
-        }
-        return .visitChildren
-    }
-
-    override func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
-        guard isCore else { return .visitChildren }
-        let labels = Set(node.arguments.compactMap { $0.label?.text })
-        guard !labels.isDisjoint(with: ["contentsOf", "contentsOfFile"]) else {
-            return .visitChildren
-        }
-        let called = node.calledExpression.trimmedDescription
-        let calledType = called.split(separator: ".").last.map(String.init)
-        if called == ".init" || called.hasSuffix(".init")
-            || calledType.map(Self.fileContentTypes.contains) == true
-        {
-            report(
-                node, "architecture.effects",
-                "Move Foundation file reads behind an interface implemented by AppInfrastructure")
-        }
-        return .visitChildren
-    }
-
-    override func visit(_ node: TypeAliasDeclSyntax) -> SyntaxVisitorContinueKind {
-        guard isCore else { return .visitChildren }
-        let target = node.initializer.value.trimmedDescription
-        let targetType = target.split(separator: ".").last.map(String.init)
-        if targetType.map(Self.effectTypes.contains) == true {
-            report(
-                node, "architecture.effects",
-                "A type alias cannot hide an effectful Foundation type in a core module")
         }
         return .visitChildren
     }
@@ -136,11 +97,6 @@ final class PolicyVisitor: SyntaxVisitor {
         if ["XCTSkip", "XCTSkipIf", "XCTSkipUnless", "withKnownIssue"].contains(name) {
             report(node, "tests.no-skip", "Do not skip or conceal test failures")
         }
-        if isCore && Self.effectTypes.contains(name) {
-            report(
-                node, "architecture.effects",
-                "Inject an interface; move \(name) into Infrastructure")
-        }
         return .visitChildren
     }
 
@@ -169,7 +125,7 @@ final class PolicyVisitor: SyntaxVisitor {
 @main
 struct Guardrails {
     private static let sourceModules: Set<String> = [
-        "App", "AppApplication", "AppDomain", "AppInfrastructure", "AppUI",
+        "App", "AppUI",
     ]
 
     static func swiftFiles(in folder: URL) throws -> [URL] {
@@ -230,38 +186,22 @@ struct Guardrails {
     static func run() throws {
         guard CommandLine.arguments.count == 2 else { throw PolicyFailure.invalidArguments }
         let root = URL(fileURLWithPath: CommandLine.arguments[1], isDirectory: true)
-        let modules: [(String, Set<String>, Bool)] = [
-            ("Sources/AppDomain", ["Swift", "Foundation"], true),
-            ("Sources/AppApplication", ["Swift", "Foundation", "Observation", "AppDomain"], true),
-            (
-                "Sources/AppInfrastructure",
-                ["Swift", "Foundation", "AppDomain", "AppApplication"], false
-            ),
-            (
-                "Sources/AppUI",
-                ["Swift", "Foundation", "SwiftUI", "AppKit", "Observation", "AppApplication"], false
-            ),
-            (
-                "Sources/App",
-                [
-                    "Swift", "Foundation", "SwiftUI", "AppKit", "AppUI", "AppApplication",
-                    "AppInfrastructure", "AppDomain",
-                ], false
-            ),
+        let modules: [(String, Set<String>)] = [
+            ("Sources/AppUI", ["SwiftUI"]),
+            ("Sources/App", ["SwiftUI", "AppUI"]),
             (
                 "Tests",
                 [
                     "Swift", "Foundation", "SwiftUI", "AppKit", "Testing", "XCTest",
-                    "PropertyBased", "SnapshotTesting", "ViewInspector", "AppUI", "AppDomain",
-                    "AppApplication", "AppInfrastructure",
-                ], false
+                    "PropertyBased", "SnapshotTesting", "ViewInspector", "AppUI",
+                ]
             ),
-            ("UITests", ["Swift", "Foundation", "XCTest", "XCUIAutomation"], false),
+            ("UITests", ["Swift", "Foundation", "XCTest", "XCUIAutomation"]),
         ]
         let layoutFindings = try sourceLayoutFindings(root: root)
         for finding in layoutFindings { print(finding) }
         var count = layoutFindings.count
-        for (directory, imports, isCore) in modules {
+        for (directory, imports) in modules {
             let folder = root.appendingPathComponent(directory)
             guard FileManager.default.fileExists(atPath: folder.path) else {
                 throw PolicyFailure.missingSource(directory)
@@ -272,7 +212,7 @@ struct Guardrails {
                 let tree = Parser.parse(source: source)
                 guard !tree.hasError else { throw PolicyFailure.unreadableDirectory(file.path) }
                 let visitor = PolicyVisitor(
-                    path: file.path, tree: tree, allowedImports: imports, isCore: isCore)
+                    path: file.path, tree: tree, allowedImports: imports)
                 visitor.walk(tree)
                 for finding in visitor.findings { print(finding) }
                 count += visitor.findings.count

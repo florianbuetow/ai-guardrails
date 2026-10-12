@@ -15,7 +15,7 @@ bash scripts/check-tools.sh
 # shellcheck source=environment.sh
 source scripts/environment.sh
 case "$task" in
-    build) bash scripts/xcode.sh build ;;
+    build) bash scripts/xcode.sh Debug build ;;
     run)
         bash scripts/package.sh
         open "build/DerivedData/Build/Products/Debug/{{project_name}}.app"
@@ -28,7 +28,7 @@ case "$task" in
         swiftlint lint --strict --config .swiftlint.yml --cache-path build/swiftlint-cache
         ;;
     code-analyze)
-        bash scripts/xcode.sh clean build-for-testing 2>&1 | tee build/logs/compiler.log
+        bash scripts/xcode.sh Debug clean build-for-testing 2>&1 | tee build/logs/compiler.log
         swiftlint analyze --strict --config .swiftlint.yml --compiler-log-path build/logs/compiler.log
         ;;
     code-architecture)
@@ -79,14 +79,14 @@ case "$task" in
     test-performance) bash scripts/tests.sh performance ;;
     performance-baseline) bash scripts/tests.sh performance-calibrate ;;
     debug)
-        bash scripts/xcode.sh build
+        bash scripts/xcode.sh Debug build
         xcrun lldb "build/DerivedData/Build/Products/Debug/{{project_name}}.app/Contents/MacOS/{{project_name}}"
         ;;
     profile)
-        bash scripts/xcode.sh build
+        bash scripts/xcode.sh Release build
         xcrun xctrace record --template 'Time Profiler' --time-limit 10s \
             --output "build/reports/profile-$(date +%s).trace" --launch -- \
-            "build/DerivedData/Build/Products/Debug/{{project_name}}.app/Contents/MacOS/{{project_name}}"
+            "build/DerivedData/Build/Products/Release/{{project_name}}.app/Contents/MacOS/{{project_name}}"
         ;;
     *)
         printf 'Unknown task: %s\n' "$task" >&2

@@ -2,10 +2,8 @@
 
 {{project_description}}
 
-This native SwiftUI application has a normal window, a menu bar item, a toolbar,
-keyboard commands and a settings window. The starter workspace counter persists
-its state through an injected file store. First launch creates a new workspace;
-corrupt saved data is reported rather than replaced with a default.
+This native SwiftUI application opens one window with a centered `Hello World!`
+message. The standard red title-bar button closes the window.
 
 ## Install, build and launch
 
@@ -52,7 +50,7 @@ and launches that bundle with `open`. `just debug` opens the executable in LLDB.
 | `just code-dependencies` | Locked dependency resolution and OSV advisories |
 | `just code-docs` | DocC documentation diagnostics |
 | `just code-package` | Bundle metadata, architecture, signature and transport policy |
-| `just test` | Swift Testing unit/integration/property tests and view inspection |
+| `just test` | Swift Testing checks, view inspection and snapshots |
 | `just test-ui` | Actual application interaction through XCUIAutomation |
 | `just test-accessibility` | Native accessibility audits |
 | `just test-snapshots` | Reviewed snapshot comparisons |
@@ -77,17 +75,14 @@ and view size when capturing or comparing images.
 
 ## Architecture
 
-`App` assembles `AppUI`, `AppApplication` and `AppInfrastructure`. UI calls
-application services; application services use `AppDomain` and persistence
-interfaces. Infrastructure implements those interfaces. Domain and application
-code cannot directly use filesystem, network, process-environment or preferences
-APIs. External testing libraries are test dependencies, never app dependencies.
-The custom checker enforces the declared module graph and specified syntax/API
-policies. It is not a whole-program, type-resolved proof of every indirect effect.
+`App` is the executable composition root and depends only on `AppUI`. `AppUI`
+contains only the centered greeting and imports only SwiftUI. External
+testing libraries are test dependencies, never app dependencies. The custom
+checker enforces this two-module graph and the specified syntax policies.
 
 ## Profiling and distribution
 
-`just profile` records a ten-second Time Profiler trace. `just memory PID` runs
+`just profile` builds Release and records a ten-second Time Profiler trace. `just memory PID` runs
 `vmmap` and `leaks` for an explicitly selected running process. Runtime diagnostics
 are separate from performance measurements. Establish performance baselines on
 the intended runner; results from unrelated hardware are not interchangeable.

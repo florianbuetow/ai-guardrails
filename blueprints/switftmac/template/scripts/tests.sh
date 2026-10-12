@@ -23,7 +23,7 @@ esac
 mkdir -p build/results
 result="$(mktemp -d "$PWD/build/results/$kind.XXXXXXXX")"
 log="$result/xcodebuild.log"
-bash scripts/xcode.sh test "${arguments[@]}" -resultBundlePath "$result/tests.xcresult" 2>&1 | tee "$log"
+bash scripts/xcode.sh Debug test "${arguments[@]}" -resultBundlePath "$result/tests.xcresult" 2>&1 | tee "$log"
 xcrun xcresulttool get test-results summary --path "$result/tests.xcresult" >"$result/summary.json"
 xcrun swift scripts/verify.swift tests "$result/summary.json"
 if grep -Eq 'Main Thread Checker:|WARNING: ThreadSanitizer|ERROR: AddressSanitizer' "$log"; then

@@ -28,7 +28,6 @@ validate_violation_output() {
     case "$violation" in
         force-unwrap) expected='force_unwrapping' ;;
         forbidden-ui-import) expected='architecture.import' ;;
-        core-file-io) expected='architecture.effects' ;;
         extra-source-module) expected='architecture.modules' ;;
         shell-process) expected='swift.no-shell-process' ;;
         insecure-transport) expected='swift.no-insecure-transport' ;;

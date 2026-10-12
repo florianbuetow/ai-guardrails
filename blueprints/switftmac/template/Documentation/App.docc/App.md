@@ -12,7 +12,8 @@ Build and validate a native macOS application from the terminal.
 
 Run `just init` to install the complete pinned toolchain, `just ci` to validate
 the project, and `just run` to open the application. SwiftUI owns presentation;
-application services coordinate domain behavior and infrastructure interfaces.
+the App target opens one window whose AppUI content centers `Hello World!` and a
+standard red title-bar close button.
 
 ### Validation
 

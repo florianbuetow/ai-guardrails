@@ -84,32 +84,10 @@ targetTemplates:
         TEST_HOST: ""
 
 targets:
-  AppDomain:
-    templates: [Framework]
-    sources:
-      - Sources/AppDomain
-
-  AppApplication:
-    templates: [Framework]
-    sources:
-      - Sources/AppApplication
-    dependencies:
-      - target: AppDomain
-
-  AppInfrastructure:
-    templates: [Framework]
-    sources:
-      - Sources/AppInfrastructure
-    dependencies:
-      - target: AppApplication
-      - target: AppDomain
-
   AppUI:
     templates: [Framework]
     sources:
       - Sources/AppUI
-    dependencies:
-      - target: AppApplication
 
   App:
     type: application
@@ -120,10 +98,7 @@ targets:
       - path: Resources
         buildPhase: resources
     dependencies:
-      - target: AppDomain
       - target: AppUI
-      - target: AppApplication
-      - target: AppInfrastructure
     settings:
       base:
         PRODUCT_NAME: {{ project_name }}
@@ -142,11 +117,10 @@ targets:
   AppTests:
     templates: [TestBundle]
     sources:
-      - Tests/AppTests
+      - path: Tests/AppTests
+        excludes:
+          - __Snapshots__/**
     dependencies:
-      - target: AppDomain
-      - target: AppApplication
-      - target: AppInfrastructure
       - target: AppUI
       - package: PropertyBased
       - package: SnapshotTesting
@@ -196,9 +170,6 @@ schemes:
       stopOnEveryMainThreadCheckerIssue: true
       gatherCoverageData: true
       coverageTargets:
-        - AppDomain
-        - AppApplication
-        - AppInfrastructure
         - AppUI
       targets:
         - name: AppTests

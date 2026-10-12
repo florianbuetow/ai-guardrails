@@ -1,51 +1,12 @@
-import AppApplication
-import AppInfrastructure
 import AppUI
-import Foundation
 import SwiftUI
 
 @main
 struct NativeApp: App {
-    @State private var model: WorkspaceModel
-
-    init() {
-        let fileURL = Self.workspaceFileURL()
-        let store = FileWorkspaceStore(fileURL: fileURL, fileManager: .default)
-        _model = State(initialValue: WorkspaceModel(store: store))
-    }
-
     var body: some Scene {
-        WindowGroup(id: "main") {
-            ContentView(model: model)
+        Window("{{ project_name }}", id: "main") {
+            ContentView()
         }
-        .defaultSize(width: 640, height: 480)
-        .commands {
-            WorkspaceCommands(model: model)
-        }
-
-        MenuBarExtra {
-            WorkspaceMenu(model: model)
-        } label: {
-            MenuBarLabel(model: model)
-        }
-        .menuBarExtraStyle(.menu)
-
-        Settings {
-            SettingsView(model: model)
-        }
-    }
-
-    private static func workspaceFileURL() -> URL {
-        if CommandLine.arguments.contains("--ui-testing") {
-            guard let path = ProcessInfo.processInfo.environment["UI_TEST_STORAGE_FILE"],
-                !path.isEmpty
-            else {
-                fatalError("UI_TEST_STORAGE_FILE is required when --ui-testing is supplied.")
-            }
-            return URL(fileURLWithPath: path)
-        }
-        return URL.applicationSupportDirectory
-            .appending(path: "{{ project_name }}", directoryHint: .isDirectory)
-            .appending(path: "workspace.json", directoryHint: .notDirectory)
+        .defaultSize(width: 480, height: 320)
     }
 }
