@@ -214,7 +214,7 @@ run_language_tests() {
         backup_dir="$(mktemp -d)"
         inject_violation "$violation_dir" "$project_dir" "$backup_dir"
         if [ "${NO_GIT_MUTATIONS:-false}" != "true" ]; then
-            (cd "$project_dir" && git add -A)
+            (cd "$project_dir" && git ls-files --cached --others --exclude-standard -z | xargs -0 git add --)
         fi
 
         # Run the targeted check — it must fail

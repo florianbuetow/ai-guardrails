@@ -68,7 +68,7 @@ generate_project() {
         git init -q && \
         git config user.email template-tests@example.invalid && \
         git config user.name "Template Tests" && \
-        git add -A && \
+        git ls-files --cached --others --exclude-standard -z | xargs -0 git add -- && \
         git -c advice.ignoredHook=false commit -q -m "init")
 }
 
