@@ -27,7 +27,7 @@ jobs:
     runs-on: xcode-27
     timeout-minutes: 120
     env:
-      PROJECT_DIR: ${{ runner.temp }}/switftmac-ci
+      PROJECT_DIR: ${{ github.workspace }}/.ci-project
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
