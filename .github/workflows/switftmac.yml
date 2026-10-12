@@ -24,6 +24,7 @@ permissions:
 
 jobs:
   template:
+    name: Generated project CI
     runs-on: xcode-27
     timeout-minutes: 120
     env:
@@ -60,8 +61,6 @@ jobs:
       - name: Full generated application CI
         working-directory: ${{ env.PROJECT_DIR }}
         run: just ci
-      - name: Repository baseline and violation target
-        run: just test-switftmac
       - name: Preserve reports and snapshot differences
         if: always()
         uses: actions/upload-artifact@v4
@@ -73,3 +72,29 @@ jobs:
             ${{ env.PROJECT_DIR }}/build/logs/
             ${{ env.PROJECT_DIR }}/build/reports/
             ${{ env.PROJECT_DIR }}/Tests/AppTests/__Snapshots__/
+
+  baseline:
+    name: Baseline and violations
+    runs-on: xcode-27
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: extractions/setup-just@v3
+      - name: Install generator
+        run: python -m pip install copier==9.17.2
+      - name: Verify exact Apple toolchain
+        run: bash blueprints/switftmac/template/scripts/check-host.sh
+      - name: Repository baseline and violation target
+        run: |
+          set -euo pipefail
+          just test-switftmac 2>&1 | tee "$RUNNER_TEMP/switftmac-baseline.log"
+      - name: Preserve baseline and violation log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: switftmac-baseline-evidence
+          if-no-files-found: error
+          path: ${{ runner.temp }}/switftmac-baseline.log
