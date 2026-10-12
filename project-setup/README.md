@@ -2,6 +2,21 @@
 
 This directory contains a complete setup system for bootstrapping new Python projects using Claude Code.
 
+## Raspberry Pi and Swift aliases
+
+Alias definitions live in the `ALIASES` array in `setup_aliases.sh`. The installer
+adds them to `~/.zshrc` for zsh (or the corresponding configuration for the selected
+shell), pointing to the template checkout under `~/scripts/ai-guardrails`.
+
+```sh
+newpicpp my-pi-project      # raspberry-pi-cpp-base: C++20 on 64-bit Raspberry Pi OS
+newswift my-mac-app         # switftmac: native Swift macOS Hello World app
+```
+
+The wrappers are `setup-project-raspberry-pi-cpp-base-claude.sh` and
+`setup-project-switftmac-claude.sh`. They scaffold projects through the shared
+`setup-project.sh` entry point.
+
 ## Contents
 
 ### Files in This Directory

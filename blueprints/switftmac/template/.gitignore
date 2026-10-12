@@ -1,0 +1,9 @@
+.tools/
+.build/
+build/
+*.xcodeproj/
+*.xcworkspace/
+.DS_Store
+*.trace/
+*.dSYM/
+xcuserdata/

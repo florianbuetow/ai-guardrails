@@ -1,0 +1,203 @@
+name: App
+
+options:
+  bundleIdPrefix: {{ bundle_identifier }}
+  minimumXcodeGenVersion: 2.46.0
+  deploymentTarget:
+    macOS: "26.0"
+  xcodeVersion: "27.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+attributes:
+  LastSwiftUpdateCheck: "2700"
+  LastUpgradeCheck: "2700"
+
+configs:
+  Debug: debug
+  Test: debug
+  AddressSanitizer: debug
+  ThreadSanitizer: debug
+  Release: release
+
+settings:
+  base:
+    MACOSX_DEPLOYMENT_TARGET: "26.0"
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    SWIFT_TREAT_WARNINGS_AS_ERRORS: true
+    GCC_TREAT_WARNINGS_AS_ERRORS: true
+    CLANG_WARN_DOCUMENTATION_COMMENTS: true
+    CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER: true
+    DEAD_CODE_STRIPPING: true
+    ENABLE_USER_SCRIPT_SANDBOXING: true
+    CODE_SIGN_IDENTITY: "-"
+    CODE_SIGN_STYLE: Manual
+    OTHER_SWIFT_FLAGS:
+      - "$(inherited)"
+      - -strict-memory-safety
+  configs:
+    Debug:
+      SWIFT_OPTIMIZATION_LEVEL: -Onone
+    Test:
+      SWIFT_OPTIMIZATION_LEVEL: -Onone
+      ENABLE_TESTABILITY: true
+    AddressSanitizer:
+      SWIFT_OPTIMIZATION_LEVEL: -Onone
+      ENABLE_TESTABILITY: true
+      ENABLE_ADDRESS_SANITIZER: true
+    ThreadSanitizer:
+      SWIFT_OPTIMIZATION_LEVEL: -Onone
+      ENABLE_TESTABILITY: true
+      ENABLE_THREAD_SANITIZER: true
+    Release:
+      SWIFT_COMPILATION_MODE: wholemodule
+
+packages:
+  PropertyBased:
+    url: https://github.com/x-sheep/swift-property-based.git
+    exactVersion: 2.0.1
+  SnapshotTesting:
+    url: https://github.com/pointfreeco/swift-snapshot-testing.git
+    exactVersion: 1.19.6
+  ViewInspector:
+    url: https://github.com/nalexn/ViewInspector.git
+    exactVersion: 0.10.5
+
+targetTemplates:
+  Framework:
+    type: framework
+    platform: macOS
+    deploymentTarget: "26.0"
+    settings:
+      base:
+        DEFINES_MODULE: true
+        GENERATE_INFOPLIST_FILE: true
+        SKIP_INSTALL: true
+  TestBundle:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "26.0"
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: true
+        TEST_HOST: ""
+
+targets:
+  AppUI:
+    templates: [Framework]
+    sources:
+      - Sources/AppUI
+
+  App:
+    type: application
+    platform: macOS
+    deploymentTarget: "26.0"
+    sources:
+      - Sources/App
+    dependencies:
+      - target: AppUI
+    settings:
+      base:
+        PRODUCT_NAME: {{ project_name }}
+        PRODUCT_BUNDLE_IDENTIFIER: {{ bundle_identifier }}
+        PRODUCT_MODULE_NAME: App
+        GENERATE_INFOPLIST_FILE: true
+        INFOPLIST_KEY_CFBundleDisplayName: {{ project_name }}
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
+        INFOPLIST_KEY_NSHighResolutionCapable: true
+        INFOPLIST_KEY_NSHumanReadableCopyright: "Copyright © {{ project_name }}"
+        MARKETING_VERSION: 1.0.0
+        CURRENT_PROJECT_VERSION: 1
+
+  AppTests:
+    templates: [TestBundle]
+    sources:
+      - path: Tests/AppTests
+        excludes:
+          - __Snapshots__/**
+    dependencies:
+      - target: AppUI
+      - package: PropertyBased
+      - package: SnapshotTesting
+      - package: ViewInspector
+
+  AppUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    deploymentTarget: "26.0"
+    sources:
+      - UITests/AppUITests
+    dependencies:
+      - target: App
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: true
+        TEST_TARGET_NAME: App
+
+  PerformanceTests:
+    type: bundle.ui-testing
+    platform: macOS
+    deploymentTarget: "26.0"
+    sources:
+      - UITests/PerformanceTests
+    dependencies:
+      - target: App
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: true
+        TEST_TARGET_NAME: App
+
+schemes:
+  App:
+    build:
+      targets:
+        App: all
+        AppTests: [test]
+        AppUITests: [test]
+        PerformanceTests: [test]
+    run:
+      config: Debug
+      disableMainThreadChecker: false
+      stopOnEveryMainThreadCheckerIssue: true
+    test:
+      config: Test
+      disableMainThreadChecker: false
+      stopOnEveryMainThreadCheckerIssue: true
+      gatherCoverageData: true
+      coverageTargets:
+        - AppUI
+      targets:
+        - name: AppTests
+        - name: AppUITests
+        - name: PerformanceTests
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+  App-AddressSanitizer:
+    build:
+      targets:
+        App: all
+        AppTests: [test]
+    test:
+      config: AddressSanitizer
+      enableAddressSanitizer: true
+      disableMainThreadChecker: false
+      stopOnEveryMainThreadCheckerIssue: true
+      targets:
+        - name: AppTests
+  App-ThreadSanitizer:
+    build:
+      targets:
+        App: all
+        AppTests: [test]
+    test:
+      config: ThreadSanitizer
+      enableThreadSanitizer: true
+      disableMainThreadChecker: false
+      stopOnEveryMainThreadCheckerIssue: true
+      targets:
+        - name: AppTests

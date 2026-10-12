@@ -1,0 +1,49 @@
+#!/bin/bash
+set -euo pipefail
+
+fail() {
+    printf 'Bundle validation failed: %s\n' "$1" >&2
+    exit 1
+}
+
+assert_equal() {
+    local label="$1" expected="$2" actual="$3"
+    if [ "$actual" != "$expected" ]; then
+        printf 'Bundle validation failed (%s): expected <%s>, got <%s>\n' "$label" "$expected" "$actual" >&2
+        exit 1
+    fi
+}
+
+read_plist() {
+    local value
+    if ! value="$(plutil -extract "$1" raw -o - "$plist")"; then
+        fail "Info.plist key '$1' is missing or unreadable: $plist"
+    fi
+    printf '%s' "$value"
+}
+
+if ! bash scripts/xcode.sh Debug build; then
+    fail 'build: xcodebuild did not succeed'
+fi
+app="build/DerivedData/Build/Products/Debug/{{project_name}}.app"
+plist="$app/Contents/Info.plist"
+[ -d "$app" ] || fail "application bundle is missing: $app"
+plutil -lint "$plist" || fail "Info.plist is invalid: $plist"
+bundle_identifier="$(read_plist CFBundleIdentifier)"
+assert_equal CFBundleIdentifier '{{bundle_identifier}}' "$bundle_identifier"
+minimum_system_version="$(read_plist LSMinimumSystemVersion)"
+assert_equal LSMinimumSystemVersion 26.0 "$minimum_system_version"
+executable="$(read_plist CFBundleExecutable)"
+[ -n "$executable" ] || fail 'CFBundleExecutable is empty'
+[ -x "$app/Contents/MacOS/$executable" ] || fail "executable is missing or not executable: $app/Contents/MacOS/$executable"
+architectures="$(xcrun lipo -archs "$app/Contents/MacOS/$executable")" || fail 'unable to inspect executable architectures'
+assert_equal architectures arm64 "$architectures"
+codesign --verify --strict --verbose=2 "$app" || fail "invalid code signature: $app"
+codesign --display --entitlements :- "$app" >build/reports/entitlements.plist || fail 'unable to read code-signing entitlements'
+if [ -s build/reports/entitlements.plist ]; then
+    plutil -lint build/reports/entitlements.plist || fail 'code-signing entitlements are invalid'
+fi
+# Verify transport policy without treating a malformed plist as absent configuration.
+plutil -convert json -o build/reports/Info.json "$plist" || fail 'unable to convert Info.plist to JSON'
+xcrun swift scripts/verify.swift bundle build/reports/Info.json || fail 'bundle transport-policy validation failed'
+printf '\033[32mApplication bundle verified\033[0m\n'

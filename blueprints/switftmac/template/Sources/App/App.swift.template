@@ -1,0 +1,12 @@
+import AppUI
+import SwiftUI
+
+@main
+struct NativeApp: App {
+    var body: some Scene {
+        Window("{{ project_name }}", id: "main") {
+            ContentView()
+        }
+        .defaultSize(width: 480, height: 320)
+    }
+}

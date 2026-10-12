@@ -46,6 +46,7 @@ help:
 	@printf "  %-40s %s\n" "init" "Install templates and set up aliases"
 	@printf "  %-40s %s\n" "check" "Check if all required tools are installed"
 	@printf "  %-40s %s\n" "check-clojure-cli-base" "Check Clojure template prerequisites"
+	@printf "  %-40s %s\n" "check-switftmac" "Check Swift macOS template host prerequisites"
 	@printf "  %-40s %s\n" "show-libs" "List direct library dependencies declared by all templates"
 	@printf "  %-40s %s\n" "help" "Show this help message"
 	@echo ""
@@ -70,6 +71,7 @@ help:
 	@printf "    %-36s %s\n" "node-typescript-cli-base" "Node.js TypeScript CLI application"
 	@printf "    %-36s %s\n" "shellscripts-base" "Portable shell script project"
 	@printf "    %-36s %s\n" "arm64-macos-cli-base" "ARM64 macOS assembly CLI application"
+	@printf "    %-36s %s\n" "switftmac" "Native Swift macOS application"
 	@printf "    %-36s %s\n" "mmix-cli-base" "MMIX assembly CLI application"
 	@echo ""
 	@printf "\033[0;33mCode Quality:\033[0m\n"
@@ -95,6 +97,7 @@ help:
 	@printf "  %-40s %s\n" "baseline-node-typescript-cli-base" "Generate Node.js TypeScript CLI template and run just ci"
 	@printf "  %-40s %s\n" "baseline-shellscripts-base" "Generate shell scripts template and run just ci"
 	@printf "  %-40s %s\n" "baseline-arm64-macos-cli-base" "Generate ARM64 macOS assembly template and run just ci"
+	@printf "  %-40s %s\n" "baseline-switftmac" "Generate Swift macOS template and run just ci"
 	@printf "  %-40s %s\n" "baseline-mmix-cli-base" "Generate MMIX assembly template and run just ci"
 	@echo ""
 	@printf "\033[0;33mCI & Testing:\033[0m\n"
@@ -102,6 +105,7 @@ help:
 	@printf "  %-40s %s\n" "test-prerequisites" "Verify every template checks prerequisites first"
 	@printf "  %-40s %s\n" "test-content-tracked" "Verify blueprint/violation content is tracked by git"
 	@printf "  %-40s %s\n" "test-shellscripts-base-contracts" "Test shell scripts blueprint contracts"
+	@printf "  %-40s %s\n" "test-switftmac-contracts" "Test Swift macOS blueprint contracts"
 	@printf "  %-40s %s\n" "test" "Run all baseline + violation tests"
 	@printf "  %-40s %s\n" "test-python-cli-base" "Run Python baseline + violation tests"
 	@printf "  %-40s %s\n" "test-java-cli-base" "Run Java baseline + violation tests"
@@ -122,6 +126,7 @@ help:
 	@printf "  %-40s %s\n" "test-shellscripts-base" "Run shell scripts baseline + violation tests"
 	@printf "  %-40s %s\n" "test-shellscripts-base-linux" "Run shell scripts tests in a Linux container"
 	@printf "  %-40s %s\n" "test-arm64-macos-cli-base" "Run ARM64 macOS assembly baseline + violation tests"
+	@printf "  %-40s %s\n" "test-switftmac" "Run Swift macOS baseline + violation tests"
 	@printf "  %-40s %s\n" "test-mmix-cli-base" "Run MMIX assembly baseline + violation tests"
 	@printf "  %-40s %s\n" "test-ai-docs" "Run AI docs installer tests"
 	@printf "  %-40s %s\n" "test-create" "Run just create for all project templates"
@@ -232,6 +237,14 @@ check-clojure-cli-base:
 		exit 1; \
 	fi; \
 	printf "\033[32m✓ all Clojure prerequisites are installed\033[0m\n"
+	@echo ""
+
+# Check Swift macOS template host prerequisites before generation or testing
+check-switftmac:
+	@echo ""
+	@bash ./blueprints/switftmac/template/scripts/check-host.sh \
+		&& printf "\033[32m✓ Swift macOS host prerequisites passed\033[0m\n" \
+		|| { printf "\033[31m✗ Swift macOS host prerequisites failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # List direct library dependencies declared by all templates
@@ -413,6 +426,12 @@ baseline-arm64-macos-cli-base:
 	@./tests/run-tests.sh arm64-macos-cli-base baseline && printf "\033[32m✓ arm64-macos-cli-base baseline passed\033[0m\n" || { printf "\033[31m✗ arm64-macos-cli-base baseline failed\033[0m\n"; exit 1; }
 	@echo ""
 
+# Generate Swift macOS template and run just ci
+baseline-switftmac: check-switftmac
+	@echo ""
+	@./tests/run-tests.sh switftmac baseline && printf "\033[32m✓ switftmac baseline passed\033[0m\n" || { printf "\033[31m✗ switftmac baseline failed\033[0m\n"; exit 1; }
+	@echo ""
+
 # Generate MMIX assembly template and run just ci
 baseline-mmix-cli-base:
 	@echo ""
@@ -473,6 +492,15 @@ test-shellscripts-base-contracts:
 		&& printf "\033[32m✓ shell scripts blueprint contracts passed\033[0m\n" \
 		|| { printf "\033[31m✗ shell scripts blueprint contracts failed\033[0m\n"; exit 1; }
 	echo ""
+
+# Test Swift macOS blueprint contracts without installing its development toolchain
+test-switftmac-contracts:
+	@echo ""
+	@printf "\033[0;34m=== Testing Swift macOS Blueprint Contracts ===\033[0m\n"
+	@python3 tests/test_switftmac.py \
+		&& printf "\033[32m✓ Swift macOS blueprint contracts passed\033[0m\n" \
+		|| { printf "\033[31m✗ Swift macOS blueprint contracts failed\033[0m\n"; exit 1; }
+	@echo ""
 
 # Test all templates (baseline + violations)
 test:
@@ -640,6 +668,12 @@ test-arm64-macos-cli-base:
 	@./tests/run-tests.sh arm64-macos-cli-base && printf "\033[32m✓ arm64-macos-cli-base tests passed\033[0m\n" || { printf "\033[31m✗ arm64-macos-cli-base tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
+# Run Swift macOS baseline + violation tests
+test-switftmac: check-switftmac test-switftmac-contracts
+	@echo ""
+	@./tests/run-tests.sh switftmac && printf "\033[32m✓ switftmac tests passed\033[0m\n" || { printf "\033[31m✗ switftmac tests failed\033[0m\n"; exit 1; }
+	@echo ""
+
 # Run MMIX assembly baseline and violation tests
 test-mmix-cli-base:
 	@echo ""
@@ -715,7 +749,7 @@ test-create:
     echo ""
 
 # Run all checks and all template tests
-ci-verbose: check test-prerequisites test-content-tracked test-shellscripts-base-contracts test-raspberry-pi-cpp-contracts code-spell code-semgrep code-shellcheck test-info test test-create
+ci-verbose: check test-prerequisites test-content-tracked test-shellscripts-base-contracts test-raspberry-pi-cpp-contracts test-switftmac-contracts code-spell code-semgrep code-shellcheck test-info test test-create
 	@echo ""
 	@printf "\033[32m✓ ci-verbose passed\033[0m\n"
 	@echo ""
@@ -730,7 +764,7 @@ ci:
     echo ""
     # Keep this list identical to ci-verbose's dependencies so both run the
     # exact same tests; only the output verbosity differs.
-    steps=(check test-prerequisites test-content-tracked test-shellscripts-base-contracts test-raspberry-pi-cpp-contracts code-spell code-semgrep code-shellcheck test-info test test-create)
+    steps=(check test-prerequisites test-content-tracked test-shellscripts-base-contracts test-raspberry-pi-cpp-contracts test-switftmac-contracts code-spell code-semgrep code-shellcheck test-info test test-create)
     for step in "${steps[@]}"; do
         printf "\033[0;34m▶ starting %s\033[0m\n" "$step"
         if output="$(just "$step" 2>&1)"; then

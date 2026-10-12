@@ -1,0 +1,14 @@
+import XCTest
+
+@MainActor
+final class AppLaunchPerformanceTests: XCTestCase {
+    func testLaunchPerformance() {
+        continueAfterFailure = false
+        let options = XCTMeasureOptions()
+        options.iterationCount = 10
+        measure(metrics: [XCTApplicationLaunchMetric(waitUntilResponsive: true)], options: options)
+        {
+            XCUIApplication().launch()
+        }
+    }
+}

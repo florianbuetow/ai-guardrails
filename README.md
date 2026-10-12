@@ -2,7 +2,7 @@
 
 ![Made with AI](https://img.shields.io/badge/Made%20with-AI-333333?labelColor=f00) ![Verified by Humans](https://img.shields.io/badge/Verified%20by-Humans-333333?labelColor=brightgreen)
 
-Copier templates for Python, Java, Go, Elixir, C++, C++ 3D games, Rust, Kotlin, Scala, Clojure, React/Vite/TypeScript, TypeScript MCP servers, Node.js TypeScript CLIs, portable shell scripts, ARM64 macOS assembly, and MMIX assembly that enforce strict validation guardrails on AI-generated code — catching antipatterns, suppressing silent defaults, and providing immediate feedback so AI agents write better, more maintainable code from the start.
+Copier templates for Python, Java, Go, Elixir, C++, C++ 3D games, Rust, Kotlin, Scala, Clojure, React/Vite/TypeScript, TypeScript MCP servers, Node.js TypeScript CLIs, portable shell scripts, ARM64 macOS assembly, native Swift macOS applications, and MMIX assembly that enforce strict validation guardrails on AI-generated code — catching antipatterns, suppressing silent defaults, and providing immediate feedback so AI agents write better, more maintainable code from the start.
 
 ## Quick Start
 
@@ -163,6 +163,27 @@ just init
 just run 4
 ```
 
+**Native Swift macOS application (`switftmac`):**
+
+From a checkout of this repository:
+
+```bash
+just create switftmac ../my-macos-app
+cd ../my-macos-app
+just run
+```
+
+The starter is a single window with **Hello World!** centered horizontally and
+vertically. The standard red title-bar button closes it; there are no demo features.
+Generation automatically installs and configures every selected tool through
+`just init`, with no opt-in switches. Use `just ci` to run the generated project's
+checks.
+
+Development requires Apple Silicon, macOS **26.6+**, and full **Xcode 27.0
+(27A266a)** selected with `xcode-select`; generated applications target macOS
+**26.0+**. See the [generated project guide](blueprints/switftmac/template/README.md.template)
+for the commands and configuration.
+
 ## Features
 
 - **Multi-step CI pipelines** with fail-fast behavior across all templates
@@ -192,6 +213,7 @@ just run 4
 | [**node-typescript-cli-base**](blueprints/node-typescript-cli-base/) | Node.js 24+ TypeScript | CLI apps with [Prettier](https://prettier.io/), [oxlint](https://oxc.rs/docs/guide/usage/linter.html), [TypeScript](https://www.typescriptlang.org/), [knip](https://knip.dev/), [dependency-cruiser](https://github.com/sverweij/dependency-cruiser), [ts-archunit](https://github.com/nielspeter/ts-archunit), [CodeQL](https://codeql.github.com/), [Gitleaks](https://github.com/gitleaks/gitleaks), [Vitest](https://vitest.dev/), [fast-check](https://fast-check.dev/), [StrykerJS](https://stryker-mutator.io/), [publint](https://publint.dev/), and [arethetypeswrong](https://arethetypeswrong.github.io/) |
 | [**shellscripts-base**](blueprints/shellscripts-base/) | POSIX shell | Portable shell projects with [ShellCheck](https://www.shellcheck.net/), [shfmt](https://github.com/mvdan/sh), [checkbashisms](https://tracker.debian.org/pkg/devscripts), Bash, dash, BusyBox ash, ksh, zsh, [Semgrep](https://semgrep.dev/), [codespell](https://github.com/codespell-project/codespell), [Bats](https://github.com/bats-core/bats-core), [ShellSpec](https://shellspec.info/), and [kcov](https://github.com/SimonKagstrom/kcov) |
 | [**arm64-macos-cli-base**](blueprints/arm64-macos-cli-base/) | ARM64 assembly (Apple Silicon) | Hand-written assembly CLIs with the [Clang integrated assembler](https://clang.llvm.org/docs/index.html), [llvm-objdump](https://llvm.org/docs/CommandGuide/llvm-objdump.html), [FileCheck](https://llvm.org/docs/CommandGuide/FileCheck.html), [llvm-readobj](https://llvm.org/docs/CommandGuide/llvm-readobj.html), [llvm-mca](https://llvm.org/docs/CommandGuide/llvm-mca.html), [Semgrep](https://semgrep.dev/), `nm`/`otool`/`lipo`/`codesign` binary validation, and assembly unit tests |
+| [**switftmac**](blueprints/switftmac/) | Swift 6.4 + SwiftUI | Minimal Hello World window for macOS 26+, with CLI builds through XcodeGen and `xcodebuild`; mandatory formatting, SwiftLint/SwiftSyntax checks, Semgrep, Gitleaks, OSV-Scanner, Swift Testing, XCTest/XCUIAutomation, ViewInspector, snapshot and property-testing libraries, accessibility audits, sanitizers, coverage, performance checks, and bundle validation |
 | [**mmix-cli-base**](blueprints/mmix-cli-base/) | MMIX assembly | Self-contained MMIX CLIs with vendored, pinned MMIXware (`mmixal`, `mmix`, `mmotype`), one cross-platform C guard/CI driver, exact capability allowlists, vendor hashes, MMIX unit tests, declarative CLI/state tests, 80% instruction coverage, and no validation-time network access |
 | [**ai-docs**](blueprints/ai-docs/) | Any | Agent-oriented knowledge base (`docs/`, `ARCHITECTURE.md`, a doc-gardening skill for Codex and Claude Code, and a map of all of it in `AGENTS.md`) added to an existing project with `newaidocs`, following OpenAI's [harness engineering](https://openai.com/index/harness-engineering/) layout; refuses to overwrite existing files, and fails with a warning when git would ignore them |
 
@@ -215,6 +237,17 @@ Every project template runs the same CI check categories via `just ci`. The tabl
 | Architecture | [pytestarch](https://github.com/zyskarch/pytestarch) | [ArchUnit](https://www.archunit.org/) | [arch-go](https://github.com/arch-go/arch-go) | [ex_arch_unit](https://hex.pm/packages/ex_arch_unit) | — | — | — | [Konsist](https://docs.konsist.lemonappdev.com/) | [ArchUnit](https://www.archunit.org/) + semantic Scalafix | [clj-depend](https://cljdoc.org/d/com.fabiodomingues/clj-depend/0.11.1) | [dependency-cruiser](https://github.com/sverweij/dependency-cruiser) | [dependency-cruiser](https://github.com/sverweij/dependency-cruiser) | [dependency-cruiser](https://github.com/sverweij/dependency-cruiser) + [ts-archunit](https://github.com/nielspeter/ts-archunit) | — | `verify-layering.sh` (object-file imports) |
 
 See each template's README for tool details and configuration.
+
+The `switftmac` template adds native-application checks that do not map cleanly to the older
+language matrix: Swift 6 strict compiler diagnostics, SwiftLint and SwiftSyntax analysis,
+XcodeGen architecture boundaries, Semgrep and Gitleaks security checks, exact SwiftPM locks
+with OSV-Scanner, Swift Testing, PropertyBased and ViewInspector test dependencies,
+XCTest/XCUIAutomation UI and accessibility tests, snapshots, `xccov` coverage,
+AddressSanitizer, ThreadSanitizer, Main Thread Checker,
+performance measurements, DocC validation, and signed `.app` bundle inspection.
+`just init` establishes the initial runner-bound performance baseline. CI requires that baseline
+and never updates it; `just performance-baseline` is the explicit recalibration command when the
+reviewed runner changes.
 
 The MMIXAL template supports GCC/Clang on macOS/Linux and MSVC on Windows. It is deliberately self-contained. It builds vendored generated MMIXware C sources and its validator locally, then uses `mmixal`, `mmotype`, and `mmix` for assembly, object structure, runtime, state, and instruction-profile checks. It does not use Semgrep, Gitleaks, codespell, external rule packs, containers, hosted APIs, or downloaded validation data.
 
@@ -253,7 +286,7 @@ Use these plugins after scaffolding a project with AI Guardrails to maintain cod
 - **copier** - Template engine ([installation guide](https://copier.readthedocs.io/))
 
 Each template has its own language-specific prerequisites. See the template READMEs for details:
-[Python](blueprints/python-cli-base/) | [Java](blueprints/java-cli-base/) | [Go](blueprints/go-cli-base/) | [Elixir](blueprints/elixir-otp-base/) | [C++](blueprints/cpp-cli-base/) | [C++ 3D Game](blueprints/cpp-3dgame-base/) | [Raspberry Pi C++](blueprints/raspberry-pi-cpp-base/) | [Rust](blueprints/rust-cli-base/) | [Kotlin](blueprints/kotlin-cli-base/) | [Scala](blueprints/scala-cli-base/) | [Clojure](blueprints/clojure-cli-base/) | [React/Vite/TypeScript](blueprints/react-vite-typescript-base/) | [TypeScript MCP](blueprints/mcp-server-typescript-base/) | [Node.js TypeScript CLI](blueprints/node-typescript-cli-base/) | [Shell scripts](blueprints/shellscripts-base/) | [ARM64 macOS assembly](blueprints/arm64-macos-cli-base/) | [MMIX assembly](blueprints/mmix-cli-base/)
+[Python](blueprints/python-cli-base/) | [Java](blueprints/java-cli-base/) | [Go](blueprints/go-cli-base/) | [Elixir](blueprints/elixir-otp-base/) | [C++](blueprints/cpp-cli-base/) | [C++ 3D Game](blueprints/cpp-3dgame-base/) | [Raspberry Pi C++](blueprints/raspberry-pi-cpp-base/) | [Rust](blueprints/rust-cli-base/) | [Kotlin](blueprints/kotlin-cli-base/) | [Scala](blueprints/scala-cli-base/) | [Clojure](blueprints/clojure-cli-base/) | [React/Vite/TypeScript](blueprints/react-vite-typescript-base/) | [TypeScript MCP](blueprints/mcp-server-typescript-base/) | [Node.js TypeScript CLI](blueprints/node-typescript-cli-base/) | [Shell scripts](blueprints/shellscripts-base/) | [ARM64 macOS assembly](blueprints/arm64-macos-cli-base/) | [Swift macOS](blueprints/switftmac/) | [MMIX assembly](blueprints/mmix-cli-base/)
 
 ## Installation
 
@@ -279,7 +312,7 @@ just run
 ```
 
 The `just create` command takes two arguments:
-1. Template name (e.g., `python-cli-base`, `java-cli-base`, `go-cli-base`, `elixir-otp-base`, `cpp-cli-base`, `cpp-3dgame-base`, `raspberry-pi-cpp-base`, `rust-cli-base`, `kotlin-cli-base`, `scala-cli-base`, `clojure-cli-base`, `react-vite-typescript-base`, `mcp-server-typescript-base`, `node-typescript-cli-base`, `shellscripts-base`, `arm64-macos-cli-base`, or `mmix-cli-base`)
+1. Template name (e.g., `python-cli-base`, `java-cli-base`, `go-cli-base`, `elixir-otp-base`, `cpp-cli-base`, `cpp-3dgame-base`, `raspberry-pi-cpp-base`, `rust-cli-base`, `kotlin-cli-base`, `scala-cli-base`, `clojure-cli-base`, `react-vite-typescript-base`, `mcp-server-typescript-base`, `node-typescript-cli-base`, `shellscripts-base`, `arm64-macos-cli-base`, `switftmac`, or `mmix-cli-base`)
 2. Target directory (absolute or relative path where the project will be created)
 
 **Method 2: Using Copier directly**
@@ -332,6 +365,7 @@ just test-shellscripts-base-linux     # Run shell scripts tests in a Linux conta
 just test-arm64-macos-cli-base        # Run ARM64 macOS assembly baseline + violation tests
 just test-raspberry-pi-cpp-contracts  # Validate rendered Pi template contracts without Docker
 just test-raspberry-pi-cpp-base       # Run Pi C++ CI and violations in Linux ARM64 containers
+just test-switftmac                   # Run Swift macOS baseline + violation tests
 just test-mmix-cli-base               # Run MMIX assembly baseline + violation tests
 just test-ai-docs                     # Run AI docs installer tests
 just test-create                      # Smoke-test `just create` for every project template, then run its CI
@@ -345,7 +379,7 @@ support. Its rendered test project is bind-mounted into the container, so set
 operating system's default temporary directory (for example, with Colima).
 
 `just ci` and `just ci-verbose` run the exact same steps (`check`, `test-prerequisites`,
-`test-shellscripts-base-contracts`, `test-raspberry-pi-cpp-contracts`, `code-spell`, `code-semgrep`, `code-shellcheck`,
+`test-shellscripts-base-contracts`, `test-raspberry-pi-cpp-contracts`, `test-switftmac-contracts`, `code-spell`, `code-semgrep`, `code-shellcheck`,
 `test-info`, `test`, `test-create`) and only
 differ in output verbosity. `ci` announces the start and completion of each step
 with a checkmark, suppressing per-step details unless a step fails (then it prints
@@ -400,6 +434,7 @@ ai-guardrails/
 │   ├── node-typescript-cli-base/            # Node.js TypeScript CLI template
 │   ├── shellscripts-base/                   # Portable shell script template
 │   ├── arm64-macos-cli-base/                # ARM64 macOS assembly CLI template
+│   ├── switftmac/                            # Native Swift macOS application template
 │   ├── mmix-cli-base/                       # MMIX assembly CLI template
 │   └── ai-docs/                             # AI knowledge base template (adds docs/ to a project)
 ├── tests/
@@ -424,6 +459,7 @@ ai-guardrails/
 │       ├── node-typescript-cli-base.sh
 │       ├── shellscripts-base.sh
 │       ├── arm64-macos-cli-base.sh
+│       ├── switftmac.sh
 │       └── mmix-cli-base.sh
 ├── violations/                              # Violation overlays used to force CI failures
 │   ├── python-cli-base/
@@ -441,7 +477,8 @@ ai-guardrails/
 │   ├── mcp-server-typescript-base/
 │   ├── node-typescript-cli-base/
 │   ├── shellscripts-base/
-│   └── arm64-macos-cli-base/
+│   ├── arm64-macos-cli-base/
+│   └── switftmac/
 ├── config/                                  # Shared validation configs (semgrep, codespell)
 ├── docs/                                    # Documentation
 ├── justfile                                 # Quick setup commands

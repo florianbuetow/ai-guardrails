@@ -10,6 +10,7 @@ NC='\033[0m' # No Color
 # Default values
 TEMPLATE_NAME=""
 TARGET_DIR="."
+BUNDLE_IDENTIFIER=""
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -93,6 +94,14 @@ case "$TEMPLATE_NAME" in
     fi
     PACKAGE_NAME="com.example.$PACKAGE_SLUG"
     ;;
+  switftmac)
+    PACKAGE_SLUG=$(printf "%s" "$PROJECT_NAME" | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]')
+    if [ -z "$PACKAGE_SLUG" ]; then
+      printf "${RED}Error: unable to derive bundle identifier from project name: %s${NC}\n" "$PROJECT_NAME"
+      exit 1
+    fi
+    BUNDLE_IDENTIFIER="com.example.$PACKAGE_SLUG"
+    ;;
 esac
 
 case "$TEMPLATE_NAME" in
@@ -144,6 +153,9 @@ case "$TEMPLATE_NAME" in
   arm64-macos-cli-base)
     PROJECT_DESCRIPTION="An ARM64 macOS assembly CLI application"
     ;;
+  switftmac)
+    PROJECT_DESCRIPTION="A native Swift macOS application"
+    ;;
   mmix-cli-base)
     PROJECT_DESCRIPTION="A portable MMIXAL CLI application"
     ;;
@@ -153,6 +165,10 @@ case "$TEMPLATE_NAME" in
     ;;
 esac
 
+if [ "$TEMPLATE_NAME" = "switftmac" ]; then
+  bash "$TEMPLATE_PATH/template/scripts/check-host.sh"
+fi
+
 echo -e "${BLUE}=== Creating Project ===${NC}"
 echo "Template: $TEMPLATE_NAME"
 echo "Target: $TARGET_DIR"
@@ -161,6 +177,10 @@ echo "Package Name: $PACKAGE_NAME"
 echo ""
 
 # Run Copier
+COPIER_EXTRA_DATA=()
+if [ -n "$BUNDLE_IDENTIFIER" ]; then
+  COPIER_EXTRA_DATA+=(--data "bundle_identifier=$BUNDLE_IDENTIFIER")
+fi
 copier copy --trust --defaults \
   --data project_name="$PROJECT_NAME" \
   --data package_name="$PACKAGE_NAME" \
@@ -171,6 +191,7 @@ copier copy --trust --defaults \
   --data author_email="" \
   --data coverage_threshold=80 \
   --data jvm_target=21 \
+  "${COPIER_EXTRA_DATA[@]}" \
   "$TEMPLATE_PATH" "$TARGET_DIR"
 
 echo ""

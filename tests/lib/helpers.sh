@@ -53,9 +53,11 @@ generate_project() {
         copier_args+=(--data "$entry")
     done
 
-    copier copy --trust --defaults \
+    if ! copier copy --trust --defaults \
         "${copier_args[@]}" \
-        "$template_path" "$target_dir"
+        "$template_path" "$target_dir"; then
+        return 1
+    fi
 
     if [ "${NO_GIT_MUTATIONS:-false}" = "true" ]; then
         return 0
@@ -66,7 +68,7 @@ generate_project() {
         git init -q && \
         git config user.email template-tests@example.invalid && \
         git config user.name "Template Tests" && \
-        git add -A && \
+        git ls-files --cached --others --exclude-standard -z | xargs -0 git add -- && \
         git -c advice.ignoredHook=false commit -q -m "init")
 }
 

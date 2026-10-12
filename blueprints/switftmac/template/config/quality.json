@@ -1,0 +1,10 @@
+{
+  "coveragePercent": 80,
+  "coverageTargets": ["AppUI.framework"],
+  "performanceIterations": 10,
+  "performanceRegressionPercent": 20,
+  "propertyCases": 200,
+  "minimumMacOS": "26.0",
+  "xcodeVersion": "27.0",
+  "xcodeBuild": "27A266a"
+}

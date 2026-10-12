@@ -29,14 +29,23 @@ class TemplatePrerequisiteTests(unittest.TestCase):
         self.assertTrue(justfiles, "No template Justfiles found")
 
         for justfile in justfiles:
-            with self.subTest(template=justfile.parents[1].name):
+            template_name = justfile.parents[1].name
+            with self.subTest(template=template_name):
                 sections = recipe_sections(justfile.read_text(encoding="utf-8"))
                 self.assertIn("check", sections, "Missing check recipe")
                 self.assertIn("init", sections, "Missing init recipe")
                 self.assertIn("ci", sections, "Missing ci recipe")
 
                 init_dependencies, _init_body = sections["init"]
-                self.assertIn("check", init_dependencies.split(), "init must depend on check")
+                if template_name == "switftmac":
+                    self.assertIn("bootstrap-check", sections, "Missing host-only bootstrap preflight")
+                    self.assertIn(
+                        "bootstrap-check",
+                        init_dependencies.split(),
+                        "init must run host preflight before installing tools",
+                    )
+                else:
+                    self.assertIn("check", init_dependencies.split(), "init must depend on check")
 
                 _ci_dependencies, ci_body = sections["ci"]
                 ci_invocations = JUST_INVOCATION_PATTERN.findall(ci_body)

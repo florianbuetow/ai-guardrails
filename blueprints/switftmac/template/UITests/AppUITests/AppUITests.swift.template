@@ -1,0 +1,33 @@
+import XCTest
+
+@MainActor
+final class HelloWorldUITests: XCTestCase {
+    func testGreetingAndStandardWindowClose() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launch()
+        let window = app.windows.firstMatch
+        XCTAssertTrue(window.waitForExistence(timeout: 5))
+        let greeting = app.staticTexts["greeting"]
+        XCTAssertTrue(greeting.waitForExistence(timeout: 5))
+        XCTAssertEqual(greeting.value as? String, "Hello World!")
+        XCTAssertEqual(greeting.frame.midX, window.frame.midX, accuracy: 1)
+        let screenshot = XCTAttachment(screenshot: window.screenshot())
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        let closeButton = window.buttons[XCUIIdentifierCloseWindow]
+        XCTAssertTrue(closeButton.exists)
+        closeButton.click()
+        XCTAssertTrue(window.waitForNonExistence(timeout: 5))
+    }
+}
+
+@MainActor
+final class AccessibilityTests: XCTestCase {
+    func testAccessibilityAudit() throws {
+        let app = XCUIApplication()
+        app.launch()
+        XCTAssertTrue(app.staticTexts["greeting"].waitForExistence(timeout: 5))
+        try app.performAccessibilityAudit()
+    }
+}

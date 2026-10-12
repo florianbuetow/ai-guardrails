@@ -1,0 +1,106 @@
+# {{project_name}}
+
+{{project_description}}
+
+This native SwiftUI application opens one window with a centered `Hello World!`
+message. The standard red title-bar button closes the window.
+
+## Install, build and launch
+
+Use an Apple Silicon Mac running macOS 26.6 or newer with **Xcode 27, build
+27A266a**, selected by `xcode-select`. Applications target macOS 26.0. The Swift
+compiler is Xcode's bundled Swift 6.4 in Swift 6 language mode. Full Xcode is a
+prerequisite because Apple's download, licensing and first-launch setup cannot
+be completed anonymously by this template.
+
+Copier runs `just init` automatically. It installs every selected command-line
+tool into `.tools/`, verifies download checksums, creates a private Python runtime
+for Semgrep/codespell, resolves the exact Swift package dependencies, builds the
+SwiftSyntax checker and installs the pre-commit hook. Initial setup also measures
+launch performance on this Mac and saves the initial baseline. It requires a
+working graphical session. Existing baselines are never refreshed by setup or CI.
+No tools are optional, and
+missing tools fail checks instead of falling back to global installations.
+
+Builds, checks and tests run locally.
+
+```sh
+just init
+just ci
+just run
+```
+
+The generated Xcode project is derived from `project.yml`. Edit that specification
+and Swift files directly; no Xcode editor is required. `just build` produces
+`build/DerivedData/Build/Products/Debug/{{project_name}}.app`. `just run` validates
+and launches that bundle with `open`. `just debug` opens the executable in LLDB.
+
+## Quality commands
+
+| Command | What it checks |
+| --- | --- |
+| `just check` | Exact host and installed tool versions |
+| `just code-format` | Explicit formatting operation; never invoked by CI |
+| `just code-style` | Non-mutating Swift format checks and strict SwiftLint |
+| `just code-analyze` | Clean compiler log and type-aware unused code/import checks |
+| `just code-architecture` | SwiftSyntax policies and declared module dependencies |
+| `just code-semgrep` | Forbidden shell execution and shell-script policies |
+| `just code-security` | Application security patterns |
+| `just code-secrets` | Gitleaks scans of project-owned source/configuration |
+| `just code-shell` | ShellCheck and shfmt for automation |
+| `just code-spell` | Spelling in source, tests, scripts and guidance |
+| `just code-dependencies` | Locked dependency resolution and OSV advisories |
+| `just code-docs` | DocC documentation diagnostics |
+| `just code-package` | Bundle metadata, architecture, signature and transport policy |
+| `just test` | Swift Testing checks, view inspection and snapshots |
+| `just test-ui` | Actual application interaction through XCUIAutomation |
+| `just test-accessibility` | Native accessibility audits |
+| `just test-snapshots` | Reviewed snapshot comparisons |
+| `just test-coverage` | At least 80% line coverage in each named first-party framework |
+| `just test-sanitize` | Separate AddressSanitizer and ThreadSanitizer runs |
+| `just test-performance` | Ten launch measurements, compared with the runner baseline (20% tolerance) |
+| `just performance-baseline` | Explicitly recalibrate after an intentional runner or performance change |
+| `just coverage-export PROFILE BINARY` | Inspect a profile with llvm-profdata and export it with llvm-cov |
+| `just ci` | All mandatory quality and test commands, fail-fast |
+| `just ci-quiet` | The same suite with a retained log |
+
+OSV scanning requires network access to current vulnerability advisories. Scanner
+and network failures fail CI. Coverage is line coverage, not branch coverage.
+Build failures, empty test selections, skipped tests and expected test failures
+are errors. Test results and logs are retained under `build/results/`.
+
+UI tests need a logged-in macOS graphical session and permission for test
+automation. A disconnected or locked runner cannot stand in for a working UI
+test environment. Snapshot references are reviewable source artifacts; CI never
+accepts new reference images automatically. Pin macOS, Xcode, appearance, locale
+and view size when capturing or comparing images. The Hello World reference uses
+scale 1 and separate reviewed images for macOS 26 and 27.
+
+## Architecture
+
+`App` is the executable composition root and depends only on `AppUI`. `AppUI`
+contains only the centered greeting and imports only SwiftUI. External
+testing libraries are test dependencies, never app dependencies. The custom
+checker enforces this two-module graph and the specified syntax policies.
+
+## Profiling and distribution
+
+`just profile` builds Release and records a ten-second Time Profiler trace. `just memory PID` runs
+`vmmap` and `leaks` for an explicitly selected running process. Runtime diagnostics
+are separate from performance measurements. Establish performance baselines on
+the intended runner; results from unrelated hardware are not interchangeable.
+
+The local build uses ad-hoc signing and does not need distribution credentials.
+`just release` requires `SIGNING_IDENTITY` and `NOTARY_PROFILE`, runs CI, archives
+with hardened runtime, submits through `notarytool`, and staples the ticket.
+Store notarization credentials in the keychain; never put them in configuration
+files or source control.
+
+## Tool updates
+
+`config/tools.lock.tsv` records native versions and SHA-256 downloads.
+`config/python-tools.lock` pins and hashes Semgrep/codespell and their dependencies.
+`project.yml` pins test libraries; `Tools/Guardrails/Package.swift` pins SwiftSyntax.
+Update pins deliberately, regenerate dependency resolutions, and run all template
+baseline and violation tests before accepting an update. Installing a newer Xcode
+alone does not silently change the project's supported compiler.
