@@ -1,0 +1,20 @@
+#!/bin/bash
+set -euo pipefail
+
+bash scripts/check-tools.sh
+if [ -z "${SIGNING_IDENTITY-}" ] || [ -z "${NOTARY_PROFILE-}" ]; then
+    printf 'SIGNING_IDENTITY and NOTARY_PROFILE are required for distribution\n' >&2
+    exit 1
+fi
+# A release always passes the same local gates before credentials are used.
+just ci
+bash scripts/xcode.sh archive -configuration Release -archivePath "build/{{project_name}}.xcarchive" \
+    CODE_SIGN_IDENTITY="$SIGNING_IDENTITY" ENABLE_HARDENED_RUNTIME=YES
+app="build/{{project_name}}.xcarchive/Products/Applications/{{project_name}}.app"
+codesign --verify --strict --verbose=2 "$app"
+ditto -c -k --keepParent "$app" "build/{{project_name}}-notarization.zip"
+xcrun notarytool submit "build/{{project_name}}-notarization.zip" --keychain-profile "$NOTARY_PROFILE" --wait
+xcrun stapler staple "$app"
+xcrun stapler validate "$app"
+ditto -c -k --keepParent "$app" "build/{{project_name}}.zip"
+printf '\033[32mSigned and notarized release: "build/{{project_name}}.zip"\033[0m\n'

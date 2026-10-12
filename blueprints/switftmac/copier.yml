@@ -1,0 +1,44 @@
+_min_copier_version: "9.0.0"
+_subdirectory: template
+_templates_suffix: ".template"
+_answers_file: .copier-answers.yml
+
+_exclude:
+  - .git
+  - .tools
+  - .build
+  - build
+
+_message_before_copy: |
+  Creating a native macOS Tahoe application with mandatory local guardrails.
+  Building requires Apple Silicon, macOS 26.6+, and Xcode 27 (27A266a).
+  Applications deploy to macOS 26.0. Setup installs every selected tool.
+
+_message_after_copy: |
+  {{project_name}} is configured. Run just ci, then just run.
+
+_tasks:
+  - [git, init, -q]
+  - [just, init]
+
+project_name:
+  type: str
+  help: Application name (lowercase letters, digits and hyphens)?
+  validator: >-
+    {% if not (project_name | regex_search('^[a-z][a-z0-9-]*$')) %}
+    Use a lowercase letter followed by lowercase letters, digits or hyphens.
+    {% endif %}
+
+bundle_identifier:
+  type: str
+  help: Reverse-DNS application identifier?
+  default: "com.example.{{project_name}}"
+  validator: >-
+    {% if not (bundle_identifier | regex_search('^[A-Za-z][A-Za-z0-9-]*(\.[A-Za-z][A-Za-z0-9-]*)+$')) %}
+    Use a reverse-DNS identifier with letters, digits and hyphens.
+    {% endif %}
+
+project_description:
+  type: str
+  help: Short description?
+  default: "A native macOS application"

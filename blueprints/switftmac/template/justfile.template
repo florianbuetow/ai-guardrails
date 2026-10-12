@@ -1,0 +1,207 @@
+set shell := ["bash", "-euo", "pipefail", "-c"]
+
+_default:
+    @just help
+
+help:
+    @echo ""
+    @printf "\033[34mNative macOS development\033[0m\n"
+    @printf "  %-24s %s\n" "bootstrap-check" "Verify supported macOS and exact Xcode"
+    @printf "  %-24s %s\n" "init" "Install and configure every required tool"
+    @printf "  %-24s %s\n" "check" "Verify installed tool versions"
+    @printf "  %-24s %s\n" "build" "Build native application"
+    @printf "  %-24s %s\n" "run" "Launch verified application bundle"
+    @printf "  %-24s %s\n" "code-format" "Format Swift source"
+    @printf "  %-24s %s\n" "code-style" "Check Swift formatting and lint"
+    @printf "  %-24s %s\n" "code-analyze" "Run type-aware SwiftLint analysis"
+    @printf "  %-24s %s\n" "code-architecture" "Enforce Swift policies and module boundaries"
+    @printf "  %-24s %s\n" "code-semgrep" "Check forbidden execution and shell policies"
+    @printf "  %-24s %s\n" "code-security" "Check application security patterns"
+    @printf "  %-24s %s\n" "code-secrets" "Scan owned files for secrets"
+    @printf "  %-24s %s\n" "code-shell" "Check shell automation"
+    @printf "  %-24s %s\n" "code-spell" "Check spelling"
+    @printf "  %-24s %s\n" "code-dependencies" "Verify dependency locks and scan advisories"
+    @printf "  %-24s %s\n" "code-docs" "Build documentation with strict diagnostics"
+    @printf "  %-24s %s\n" "code-package" "Validate native application bundle"
+    @printf "  %-24s %s\n" "test" "Run unit, integration and property tests"
+    @printf "  %-24s %s\n" "test-ui" "Run native application workflow tests"
+    @printf "  %-24s %s\n" "test-accessibility" "Audit application accessibility"
+    @printf "  %-24s %s\n" "test-snapshots" "Compare reviewed visual snapshots"
+    @printf "  %-24s %s\n" "test-coverage" "Enforce first-party line coverage"
+    @printf "  %-24s %s\n" "test-sanitize" "Run separate ASan and TSan suites"
+    @printf "  %-24s %s\n" "test-performance" "Measure application launch performance"
+    @printf "  %-24s %s\n" "performance-baseline" "Explicitly recalibrate performance on this runner"
+    @printf "  %-24s %s\n" "debug" "Debug native executable with LLDB"
+    @printf "  %-24s %s\n" "profile" "Record a Time Profiler trace"
+    @printf "  %-24s %s\n" "ci" "Run all mandatory checks fail-fast"
+    @printf "  %-24s %s\n" "ci-quiet" "Run CI with retained logs"
+    @printf "  %-24s %s\n" "memory PID" "Inspect a running application with vmmap/leaks"
+    @printf "  %-24s %s\n" "coverage-export PROFILE BINARY" "Export an instrumented binary's LLVM coverage"
+    @printf "  %-24s %s\n" "release" "Sign and notarize using supplied credentials"
+    @printf "\033[32mhelp completed successfully\033[0m\n"
+    @echo ""
+
+bootstrap-check:
+    @echo ""
+    @bash scripts/task.sh bootstrap-check && printf "\033[32mbootstrap-check completed successfully\033[0m\n" || { printf "\033[31mbootstrap-check failed\033[0m\n"; exit 1; }
+    @echo ""
+
+init: bootstrap-check
+    @echo ""
+    @bash scripts/task.sh init && printf "\033[32minit completed successfully\033[0m\n" || { printf "\033[31minit failed\033[0m\n"; exit 1; }
+    @echo ""
+
+check:
+    @echo ""
+    @bash scripts/task.sh check && printf "\033[32mcheck completed successfully\033[0m\n" || { printf "\033[31mcheck failed\033[0m\n"; exit 1; }
+    @echo ""
+
+build:
+    @echo ""
+    @bash scripts/task.sh build && printf "\033[32mbuild completed successfully\033[0m\n" || { printf "\033[31mbuild failed\033[0m\n"; exit 1; }
+    @echo ""
+
+run:
+    @echo ""
+    @bash scripts/task.sh run && printf "\033[32mrun completed successfully\033[0m\n" || { printf "\033[31mrun failed\033[0m\n"; exit 1; }
+    @echo ""
+
+code-format:
+    @echo ""
+    @bash scripts/task.sh code-format && printf "\033[32mcode-format completed successfully\033[0m\n" || { printf "\033[31mcode-format failed\033[0m\n"; exit 1; }
+    @echo ""
+
+code-style:
+    @echo ""
+    @bash scripts/task.sh code-style && printf "\033[32mcode-style completed successfully\033[0m\n" || { printf "\033[31mcode-style failed\033[0m\n"; exit 1; }
+    @echo ""
+
+code-analyze:
+    @echo ""
+    @bash scripts/task.sh code-analyze && printf "\033[32mcode-analyze completed successfully\033[0m\n" || { printf "\033[31mcode-analyze failed\033[0m\n"; exit 1; }
+    @echo ""
+
+code-architecture:
+    @echo ""
+    @bash scripts/task.sh code-architecture && printf "\033[32mcode-architecture completed successfully\033[0m\n" || { printf "\033[31mcode-architecture failed\033[0m\n"; exit 1; }
+    @echo ""
+
+code-semgrep:
+    @echo ""
+    @bash scripts/task.sh code-semgrep && printf "\033[32mcode-semgrep completed successfully\033[0m\n" || { printf "\033[31mcode-semgrep failed\033[0m\n"; exit 1; }
+    @echo ""
+
+code-security:
+    @echo ""
+    @bash scripts/task.sh code-security && printf "\033[32mcode-security completed successfully\033[0m\n" || { printf "\033[31mcode-security failed\033[0m\n"; exit 1; }
+    @echo ""
+
+code-secrets:
+    @echo ""
+    @bash scripts/task.sh code-secrets && printf "\033[32mcode-secrets completed successfully\033[0m\n" || { printf "\033[31mcode-secrets failed\033[0m\n"; exit 1; }
+    @echo ""
+
+code-shell:
+    @echo ""
+    @bash scripts/task.sh code-shell && printf "\033[32mcode-shell completed successfully\033[0m\n" || { printf "\033[31mcode-shell failed\033[0m\n"; exit 1; }
+    @echo ""
+
+code-spell:
+    @echo ""
+    @bash scripts/task.sh code-spell && printf "\033[32mcode-spell completed successfully\033[0m\n" || { printf "\033[31mcode-spell failed\033[0m\n"; exit 1; }
+    @echo ""
+
+code-dependencies:
+    @echo ""
+    @bash scripts/task.sh code-dependencies && printf "\033[32mcode-dependencies completed successfully\033[0m\n" || { printf "\033[31mcode-dependencies failed\033[0m\n"; exit 1; }
+    @echo ""
+
+code-docs:
+    @echo ""
+    @bash scripts/task.sh code-docs && printf "\033[32mcode-docs completed successfully\033[0m\n" || { printf "\033[31mcode-docs failed\033[0m\n"; exit 1; }
+    @echo ""
+
+code-package:
+    @echo ""
+    @bash scripts/task.sh code-package && printf "\033[32mcode-package completed successfully\033[0m\n" || { printf "\033[31mcode-package failed\033[0m\n"; exit 1; }
+    @echo ""
+
+test:
+    @echo ""
+    @bash scripts/task.sh test && printf "\033[32mtest completed successfully\033[0m\n" || { printf "\033[31mtest failed\033[0m\n"; exit 1; }
+    @echo ""
+
+test-ui:
+    @echo ""
+    @bash scripts/task.sh test-ui && printf "\033[32mtest-ui completed successfully\033[0m\n" || { printf "\033[31mtest-ui failed\033[0m\n"; exit 1; }
+    @echo ""
+
+test-accessibility:
+    @echo ""
+    @bash scripts/task.sh test-accessibility && printf "\033[32mtest-accessibility completed successfully\033[0m\n" || { printf "\033[31mtest-accessibility failed\033[0m\n"; exit 1; }
+    @echo ""
+
+test-snapshots:
+    @echo ""
+    @bash scripts/task.sh test-snapshots && printf "\033[32mtest-snapshots completed successfully\033[0m\n" || { printf "\033[31mtest-snapshots failed\033[0m\n"; exit 1; }
+    @echo ""
+
+test-coverage:
+    @echo ""
+    @bash scripts/task.sh test-coverage && printf "\033[32mtest-coverage completed successfully\033[0m\n" || { printf "\033[31mtest-coverage failed\033[0m\n"; exit 1; }
+    @echo ""
+
+test-sanitize:
+    @echo ""
+    @bash scripts/task.sh test-sanitize && printf "\033[32mtest-sanitize completed successfully\033[0m\n" || { printf "\033[31mtest-sanitize failed\033[0m\n"; exit 1; }
+    @echo ""
+
+test-performance:
+    @echo ""
+    @bash scripts/task.sh test-performance && printf "\033[32mtest-performance completed successfully\033[0m\n" || { printf "\033[31mtest-performance failed\033[0m\n"; exit 1; }
+    @echo ""
+
+performance-baseline:
+    @echo ""
+    @bash scripts/task.sh performance-baseline && printf "\033[32mPerformance baseline calibrated\033[0m\n" || { printf "\033[31mPerformance calibration failed\033[0m\n"; exit 1; }
+    @echo ""
+
+debug:
+    @echo ""
+    @bash scripts/task.sh debug && printf "\033[32mdebug completed successfully\033[0m\n" || { printf "\033[31mdebug failed\033[0m\n"; exit 1; }
+    @echo ""
+
+profile:
+    @echo ""
+    @bash scripts/task.sh profile && printf "\033[32mprofile completed successfully\033[0m\n" || { printf "\033[31mprofile failed\033[0m\n"; exit 1; }
+    @echo ""
+
+ci:
+    @echo ""
+    @printf "\033[34mRunning all mandatory CI checks\033[0m\n"
+    @just check && just build && just code-style && just code-analyze && just code-architecture && just code-semgrep && just code-security && just code-secrets && just code-shell && just code-spell && just code-dependencies && just code-docs && just code-package && just test && just test-ui && just test-accessibility && just test-snapshots && just test-coverage && just test-sanitize && just test-performance && printf "\033[32mAll CI checks passed\033[0m\n" || { printf "\033[31mCI failed\033[0m\n"; exit 1; }
+    @echo ""
+
+ci-quiet:
+    @echo ""
+    @printf "\033[34mRunning CI Checks (Quiet Mode)\033[0m\n"
+    @mkdir -p build/logs
+    @just ci > build/logs/ci.log 2>&1 && printf "\033[32mAll CI checks passed\033[0m\n" || { cat build/logs/ci.log; printf "\033[31mCI failed\033[0m\n"; exit 1; }
+    @echo ""
+
+{% raw %}
+memory pid:
+    @echo ""
+    @bash scripts/memory.sh "{{pid}}" && printf "\033[32mMemory inspection completed\033[0m\n" || { printf "\033[31mMemory inspection failed\033[0m\n"; exit 1; }
+    @echo ""
+
+coverage-export profile binary:
+    @echo ""
+    @bash scripts/coverage-export.sh "{{profile}}" "{{binary}}" && printf "\033[32mCoverage export completed\033[0m\n" || { printf "\033[31mCoverage export failed\033[0m\n"; exit 1; }
+    @echo ""
+{% endraw %}
+
+release:
+    @echo ""
+    @bash scripts/release.sh && printf "\033[32mRelease completed\033[0m\n" || { printf "\033[31mRelease failed\033[0m\n"; exit 1; }
+    @echo ""

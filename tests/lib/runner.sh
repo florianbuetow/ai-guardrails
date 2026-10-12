@@ -121,7 +121,10 @@ run_language_tests() {
 
     log_section "Running $LANG_NAME template tests"
 
-    check_prerequisites
+    if ! check_prerequisites; then
+        log_fail "$LANG_NAME prerequisites failed"
+        return 1
+    fi
 
     # --- One-time project setup ---
     temp_dir="$(mktemp -d)"

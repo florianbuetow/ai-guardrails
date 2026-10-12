@@ -1,0 +1,95 @@
+#!/bin/bash
+set -euo pipefail
+
+if [ "$#" -ne 1 ]; then
+    printf 'Expected exactly one task name\n' >&2
+    exit 1
+fi
+task="$1"
+case "$task" in
+    bootstrap-check) exec bash scripts/check-host.sh ;;
+    init) exec bash scripts/bootstrap.sh ;;
+    check) exec bash scripts/check-tools.sh ;;
+esac
+bash scripts/check-tools.sh
+# shellcheck source=environment.sh
+source scripts/environment.sh
+case "$task" in
+    build) bash scripts/xcode.sh build ;;
+    run)
+        bash scripts/package.sh
+        open "build/DerivedData/Build/Products/Debug/{{project_name}}.app"
+        ;;
+    code-format)
+        xcrun swift format format --in-place --recursive Sources Tests UITests Tools/Guardrails/Sources Tools/Guardrails/Tests scripts/verify.swift scripts/performance.swift Tools/Guardrails/Package.swift
+        ;;
+    code-style)
+        xcrun swift format lint --strict --recursive Sources Tests UITests Tools/Guardrails/Sources Tools/Guardrails/Tests scripts/verify.swift scripts/performance.swift Tools/Guardrails/Package.swift
+        swiftlint lint --strict --config .swiftlint.yml --cache-path build/swiftlint-cache
+        ;;
+    code-analyze)
+        bash scripts/xcode.sh clean build-for-testing 2>&1 | tee build/logs/compiler.log
+        swiftlint analyze --strict --config .swiftlint.yml --compiler-log-path build/logs/compiler.log
+        ;;
+    code-architecture)
+        xcrun swift test --package-path Tools/Guardrails --force-resolved-versions -c release --jobs 2
+        xcrun swift run --package-path Tools/Guardrails -c release --skip-build Guardrails "$PWD"
+        xcodegen dump --spec project.yml --type json >build/reports/project.json
+        xcrun swift scripts/verify.swift graph build/reports/project.json
+        ;;
+    code-semgrep)
+        semgrep scan --config config/semgrep/policy.yml --error --strict --metrics=off --no-git-ignore \
+            --json-output build/reports/semgrep-policy.json Sources scripts
+        xcrun swift scripts/verify.swift scanner build/reports/semgrep-policy.json
+        ;;
+    code-security)
+        semgrep scan --config config/semgrep/security.yml --error --strict --metrics=off --no-git-ignore \
+            --json-output build/reports/semgrep-security.json Sources scripts
+        xcrun swift scripts/verify.swift scanner build/reports/semgrep-security.json
+        ;;
+    code-secrets)
+        bash scripts/secrets.sh
+        ;;
+    code-shell)
+        find scripts -name '*.sh' -print0 | xargs -0 shfmt -d -i 4 -ci
+        find scripts -name '*.sh' -print0 | xargs -0 shellcheck -P SCRIPTDIR
+        shellcheck .githooks/pre-commit
+        ;;
+    code-spell)
+        codespell Sources Tests UITests scripts Documentation Tools/Guardrails/Sources \
+            Tools/Guardrails/Package.swift project.yml justfile README.md AGENTS.md \
+            config/quality.json config/semgrep .swiftlint.yml --ignore-words=config/codespell.txt
+        ;;
+    code-dependencies)
+        bash scripts/dependencies.sh
+        ;;
+    code-docs)
+        xcrun docc convert Documentation/App.docc --warnings-as-errors --analyze --output-dir build/documentation
+        ;;
+    code-package) bash scripts/package.sh ;;
+    test) bash scripts/tests.sh unit ;;
+    test-ui) bash scripts/tests.sh ui ;;
+    test-accessibility) bash scripts/tests.sh accessibility ;;
+    test-snapshots) bash scripts/tests.sh snapshots ;;
+    test-coverage) bash scripts/tests.sh coverage ;;
+    test-sanitize)
+        bash scripts/tests.sh address
+        bash scripts/tests.sh thread
+        ;;
+    test-performance) bash scripts/tests.sh performance ;;
+    performance-baseline) bash scripts/tests.sh performance-calibrate ;;
+    debug)
+        bash scripts/xcode.sh build
+        xcrun lldb "build/DerivedData/Build/Products/Debug/{{project_name}}.app/Contents/MacOS/{{project_name}}"
+        ;;
+    profile)
+        bash scripts/xcode.sh build
+        xcrun xctrace record --template 'Time Profiler' --time-limit 10s \
+            --output "build/reports/profile-$(date +%s).trace" --launch -- \
+            "build/DerivedData/Build/Products/Debug/{{project_name}}.app/Contents/MacOS/{{project_name}}"
+        ;;
+    *)
+        printf 'Unknown task: %s\n' "$task" >&2
+        exit 1
+        ;;
+esac

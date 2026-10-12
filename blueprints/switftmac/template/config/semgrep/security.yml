@@ -1,0 +1,8 @@
+rules:
+  - id: swift.no-insecure-transport
+    languages: [generic]
+    severity: ERROR
+    message: Application endpoints must use TLS.
+    pattern-regex: '"http://[^"\s]+"'
+    paths:
+      include: ["**/*.swift"]

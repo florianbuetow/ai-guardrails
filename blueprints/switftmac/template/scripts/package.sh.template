@@ -1,0 +1,22 @@
+#!/bin/bash
+set -euo pipefail
+
+bash scripts/xcode.sh build
+app="build/DerivedData/Build/Products/Debug/{{project_name}}.app"
+plist="$app/Contents/Info.plist"
+plutil -lint "$plist"
+[ "$(plutil -extract CFBundleIdentifier raw "$plist")" = '{{bundle_identifier}}' ]
+[ "$(plutil -extract LSMinimumSystemVersion raw "$plist")" = 26.0 ]
+executable="$(plutil -extract CFBundleExecutable raw "$plist")"
+[ -n "$executable" ] && [ -x "$app/Contents/MacOS/$executable" ]
+[ -s "$app/Contents/Resources/Assets.car" ]
+[ "$(xcrun lipo -archs "$app/Contents/MacOS/$executable")" = arm64 ]
+codesign --verify --strict --verbose=2 "$app"
+codesign --display --entitlements :- "$app" >build/reports/entitlements.plist
+if [ -s build/reports/entitlements.plist ]; then
+    plutil -lint build/reports/entitlements.plist
+fi
+# Verify transport policy without treating a malformed plist as absent configuration.
+plutil -convert json -o build/reports/Info.json "$plist"
+xcrun swift scripts/verify.swift bundle build/reports/Info.json
+printf '\033[32mApplication bundle verified\033[0m\n'

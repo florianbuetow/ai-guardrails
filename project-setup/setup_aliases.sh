@@ -28,6 +28,7 @@ ALIASES=(
   "newnode:setup-project-node-typescript-cli-base-claude.sh"
   "newshell:setup-project-shellscripts-base-claude.sh"
   "newarm64:setup-project-arm64-macos-cli-base-claude.sh"
+  "newswitftmac:setup-project-switftmac-claude.sh"
   "newmmix:setup-project-mmix-cli-base-claude.sh"
   "newaidocs:setup-project-ai-docs-claude.sh"
 )

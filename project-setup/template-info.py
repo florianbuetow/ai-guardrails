@@ -110,6 +110,10 @@ def collect_dependencies(template_dir: Path) -> list[Dependency]:
         ("mix.exs.template", parse_elixir_manifest),
         ("Cargo.toml.template", parse_rust_manifest),
         ("CMakeLists.txt.template", parse_cmake_manifest),
+        ("Package.swift.template", parse_swift_manifest),
+        ("Tools/Guardrails/Package.swift.template", parse_swift_manifest),
+        ("Tools/Guardrails/Package.swift", parse_swift_manifest),
+        ("project.yml.template", parse_xcodegen_manifest),
         ("package.json.template", parse_npm_manifest),
         ("scripts/bootstrap-vite.sh.template", parse_npm_bootstrap),
     )
@@ -554,6 +558,76 @@ def parse_rust_manifest(path: Path) -> list[Dependency]:
                     table_match.group(1),
                 )
             )
+
+    return dependencies
+
+
+def parse_swift_manifest(path: Path) -> list[Dependency]:
+    """Return exact SwiftPM package declarations from a Package.swift template."""
+    text = path.read_text(encoding="utf-8")
+    dependencies: list[Dependency] = []
+    pattern = re.compile(
+        r'\.package\(\s*url:\s*"(?P<url>https://github\.com/[^"/]+/[^"/]+(?:\.git)?)"\s*,\s*'
+        r'exact:\s*"(?P<version>[^"]+)"\s*\)',
+        re.MULTILINE,
+    )
+    for match in pattern.finditer(text):
+        repository = match.group("url")
+        package_name = repository.removesuffix(".git").rsplit("/", 1)[-1]
+        dependencies.append(
+            Dependency(
+                "SwiftPM packages",
+                package_name,
+                match.group("version"),
+                path.name,
+                latest_version.REGISTRY_GITHUB_TAGS,
+                repository,
+            )
+        )
+    return dependencies
+
+
+def parse_xcodegen_manifest(path: Path) -> list[Dependency]:
+    """Return exact remote packages from the top-level XcodeGen package map."""
+    dependencies: list[Dependency] = []
+    in_packages = False
+    package_name = ""
+    repository = ""
+
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line == "packages:":
+            in_packages = True
+            continue
+        if in_packages and line and not line.startswith(" "):
+            break
+        if not in_packages or not line.strip() or line.lstrip().startswith("#"):
+            continue
+
+        package_match = re.fullmatch(r"  ([A-Za-z0-9_-]+):", line)
+        if package_match:
+            package_name = package_match.group(1)
+            repository = ""
+            continue
+
+        url_match = re.fullmatch(r"    url:\s*(https://github\.com/\S+)", line)
+        if url_match:
+            repository = url_match.group(1)
+            continue
+
+        version_match = re.fullmatch(r"    exactVersion:\s*([^\s#]+)", line)
+        if version_match and package_name and repository:
+            dependencies.append(
+                Dependency(
+                    "XcodeGen packages",
+                    package_name,
+                    version_match.group(1),
+                    path.name,
+                    latest_version.REGISTRY_GITHUB_TAGS,
+                    repository,
+                )
+            )
+            package_name = ""
+            repository = ""
 
     return dependencies
 

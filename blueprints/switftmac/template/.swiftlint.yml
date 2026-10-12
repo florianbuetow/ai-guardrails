@@ -1,0 +1,36 @@
+included:
+  - Sources
+  - Tests
+  - UITests
+only_rules:
+  - force_cast
+  - force_try
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+  - unhandled_throwing_task
+  - weak_delegate
+  - private_swiftui_state
+  - duplicate_conditions
+  - identical_operands
+  - empty_count
+  - cyclomatic_complexity
+  - function_body_length
+  - function_parameter_count
+  - nesting
+  - unused_optional_binding
+analyzer_rules:
+  - unused_import
+  - unused_declaration
+force_cast: error
+force_try: error
+force_unwrapping: error
+cyclomatic_complexity:
+  warning: 10
+  error: 15
+function_body_length:
+  warning: 60
+  error: 100
+function_parameter_count:
+  warning: 6
+  error: 8
+reporter: xcode

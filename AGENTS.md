@@ -180,6 +180,16 @@ Before running a violation, confirm that its resolved recipe (`check` or the `co
 - `just perf-mca` prints an `llvm-mca` throughput report — informational, deliberately outside `ci`. ArmLS and `xctrace` are documented as developer-only tools and are never CI gates
 - `code-lspchecks` here means Clang's integrated assembler, **not** ArmLS; the generated AGENTS.md says so explicitly
 
+### The Swift macOS Application Template (`blueprints/switftmac`)
+
+- Native Swift 6.4 SwiftUI/AppKit desktop application targeting macOS Tahoe 26.0; development requires Apple Silicon, macOS 26.6+, and Xcode 27 build 27A266a
+- CLI-only workflow using XcodeGen and `xcodebuild`; generated scheme `App` builds a conventional signed `.app` bundle and `just run` launches it
+- Architecture: `App -> UI -> Application -> Domain`, with Infrastructure implementing application-facing interfaces; dependency and import direction are checked
+- Validation: `swift format`, SwiftLint and analyzer rules, SwiftSyntax policy checks, Semgrep, Gitleaks, OSV-Scanner, ShellCheck, shfmt, codespell, DocC, bundle/signature inspection, and dependency locks
+- Tests: Swift Testing, XCTest/XCUIAutomation, accessibility audits, SnapshotTesting, ViewInspector, PropertyBased, coverage thresholds, AddressSanitizer, ThreadSanitizer, Main Thread Checker, and performance measurements
+- `just init` installs and configures the complete pinned toolchain after a separate host preflight and creates the initial runner-bound performance baseline when absent; CI never refreshes that baseline, and `just performance-baseline` is the explicit recalibration path
+- Missing or wrong tool versions, missing performance baselines, runner identity changes, skipped/empty tests, and performance regressions fail instead of being skipped
+
 ### The MMIX Assembly CLI Template (`blueprints/mmix-cli-base`)
 
 - MMIX assembly (`.mms`) with pinned generated MMIXware C sources vendored into every generated project
@@ -221,7 +231,7 @@ These rules apply to all justfiles — in this repository and in all generated t
 
 - `just ci` — Run all repo-level checks (codespell, semgrep, shellcheck) + all template tests
 - `just test` — Run baseline + violation tests for all templates
-- `just test-<language>` — Run tests for one template family (python-cli-base, java-cli-base, go-cli-base, elixir-otp-base, cpp-cli-base, cpp-3dgame-base, rust-cli-base, kotlin-cli-base, scala-cli-base, clojure-cli-base, react-vite-typescript-base, mcp-server-typescript-base, node-typescript-cli-base, shellscripts-base, arm64-macos-cli-base, mmix-cli-base, ai-docs)
+- `just test-<language>` — Run tests for one template family (python-cli-base, java-cli-base, go-cli-base, elixir-otp-base, cpp-cli-base, cpp-3dgame-base, rust-cli-base, kotlin-cli-base, scala-cli-base, clojure-cli-base, react-vite-typescript-base, mcp-server-typescript-base, node-typescript-cli-base, shellscripts-base, arm64-macos-cli-base, switftmac, mmix-cli-base, ai-docs)
 - `just check` — Verify required tools are installed
 - `just create <template> <target-dir>` — Scaffold a new project from a blueprint
 

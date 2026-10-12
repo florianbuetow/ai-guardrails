@@ -1,0 +1,125 @@
+import XCTest
+
+@MainActor
+final class WorkspaceUITests: XCTestCase {
+    func testCreatesAndUsesWorkspace() throws {
+        continueAfterFailure = false
+        let app = launchApp()
+        createWorkspace(in: app)
+
+        let counter = app.staticTexts["counter-value"]
+        XCTAssertTrue(counter.waitForExistence(timeout: 5))
+        XCTAssertEqual(counter.value as? String, "0")
+
+        app.buttons["toolbar-increment"].click()
+        XCTAssertEqual(counter.value as? String, "1")
+
+        app.terminate()
+        app.launch()
+        XCTAssertTrue(counter.waitForExistence(timeout: 5))
+        XCTAssertEqual(counter.value as? String, "1")
+    }
+
+    func testKeyboardCommandAndSettingsPersistReset() throws {
+        continueAfterFailure = false
+        let app = launchApp()
+        createWorkspace(in: app)
+        let counter = app.staticTexts["counter-value"]
+        XCTAssertTrue(counter.waitForExistence(timeout: 5))
+
+        app.typeKey("+", modifierFlags: .command)
+        expect(counter, toHaveValue: "1")
+
+        app.typeKey(",", modifierFlags: .command)
+        XCTAssertTrue(app.scrollViews["settings-form"].waitForExistence(timeout: 5))
+        let status = app.staticTexts["settings-status"]
+        XCTAssertTrue(status.waitForExistence(timeout: 5))
+        XCTAssertEqual(status.value as? String, "Studio, count 1")
+        app.buttons["settings-reset"].click()
+        expect(counter, toHaveValue: "0")
+
+        app.terminate()
+        app.launch()
+        XCTAssertTrue(counter.waitForExistence(timeout: 5))
+        XCTAssertEqual(counter.value as? String, "0")
+    }
+
+    func testMenuBarItemDisplaysAndChangesCount() throws {
+        continueAfterFailure = false
+        let app = launchApp()
+        createWorkspace(in: app)
+
+        let statusItem = app.menuBars.statusItems["menu-bar-workspace"]
+        XCTAssertTrue(statusItem.waitForExistence(timeout: 5))
+        statusItem.click()
+        XCTAssertTrue(app.menuItems["Studio: 0"].waitForExistence(timeout: 5))
+        let increment = app.menuItems["Increment"]
+        XCTAssertTrue(increment.waitForExistence(timeout: 5))
+        increment.click()
+        statusItem.click()
+        XCTAssertTrue(app.menuItems["Studio: 1"].waitForExistence(timeout: 5))
+    }
+
+    private func createWorkspace(in app: XCUIApplication) {
+        let nameField = app.textFields["workspace-name"]
+        XCTAssertTrue(nameField.waitForExistence(timeout: 5))
+        nameField.click()
+        nameField.typeText("Studio")
+        app.buttons["create-workspace"].click()
+    }
+
+    private func expect(_ element: XCUIElement, toHaveValue value: String) {
+        let predicate = NSPredicate(format: "value == %@", value)
+        expectation(for: predicate, evaluatedWith: element)
+        waitForExpectations(timeout: 5)
+    }
+
+    private func launchApp() -> XCUIApplication {
+        let storageFile = FileManager.default.temporaryDirectory
+            .appending(path: "{{ project_name }}-ui-tests-\(UUID().uuidString).json")
+            .path
+        addTeardownBlock {
+            if FileManager.default.fileExists(atPath: storageFile) {
+                try FileManager.default.removeItem(atPath: storageFile)
+            }
+        }
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing"]
+        app.launchEnvironment = ["UI_TEST_STORAGE_FILE": storageFile]
+        app.launch()
+        return app
+    }
+
+}
+
+@MainActor
+final class AccessibilityTests: XCTestCase {
+    func testAccessibilityAudit() throws {
+        let storageFile = FileManager.default.temporaryDirectory
+            .appending(path: "{{ project_name }}-accessibility-\(UUID().uuidString).json")
+            .path
+        addTeardownBlock {
+            if FileManager.default.fileExists(atPath: storageFile) {
+                try FileManager.default.removeItem(atPath: storageFile)
+            }
+        }
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing"]
+        app.launchEnvironment = ["UI_TEST_STORAGE_FILE": storageFile]
+        app.launch()
+
+        try app.performAccessibilityAudit()
+
+        let nameField = app.textFields["workspace-name"]
+        XCTAssertTrue(nameField.waitForExistence(timeout: 5))
+        nameField.click()
+        nameField.typeText("Accessible Studio")
+        app.buttons["create-workspace"].click()
+        XCTAssertTrue(app.staticTexts["counter-value"].waitForExistence(timeout: 5))
+        try app.performAccessibilityAudit()
+
+        app.typeKey(",", modifierFlags: .command)
+        XCTAssertTrue(app.scrollViews["settings-form"].waitForExistence(timeout: 5))
+        try app.performAccessibilityAudit()
+    }
+}

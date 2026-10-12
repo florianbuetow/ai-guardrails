@@ -1,0 +1,26 @@
+import XCTest
+
+@MainActor
+final class AppLaunchPerformanceTests: XCTestCase {
+    func testLaunchPerformance() throws {
+        let storageFile = FileManager.default.temporaryDirectory
+            .appending(path: "{{ project_name }}-performance-\(UUID().uuidString).json")
+            .path
+        addTeardownBlock {
+            if FileManager.default.fileExists(atPath: storageFile) {
+                try FileManager.default.removeItem(atPath: storageFile)
+            }
+        }
+
+        let options = XCTMeasureOptions()
+        options.iterationCount = 10
+        measure(metrics: [XCTApplicationLaunchMetric(waitUntilResponsive: true)], options: options)
+        {
+            let app = XCUIApplication()
+            app.launchArguments = ["--ui-testing"]
+            app.launchEnvironment = ["UI_TEST_STORAGE_FILE": storageFile]
+            app.launch()
+            app.terminate()
+        }
+    }
+}

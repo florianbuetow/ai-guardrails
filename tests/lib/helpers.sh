@@ -53,9 +53,11 @@ generate_project() {
         copier_args+=(--data "$entry")
     done
 
-    copier copy --trust --defaults \
+    if ! copier copy --trust --defaults \
         "${copier_args[@]}" \
-        "$template_path" "$target_dir"
+        "$template_path" "$target_dir"; then
+        return 1
+    fi
 
     if [ "${NO_GIT_MUTATIONS:-false}" = "true" ]; then
         return 0

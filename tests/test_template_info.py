@@ -8,6 +8,7 @@ import io
 import importlib.util
 from pathlib import Path
 import sys
+import tempfile
 import unittest
 
 
@@ -125,6 +126,91 @@ class TemplateInfoTests(unittest.TestCase):
         googletest = dependency_by_name(dependencies, "googletest")
         self.assertEqual("github-tags", googletest.latest_registry)
         self.assertEqual("https://github.com/google/googletest.git", googletest.latest_identifier)
+
+    def test_swift_parser_reports_exact_github_packages(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            manifest = Path(temporary_directory) / "Package.swift.template"
+            manifest.write_text(
+                """// swift-tools-version: 6.2
+import PackageDescription
+let package = Package(
+    name: "Fixture",
+    dependencies: [
+        .package(
+            url: "https://github.com/pointfreeco/swift-snapshot-testing.git",
+            exact: "1.18.7"
+        ),
+    ]
+)
+""",
+                encoding="utf-8",
+            )
+
+            dependencies = template_info.parse_swift_manifest(manifest)
+
+        self.assertEqual(1, len(dependencies))
+        snapshot_testing = dependencies[0]
+        self.assertEqual("SwiftPM packages", snapshot_testing.group)
+        self.assertEqual("swift-snapshot-testing", snapshot_testing.name)
+        self.assertEqual("1.18.7", snapshot_testing.spec)
+        self.assertEqual("github-tags", snapshot_testing.latest_registry)
+        self.assertEqual(
+            "https://github.com/pointfreeco/swift-snapshot-testing.git",
+            snapshot_testing.latest_identifier,
+        )
+
+    def test_xcodegen_parser_reports_exact_remote_packages(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            manifest = Path(temporary_directory) / "project.yml.template"
+            manifest.write_text(
+                """name: Fixture
+packages:
+  PropertyBased:
+    url: https://github.com/x-sheep/swift-property-based.git
+    exactVersion: 2.0.1
+targets:
+  App:
+    type: application
+""",
+                encoding="utf-8",
+            )
+
+            dependencies = template_info.parse_xcodegen_manifest(manifest)
+
+        self.assertEqual(1, len(dependencies))
+        property_based = dependencies[0]
+        self.assertEqual("XcodeGen packages", property_based.group)
+        self.assertEqual("PropertyBased", property_based.name)
+        self.assertEqual("2.0.1", property_based.spec)
+        self.assertEqual("github-tags", property_based.latest_registry)
+        self.assertEqual(
+            "https://github.com/x-sheep/swift-property-based.git",
+            property_based.latest_identifier,
+        )
+
+    def test_switftmac_inventory_includes_all_xcodegen_packages(self) -> None:
+        manifest = REPO_ROOT / "blueprints/switftmac/template/project.yml.template"
+
+        dependencies = template_info.parse_xcodegen_manifest(manifest)
+
+        self.assertEqual(
+            {"PropertyBased", "SnapshotTesting", "ViewInspector"},
+            names(dependencies),
+        )
+        self.assertEqual(
+            {"PropertyBased": "2.0.1", "SnapshotTesting": "1.19.6", "ViewInspector": "0.10.5"},
+            {dependency.name: dependency.spec for dependency in dependencies},
+        )
+
+    def test_switftmac_inventory_includes_swiftsyntax_guardrail_dependency(self) -> None:
+        manifest = REPO_ROOT / "blueprints/switftmac/template/Tools/Guardrails/Package.swift"
+
+        dependencies = template_info.parse_swift_manifest(manifest)
+
+        self.assertEqual(1, len(dependencies))
+        swift_syntax = dependencies[0]
+        self.assertEqual("swift-syntax", swift_syntax.name)
+        self.assertEqual("604.0.0", swift_syntax.spec)
 
     def test_clojars_coordinate_parser_requires_group_and_artifact(self) -> None:
         self.assertEqual(

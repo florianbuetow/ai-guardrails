@@ -1,0 +1,3 @@
+title = "switftmac secrets policy"
+[extend]
+useDefault = true

@@ -1,0 +1,22 @@
+rules:
+  - id: swift.no-shell-process
+    languages: [generic]
+    severity: ERROR
+    message: Do not launch a shell from application code; use typed APIs.
+    pattern-regex: '"(/bin/(ba|z)?sh|/usr/bin/env)"'
+    paths:
+      include: ["*.swift"]
+  - id: scripts.no-checker-suppression
+    languages: [generic]
+    severity: ERROR
+    message: Fix shell diagnostics rather than suppressing them.
+    pattern-regex: '#\s*shellcheck\s+disable'
+    paths:
+      include: ["*.sh"]
+  - id: scripts.no-lossy-pipeline
+    languages: [generic]
+    severity: ERROR
+    message: Do not discard checker failures.
+    pattern-regex: '\|\|\s*(true|:)\b'
+    paths:
+      include: ["*.sh"]
