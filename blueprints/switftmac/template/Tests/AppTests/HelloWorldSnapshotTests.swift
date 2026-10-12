@@ -1,4 +1,5 @@
 import AppUI
+import Foundation
 import SnapshotTesting
 import SwiftUI
 import XCTest
@@ -17,6 +18,7 @@ final class SnapshotTests: XCTestCase {
             XCTFail("Unable to render the Hello World view")
             return
         }
-        assertSnapshot(of: image, as: .image, named: "hello-world")
+        let platform = ProcessInfo.processInfo.operatingSystemVersion.majorVersion
+        assertSnapshot(of: image, as: .image, named: "hello-world-macos-\(platform)")
     }
 }

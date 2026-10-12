@@ -71,7 +71,8 @@ UI tests need a logged-in macOS graphical session and permission for test
 automation. A disconnected or locked runner cannot stand in for a working UI
 test environment. Snapshot references are reviewable source artifacts; CI never
 accepts new reference images automatically. Pin macOS, Xcode, appearance, locale
-and view size when capturing or comparing images.
+and view size when capturing or comparing images. The Hello World reference uses
+scale 1 and separate reviewed images for macOS 26 and 27.
 
 ## Architecture
 
