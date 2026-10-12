@@ -62,6 +62,23 @@ jobs:
         run: just ci
       - name: Repository baseline and violation target
         run: just test-switftmac
+      - name: Capture independent snapshot evidence after failure
+        if: failure()
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: just test-snapshots
+      - name: Diagnose native launch metric variants
+        if: failure()
+        run: |
+          set -euo pipefail
+          cp tests/fixtures/switftmac/LaunchMetricDiagnostics.swift \
+            "$PROJECT_DIR/UITests/PerformanceTests/AppLaunchPerformanceTests.swift"
+          cd "$PROJECT_DIR"
+          bash scripts/xcode.sh test -only-testing:PerformanceTests \
+            -enableCodeCoverage NO -enableAddressSanitizer NO -enableThreadSanitizer NO \
+            -resultBundlePath build/results/launch-diagnostics.xcresult
+          xcrun xcresulttool get test-results metrics --schema-version 0.1.0 \
+            --path build/results/launch-diagnostics.xcresult --compact \
+            >build/reports/launch-diagnostics.json
       - name: Preserve reports and snapshot differences
         if: always()
         uses: actions/upload-artifact@v4
