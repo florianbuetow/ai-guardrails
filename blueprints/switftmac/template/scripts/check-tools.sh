@@ -25,6 +25,13 @@ while IFS=$'\t' read -r name expected kind url checksum; do
         exit 1
     fi
 done <config/tools.lock.tsv
+for preset in base.yml Configs/debug.yml Configs/release.yml Platforms/macOS.yml \
+    Products/framework.yml Products/bundle.unit-test.yml Products/bundle.ui-testing.yml; do
+    if [ ! -f ".tools/share/xcodegen/SettingPresets/$preset" ]; then
+        printf 'Missing XcodeGen setting preset: %s; run just init\n' "$preset" >&2
+        exit 1
+    fi
+done
 [ "$(.tools/bin/codespell --version)" = 2.4.3 ]
 [ "$(.tools/bin/semgrep --version)" = 1.180.0 ]
 [ "$(.tools/python/bin/python --version)" = 'Python 3.14.8' ]

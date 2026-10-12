@@ -3,7 +3,7 @@ set -euo pipefail
 
 # shellcheck source=environment.sh
 source scripts/environment.sh
-for directory in .tools .tools/bin .tools/packages .tools/downloads; do
+for directory in .tools .tools/bin .tools/share .tools/packages .tools/downloads; do
     if [ -L "$directory" ]; then
         printf 'Refusing symlinked tool directory: %s\n' "$directory" >&2
         exit 1
@@ -44,6 +44,11 @@ while IFS=$'\t' read -r name version kind url checksum; do
     [ -n "$executable" ] && [ "$(printf '%s\n' "$executable" | wc -l | tr -d ' ')" = 1 ]
     chmod +x "$executable"
     ln -sf "$executable" ".tools/bin/$name"
+    if [ "$name" = xcodegen ]; then
+        resources="$package/xcodegen/share/xcodegen"
+        [ -f "$resources/SettingPresets/base.yml" ]
+        ln -sfn "$resources" .tools/share/xcodegen
+    fi
     printf 'Installed %s %s\n' "$name" "$version"
 done <config/tools.lock.tsv
 
