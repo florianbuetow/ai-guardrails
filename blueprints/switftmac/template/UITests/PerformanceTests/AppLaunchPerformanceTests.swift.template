@@ -3,6 +3,7 @@ import XCTest
 @MainActor
 final class AppLaunchPerformanceTests: XCTestCase {
     func testLaunchPerformance() throws {
+        continueAfterFailure = false
         let storageFile = FileManager.default.temporaryDirectory
             .appending(path: "{{ project_name }}-performance-\(UUID().uuidString).json")
             .path
@@ -12,15 +13,16 @@ final class AppLaunchPerformanceTests: XCTestCase {
             }
         }
 
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing"]
+        app.launchEnvironment = ["UI_TEST_STORAGE_FILE": storageFile]
+        defer { app.terminate() }
+
         let options = XCTMeasureOptions()
         options.iterationCount = 10
         measure(metrics: [XCTApplicationLaunchMetric(waitUntilResponsive: true)], options: options)
         {
-            let app = XCUIApplication()
-            app.launchArguments = ["--ui-testing"]
-            app.launchEnvironment = ["UI_TEST_STORAGE_FILE": storageFile]
             app.launch()
-            app.terminate()
         }
     }
 }
