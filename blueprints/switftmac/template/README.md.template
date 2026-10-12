@@ -17,10 +17,12 @@ Copier runs `just init` automatically. It installs every selected command-line
 tool into `.tools/`, verifies download checksums, creates a private Python runtime
 for Semgrep/codespell, resolves the exact Swift package dependencies, builds the
 SwiftSyntax checker and installs the pre-commit hook. Initial setup also measures
-launch performance on this runner and saves the initial baseline. It requires a
+launch performance on this Mac and saves the initial baseline. It requires a
 working graphical session. Existing baselines are never refreshed by setup or CI.
 No tools are optional, and
 missing tools fail checks instead of falling back to global installations.
+
+Builds, checks and tests run locally.
 
 ```sh
 just init
@@ -93,9 +95,6 @@ The local build uses ad-hoc signing and does not need distribution credentials.
 with hardened runtime, submits through `notarytool`, and staples the ticket.
 Store notarization credentials in the keychain; never put them in configuration
 files or source control.
-
-Mutation testing is not configured pending the upstream-tool evaluation and the
-template owner's decision. No mutation score is claimed by this template.
 
 ## Tool updates
 
