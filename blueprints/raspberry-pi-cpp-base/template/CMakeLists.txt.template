@@ -1,0 +1,151 @@
+cmake_minimum_required(VERSION 3.25)
+project({{project_name}} VERSION 0.1.0 LANGUAGES CXX)
+
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    message(FATAL_ERROR "This project requires Linux. Found '${CMAKE_SYSTEM_NAME}'.")
+endif()
+
+string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" project_processor)
+if(NOT project_processor MATCHES "^(aarch64|arm64)$")
+    message(FATAL_ERROR
+        "This project requires 64-bit ARM Linux. Found '${CMAKE_SYSTEM_PROCESSOR}'.")
+endif()
+
+if(NOT CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|Clang)$")
+    message(FATAL_ERROR
+        "This project requires GCC or LLVM/Clang. Found '${CMAKE_CXX_COMPILER_ID}'.")
+endif()
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+option(ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
+option(ENABLE_COVERAGE "Enable Clang source-based coverage instrumentation" OFF)
+
+function(configure_project_target target_name)
+    set_target_properties(${target_name} PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    target_compile_options(${target_name} PRIVATE
+        -march=armv8-a
+        -Wall
+        -Wextra
+        -Wpedantic
+        -Wconversion
+        -Wsign-conversion
+        -Wshadow
+        -Wnon-virtual-dtor
+        -Wold-style-cast
+        -Wcast-align
+        -Woverloaded-virtual
+        -Wunused
+        -Werror
+        -fstack-protector-strong
+    )
+endfunction()
+
+function(configure_project_executable target_name)
+    target_link_options(${target_name} PRIVATE
+        -pie
+        -Wl,-z,relro
+        -Wl,-z,now
+        -Wl,-z,noexecstack
+        -Wl,--as-needed
+    )
+endfunction()
+
+if(ENABLE_SANITIZERS)
+    add_compile_options(
+        -fsanitize=address,undefined
+        -fno-sanitize-recover=all
+        -fno-omit-frame-pointer
+    )
+    add_link_options(-fsanitize=address,undefined)
+endif()
+
+if(ENABLE_COVERAGE)
+    if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        message(FATAL_ERROR "Coverage requires LLVM/Clang.")
+    endif()
+    if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+        message(FATAL_ERROR "Coverage requires a Debug build.")
+    endif()
+    add_compile_options(-fprofile-instr-generate -fcoverage-mapping)
+    add_link_options(-fprofile-instr-generate -fcoverage-mapping)
+endif()
+
+include(CheckCXXSourceCompiles)
+set(CMAKE_REQUIRED_FLAGS "-march=armv8-a")
+check_cxx_source_compiles(
+    "#include <arm_neon.h>
+     int main() {
+         const uint32x4_t value = vdupq_n_u32(1U);
+         return vgetq_lane_u32(value, 0) == 1U ? 0 : 1;
+     }"
+    PROJECT_HAS_ARM_NEON_INTRINSICS
+)
+unset(CMAKE_REQUIRED_FLAGS)
+if(NOT PROJECT_HAS_ARM_NEON_INTRINSICS)
+    message(FATAL_ERROR "The compiler cannot build ARM NEON intrinsics for ARMv8-A.")
+endif()
+
+add_library(${PROJECT_NAME}_domain STATIC src/domain/greeting.cpp)
+target_include_directories(${PROJECT_NAME}_domain PUBLIC ${CMAKE_SOURCE_DIR}/include)
+configure_project_target(${PROJECT_NAME}_domain)
+
+add_library(${PROJECT_NAME}_application STATIC src/application/application.cpp)
+target_include_directories(${PROJECT_NAME}_application PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_link_libraries(${PROJECT_NAME}_application PUBLIC ${PROJECT_NAME}_domain)
+configure_project_target(${PROJECT_NAME}_application)
+
+add_executable(${PROJECT_NAME} src/cli/main.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_application)
+configure_project_target(${PROJECT_NAME})
+configure_project_executable(${PROJECT_NAME})
+
+install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+
+include(CTest)
+if(BUILD_TESTING)
+    # Debian packages GoogleTest 1.16 with a 1.15 CMake compatibility version.
+    find_package(GTest 1.15 CONFIG REQUIRED)
+    find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+
+    add_executable(${PROJECT_NAME}_unit_tests
+        tests/application_test.cpp
+        tests/domain_test.cpp
+    )
+    target_link_libraries(${PROJECT_NAME}_unit_tests PRIVATE
+        ${PROJECT_NAME}_application
+        GTest::gtest_main
+    )
+    configure_project_target(${PROJECT_NAME}_unit_tests)
+    configure_project_executable(${PROJECT_NAME}_unit_tests)
+
+    add_library(${PROJECT_NAME}_application_header_test OBJECT
+        tests/application_header_test.cpp
+    )
+    target_include_directories(${PROJECT_NAME}_application_header_test PRIVATE
+        ${CMAKE_SOURCE_DIR}/include
+    )
+    configure_project_target(${PROJECT_NAME}_application_header_test)
+
+    add_library(${PROJECT_NAME}_domain_header_test OBJECT tests/domain_header_test.cpp)
+    target_include_directories(${PROJECT_NAME}_domain_header_test PRIVATE
+        ${CMAKE_SOURCE_DIR}/include
+    )
+    configure_project_target(${PROJECT_NAME}_domain_header_test)
+
+    include(GoogleTest)
+    gtest_discover_tests(${PROJECT_NAME}_unit_tests
+        DISCOVERY_TIMEOUT 30
+        PROPERTIES TIMEOUT 30
+    )
+
+    add_test(
+        NAME cli_contract
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/scripts/test-cli.py
+            --binary $<TARGET_FILE:${PROJECT_NAME}>
+    )
+    set_tests_properties(cli_contract PROPERTIES TIMEOUT 30)
+endif()

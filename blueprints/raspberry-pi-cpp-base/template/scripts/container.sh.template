@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if [ "$#" -ne 1 ]; then
+    printf 'Usage: %s <build|init|ci|run|shell|artifact>\n' "$0" >&2
+    exit 1
+fi
+command -v docker >/dev/null
+docker info >/dev/null
+image='{{project_name}}-dev:trixie-arm64'
+case "$1" in
+    build)
+        docker build --platform linux/arm64 --target development -t "$image" .
+        ;;
+    init | ci | run)
+        docker run --rm --platform linux/arm64 --user "$(id -u):$(id -g)" --env XDG_CONFIG_HOME=/tmp/guardrails-config --env XDG_CACHE_HOME=/tmp/guardrails-cache --mount "type=bind,source=$(pwd),target=/src" --workdir /src "$image" just "$1"
+        ;;
+    shell)
+        docker run --rm -it --platform linux/arm64 --user "$(id -u):$(id -g)" --env XDG_CONFIG_HOME=/tmp/guardrails-config --env XDG_CACHE_HOME=/tmp/guardrails-cache --mount "type=bind,source=$(pwd),target=/src" --workdir /src "$image" bash
+        ;;
+    artifact)
+        docker build --platform linux/arm64 --target runtime -t '{{project_name}}-runtime:trixie-arm64' .
+        report=$(mktemp -d)
+        trap 'rm -rf "$report"' EXIT
+        docker run --rm --platform linux/arm64 '{{project_name}}-runtime:trixie-arm64' >"$report/stdout" 2>"$report/stderr"
+        printf 'Hello, world!\n' >"$report/expected"
+        cmp "$report/expected" "$report/stdout"
+        test ! -s "$report/stderr"
+        ;;
+    *)
+        printf 'Unknown container command: %s\n' "$1" >&2
+        exit 1
+        ;;
+esac

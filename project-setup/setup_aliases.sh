@@ -18,6 +18,7 @@ ALIASES=(
   "newgo:setup-project-go-cli-base-claude.sh"
   "newcpp:setup-project-cpp-cli-base-claude.sh"
   "newgamecpp:setup-project-cpp-3dgame-base-claude.sh"
+  "newpicpp:setup-project-raspberry-pi-cpp-base-claude.sh"
   "newelixir:setup-project-elixir-otp-base-claude.sh"
   "newrust:setup-project-rust-cli-base-claude.sh"
   "newkotlin:setup-project-kotlin-cli-base-claude.sh"

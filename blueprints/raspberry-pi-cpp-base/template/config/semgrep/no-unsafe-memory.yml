@@ -1,0 +1,40 @@
+rules:
+  - id: raspberry-pi-cpp.no-raw-new
+    languages: [cpp]
+    severity: ERROR
+    message: Use RAII containers or smart pointers instead of raw new.
+    pattern-either:
+      - pattern: new $TYPE(...)
+      - pattern: new $TYPE[$SIZE]
+    paths:
+      include: [/src/, /include/]
+
+  - id: raspberry-pi-cpp.no-raw-delete
+    languages: [cpp]
+    severity: ERROR
+    message: Use RAII containers or smart pointers instead of raw delete.
+    pattern-either:
+      - pattern: delete $PTR
+      - pattern: "delete[] $PTR"
+    paths:
+      include: [/src/, /include/]
+
+  - id: raspberry-pi-cpp.no-c-allocation
+    languages: [cpp]
+    severity: ERROR
+    message: Use C++ RAII containers instead of C allocation functions.
+    pattern-either:
+      - pattern: malloc(...)
+      - pattern: calloc(...)
+      - pattern: realloc(...)
+      - pattern: free(...)
+    paths:
+      include: [/src/, /include/]
+
+  - id: raspberry-pi-cpp.no-reinterpret-cast
+    languages: [cpp]
+    severity: ERROR
+    message: Use a typed interface or std::bit_cast instead of reinterpret_cast.
+    pattern: reinterpret_cast<$TYPE>($VALUE)
+    paths:
+      include: [/src/, /include/]

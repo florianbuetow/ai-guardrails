@@ -569,6 +569,20 @@ def parse_cmake_manifest(path: Path) -> list[Dependency]:
         if not stripped or stripped.startswith("#"):
             continue
 
+        package_match = re.fullmatch(r"find_package\(GTest\s+(\d+\.\d+(?:\.\d+)?)\s+CONFIG\s+REQUIRED\)", stripped)
+        if package_match:
+            dependencies.append(
+                Dependency(
+                    "CMake system packages",
+                    "googletest",
+                    ">=" + package_match.group(1),
+                    path.name,
+                    latest_version.REGISTRY_GITHUB_TAGS,
+                    "https://github.com/google/googletest.git",
+                )
+            )
+            continue
+
         declare_match = re.match(r"FetchContent_Declare\(\s*([A-Za-z0-9_-]+)", stripped)
         if declare_match:
             active_name = declare_match.group(1)

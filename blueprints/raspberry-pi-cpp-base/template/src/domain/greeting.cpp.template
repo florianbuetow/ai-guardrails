@@ -1,0 +1,11 @@
+#include "{{project_name}}/domain/greeting.hpp"
+
+#include <string_view>
+
+namespace {{project_name | replace('-', '_')}}::domain {
+
+auto greeting() noexcept -> std::string_view {
+    return "Hello, world!";
+}
+
+}  // namespace {{project_name | replace('-', '_')}}::domain

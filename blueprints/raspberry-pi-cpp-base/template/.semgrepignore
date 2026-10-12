@@ -1,0 +1,7 @@
+# Keep tests and validation scripts visible to policy checks.
+.git/
+build/
+reports/
+dist/
+out/
+__pycache__/

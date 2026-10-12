@@ -1,0 +1,11 @@
+#include <gtest/gtest.h>
+
+#include "{{project_name}}/domain/greeting.hpp"
+
+namespace {{project_name | replace('-', '_')}}::domain::test {
+
+TEST(GreetingTest, ReturnsExactGreeting) {
+    EXPECT_EQ(greeting(), "Hello, world!");
+}
+
+}  // namespace {{project_name | replace('-', '_')}}::domain::test

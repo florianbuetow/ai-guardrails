@@ -60,6 +60,7 @@ help:
 	@printf "    %-36s %s\n" "elixir-otp-base" "Elixir OTP application"
 	@printf "    %-36s %s\n" "cpp-cli-base" "C++ CLI application"
 	@printf "    %-36s %s\n" "cpp-3dgame-base" "C++ 3D game application"
+	@printf "    %-36s %s\n" "raspberry-pi-cpp-base" "64-bit Raspberry Pi C++ application"
 	@printf "    %-36s %s\n" "rust-cli-base" "Rust CLI application"
 	@printf "    %-36s %s\n" "kotlin-cli-base" "Kotlin CLI application"
 	@printf "    %-36s %s\n" "scala-cli-base" "Scala CLI application"
@@ -84,6 +85,7 @@ help:
 	@printf "  %-40s %s\n" "baseline-elixir-otp-base" "Generate Elixir template and run just ci"
 	@printf "  %-40s %s\n" "baseline-cpp-cli-base" "Generate C++ template and run just ci"
 	@printf "  %-40s %s\n" "baseline-cpp-3dgame-base" "Generate C++ 3D game template and run just ci"
+	@printf "  %-40s %s\n" "baseline-raspberry-pi-cpp-base" "Generate Raspberry Pi C++ template and run container CI"
 	@printf "  %-40s %s\n" "baseline-rust-cli-base" "Generate Rust template and run just ci"
 	@printf "  %-40s %s\n" "baseline-kotlin-cli-base" "Generate Kotlin template and run just ci"
 	@printf "  %-40s %s\n" "baseline-scala-cli-base" "Generate Scala template and run just ci"
@@ -108,6 +110,8 @@ help:
 	@printf "  %-40s %s\n" "test-cpp-cli-base" "Run C++ baseline + violation tests"
 	@printf "  %-40s %s\n" "test-cpp-3dgame-base" "Run C++ 3D game baseline + violation tests"
 	@printf "  %-40s %s\n" "test-cpp-3dgame-base-linux" "Run C++ 3D game full CI in a Linux (amd64) container"
+	@printf "  %-40s %s\n" "test-raspberry-pi-cpp-contracts" "Test Raspberry Pi C++ render contracts without Docker"
+	@printf "  %-40s %s\n" "test-raspberry-pi-cpp-base" "Run Raspberry Pi C++ container baseline + violation tests"
 	@printf "  %-40s %s\n" "test-rust-cli-base" "Run Rust baseline + violation tests"
 	@printf "  %-40s %s\n" "test-kotlin-cli-base" "Run Kotlin baseline + violation tests"
 	@printf "  %-40s %s\n" "test-scala-cli-base" "Run Scala baseline + violation tests"
@@ -349,6 +353,12 @@ baseline-cpp-3dgame-base:
 	@./tests/run-tests.sh cpp-3dgame-base baseline && printf "\033[32m✓ cpp-3dgame-base baseline passed\033[0m\n" || { printf "\033[31m✗ cpp-3dgame-base baseline failed\033[0m\n"; exit 1; }
 	@echo ""
 
+# Generate Raspberry Pi C++ template and run its Linux ARM64 container CI
+baseline-raspberry-pi-cpp-base:
+	@echo ""
+	@./tests/run-tests.sh raspberry-pi-cpp-base baseline && printf "\033[32m✓ raspberry-pi-cpp-base baseline passed\033[0m\n" || { printf "\033[31m✗ raspberry-pi-cpp-base baseline failed\033[0m\n"; exit 1; }
+	@echo ""
+
 # Generate Rust template and run just ci
 baseline-rust-cli-base:
 	@echo ""
@@ -504,6 +514,18 @@ test-cpp-cli-base:
 test-cpp-3dgame-base:
 	@echo ""
 	@./tests/run-tests.sh cpp-3dgame-base && printf "\033[32m✓ cpp-3dgame-base tests passed\033[0m\n" || { printf "\033[31m✗ cpp-3dgame-base tests failed\033[0m\n"; exit 1; }
+	@echo ""
+
+# Verify the Raspberry Pi C++ template's rendered layout and repository contracts
+test-raspberry-pi-cpp-contracts:
+	@echo ""
+	@python3 tests/test_raspberry_pi_cpp_runner.py && python3 tests/test_raspberry_pi_cpp.py --contracts && printf "\033[32m✓ raspberry-pi-cpp-base contracts passed\033[0m\n" || { printf "\033[31m✗ raspberry-pi-cpp-base contracts failed\033[0m\n"; exit 1; }
+	@echo ""
+
+# Run Raspberry Pi C++ baseline and violation tests in Linux ARM64 containers
+test-raspberry-pi-cpp-base:
+	@echo ""
+	@./tests/run-tests.sh raspberry-pi-cpp-base && printf "\033[32m✓ raspberry-pi-cpp-base tests passed\033[0m\n" || { printf "\033[31m✗ raspberry-pi-cpp-base tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Run the C++ 3D game template's full CI inside a Linux amd64 container.
@@ -671,8 +693,13 @@ test-create:
             printf "\033[31m✗ test-create failed for %s\033[0m\n" "$template"
             exit 1
         fi
-        printf "\033[0;34mRunning: just ci in %s\033[0m\n" "$shortname"
-        if ! (cd "$target_dir" && just ci); then
+        printf "\033[0;34mRunning generated CI for %s\033[0m\n" "$shortname"
+        if [ "$template" = "raspberry-pi-cpp-base" ]; then
+            ci_command=(python3 tests/test_raspberry_pi_cpp.py --baseline --generated-project "$target_dir")
+        else
+            ci_command=(bash -c 'cd "$1" && just ci' _ "$target_dir")
+        fi
+        if ! "${ci_command[@]}"; then
             printf "\033[31m✗ test-create ci failed for %s\033[0m\n" "$template"
             exit 1
         fi
@@ -688,7 +715,7 @@ test-create:
     echo ""
 
 # Run all checks and all template tests
-ci-verbose: check test-prerequisites test-content-tracked test-shellscripts-base-contracts code-spell code-semgrep code-shellcheck test-info test test-create
+ci-verbose: check test-prerequisites test-content-tracked test-shellscripts-base-contracts test-raspberry-pi-cpp-contracts code-spell code-semgrep code-shellcheck test-info test test-create
 	@echo ""
 	@printf "\033[32m✓ ci-verbose passed\033[0m\n"
 	@echo ""
@@ -703,7 +730,7 @@ ci:
     echo ""
     # Keep this list identical to ci-verbose's dependencies so both run the
     # exact same tests; only the output verbosity differs.
-    steps=(check test-prerequisites test-content-tracked test-shellscripts-base-contracts code-spell code-semgrep code-shellcheck test-info test test-create)
+    steps=(check test-prerequisites test-content-tracked test-shellscripts-base-contracts test-raspberry-pi-cpp-contracts code-spell code-semgrep code-shellcheck test-info test test-create)
     for step in "${steps[@]}"; do
         printf "\033[0;34m▶ starting %s\033[0m\n" "$step"
         if output="$(just "$step" 2>&1)"; then

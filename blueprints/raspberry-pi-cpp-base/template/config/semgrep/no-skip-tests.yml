@@ -1,0 +1,24 @@
+rules:
+  - id: raspberry-pi-cpp.no-disabled-tests
+    languages: [generic]
+    severity: ERROR
+    message: Disabled or focused tests shrink the required test suite.
+    pattern-regex: '\b(TEST|TEST_F|TEST_P|TYPED_TEST|TYPED_TEST_P)\s*\(\s*(DISABLED_\w+|\w+\s*,\s*DISABLED_\w+)'
+    paths:
+      include: ["/tests/*.cpp", "/tests/**/*.cpp"]
+
+  - id: raspberry-pi-cpp.no-gtest-skip
+    languages: [generic]
+    severity: ERROR
+    message: Tests must pass or fail; do not skip them.
+    pattern-regex: '\bGTEST_SKIP\s*\('
+    paths:
+      include: ["/tests/*.cpp", "/tests/**/*.cpp"]
+
+  - id: raspberry-pi-cpp.no-python-skipped-tests
+    languages: [generic]
+    severity: ERROR
+    message: Python test wrappers must execute every test and fail on errors.
+    pattern-regex: '@(?:unittest\.)?(skip|skipIf|skipUnless|expectedFailure)\b|\.skipTest\s*\('
+    paths:
+      include: ["/scripts/*.py", "/scripts/**/*.py"]

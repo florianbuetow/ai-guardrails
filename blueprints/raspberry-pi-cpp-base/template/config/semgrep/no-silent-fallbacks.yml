@@ -1,0 +1,34 @@
+rules:
+  - id: raspberry-pi-cpp.no-empty-catch
+    languages: [cpp]
+    severity: ERROR
+    message: Handle or propagate exceptions; empty catch blocks hide failures.
+    pattern-regex: '\bcatch\s*\([^)]*\)\s*\{(?:\s|//[^\n]*(?:\n|$)|/\*[\s\S]*?\*/)*\}'
+    paths:
+      include: [/src/, /include/]
+
+  - id: raspberry-pi-cpp.no-catch-all-without-rethrow
+    languages: [cpp]
+    severity: ERROR
+    message: A catch-all must propagate the unknown failure.
+    patterns:
+      - pattern: |
+          try { ... } catch (...) {
+            ...
+          }
+      - pattern-not: |
+          try { ... } catch (...) {
+            ...
+            throw;
+            ...
+          }
+    paths:
+      include: [/src/, /include/]
+
+  - id: raspberry-pi-cpp.no-environment-default
+    languages: [generic]
+    severity: ERROR
+    message: Missing environment configuration must be reported explicitly.
+    pattern-regex: '(std::)?getenv\s*\([^)]*\)\s*(\?\s*[^:]|\?:|\|\|)|value_or\s*\('
+    paths:
+      include: ["/src/*.cpp", "/src/**/*.cpp", "/include/*.hpp", "/include/**/*.hpp"]

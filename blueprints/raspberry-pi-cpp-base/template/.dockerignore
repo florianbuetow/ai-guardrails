@@ -1,0 +1,8 @@
+.git
+build
+reports
+dist
+out
+__pycache__
+*.profraw
+*.profdata

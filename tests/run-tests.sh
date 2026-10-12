@@ -10,7 +10,7 @@ source "$SCRIPT_DIR/lib/helpers.sh"
 source "$SCRIPT_DIR/lib/runner.sh"
 
 usage() {
-    printf "Usage: %s <python-cli-base|java-cli-base|go-cli-base|elixir-otp-base|cpp-cli-base|cpp-3dgame-base|rust-cli-base|kotlin-cli-base|scala-cli-base|clojure-cli-base|react-vite-typescript-base|mcp-server-typescript-base|node-typescript-cli-base|shellscripts-base|arm64-macos-cli-base|mmix-cli-base|ai-docs|all> [baseline]\n" "$0"
+    printf "Usage: %s <python-cli-base|java-cli-base|go-cli-base|elixir-otp-base|cpp-cli-base|cpp-3dgame-base|raspberry-pi-cpp-base|rust-cli-base|kotlin-cli-base|scala-cli-base|clojure-cli-base|react-vite-typescript-base|mcp-server-typescript-base|node-typescript-cli-base|shellscripts-base|arm64-macos-cli-base|mmix-cli-base|ai-docs|all> [baseline]\n" "$0"
     printf "  Add 'baseline' to run only project generation + just ci (skip violation tests)\n"
 }
 
@@ -28,11 +28,11 @@ if [ "$TEST_MODE" != "all" ] && [ "$TEST_MODE" != "baseline" ]; then
 fi
 
 case "$1" in
-    python-cli-base|java-cli-base|go-cli-base|elixir-otp-base|cpp-cli-base|cpp-3dgame-base|rust-cli-base|kotlin-cli-base|scala-cli-base|clojure-cli-base|react-vite-typescript-base|mcp-server-typescript-base|node-typescript-cli-base|shellscripts-base|arm64-macos-cli-base|mmix-cli-base|ai-docs)
+    python-cli-base|java-cli-base|go-cli-base|elixir-otp-base|cpp-cli-base|cpp-3dgame-base|raspberry-pi-cpp-base|rust-cli-base|kotlin-cli-base|scala-cli-base|clojure-cli-base|react-vite-typescript-base|mcp-server-typescript-base|node-typescript-cli-base|shellscripts-base|arm64-macos-cli-base|mmix-cli-base|ai-docs)
         languages=("$1")
         ;;
     all)
-        languages=(python-cli-base java-cli-base go-cli-base elixir-otp-base cpp-cli-base cpp-3dgame-base rust-cli-base kotlin-cli-base scala-cli-base clojure-cli-base react-vite-typescript-base mcp-server-typescript-base node-typescript-cli-base shellscripts-base arm64-macos-cli-base mmix-cli-base ai-docs)
+        languages=(python-cli-base java-cli-base go-cli-base elixir-otp-base cpp-cli-base cpp-3dgame-base raspberry-pi-cpp-base rust-cli-base kotlin-cli-base scala-cli-base clojure-cli-base react-vite-typescript-base mcp-server-typescript-base node-typescript-cli-base shellscripts-base arm64-macos-cli-base mmix-cli-base ai-docs)
         ;;
     *)
         usage
@@ -44,6 +44,18 @@ requested_count=${#languages[@]}
 passed_languages=0
 
 for lang in "${languages[@]}"; do
+    if [ "$lang" = "raspberry-pi-cpp-base" ]; then
+        raspberry_pi_args=()
+        if [ "$TEST_MODE" = "baseline" ]; then
+            raspberry_pi_args+=(--baseline)
+        fi
+        if ! python3 "$SCRIPT_DIR/test_raspberry_pi_cpp.py" ${raspberry_pi_args[@]+"${raspberry_pi_args[@]}"}; then
+            log_fail "$lang tests failed — aborting"
+            exit 1
+        fi
+        passed_languages=$((passed_languages + 1))
+        continue
+    fi
     if [ "$lang" = "mmix-cli-base" ]; then
         mmix_args=()
         if [ "$TEST_MODE" = "baseline" ]; then

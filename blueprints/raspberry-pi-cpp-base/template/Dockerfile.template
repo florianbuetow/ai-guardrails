@@ -1,0 +1,35 @@
+# Build and runtime use the same pinned Debian ARM64 base.
+FROM debian:trixie-slim@sha256:a29215f6a35e51e22adffa17f89e9d2ef06214e64a2bad10d765c46aea49f11f AS base
+
+# A dated archive fixes apt dependency resolution across rebuilds.
+RUN printf '%s\n' \
+    'deb [check-valid-until=no] http://snapshot.debian.org/archive/debian/20261001T000000Z/ trixie main' \
+    > /etc/apt/sources.list && rm /etc/apt/sources.list.d/debian.sources
+
+FROM base AS development
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates gcc g++ cmake ninja-build git just \
+    clang-19 clang-tidy-19 clang-format-19 llvm-19 libclang-rt-19-dev \
+    libgtest-dev cppcheck flawfinder codespell shellcheck shfmt gitleaks \
+    python3 python3-venv python3-pip binutils gdb strace valgrind \
+    && rm -rf /var/lib/apt/lists/*
+COPY config/semgrep-requirements.lock /tmp/semgrep-requirements.lock
+RUN python3 -m venv /opt/guardrails \
+    && /opt/guardrails/bin/pip install --no-cache-dir --require-hashes -r /tmp/semgrep-requirements.lock
+ENV PATH="/opt/guardrails/bin:/usr/lib/llvm-19/bin:${PATH}"
+ENV SEMGREP_SEND_METRICS=off
+WORKDIR /src
+CMD ["just", "help"]
+
+FROM development AS build
+COPY . /src
+RUN cmake --preset gcc-release \
+    && cmake --build --preset gcc-release \
+    && cmake --install build/gcc-release --prefix /out
+
+FROM base AS runtime
+RUN apt-get update && apt-get install -y --no-install-recommends libstdc++6 \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=build /out/ /usr/local/
+USER 65534:65534
+ENTRYPOINT ["/usr/local/bin/{{project_name}}"]

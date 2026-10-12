@@ -1,0 +1,228 @@
+# Raspberry Pi C++ workflow. No source edits during CI.
+_default:
+    @just help
+
+help:
+    @echo ""
+    @printf "\033[34mRaspberry Pi C++ development\033[0m\n"
+    @echo ""
+    @printf "Setup and containers:\n"
+    @printf "  %-25s %s\n" "container-build" "Build the ARM64 development image"
+    @printf "  %-25s %s\n" "container-init" "Initialize inside the container"
+    @printf "  %-25s %s\n" "container-ci" "Run all checks inside the container"
+    @printf "  %-25s %s\n" "container-run" "Run Hello World inside the container"
+    @printf "  %-25s %s\n" "container-shell" "Open a development shell"
+    @printf "  %-25s %s\n" "container-artifact" "Build and test a clean runtime image"
+    @printf "  %-25s %s\n" "check" "Check ARM64 Linux and required tools"
+    @printf "  %-25s %s\n" "init" "Initialize the project and pre-commit hook"
+    @echo ""
+    @printf "Build and run:\n"
+    @printf "  %-25s %s\n" "build" "Build the GCC release executable"
+    @printf "  %-25s %s\n" "run" "Run the application"
+    @printf "  %-25s %s\n" "debug" "Debug the application with GDB"
+    @printf "  %-25s %s\n" "destroy" "Remove build output and reports"
+    @echo ""
+    @printf "Code quality:\n"
+    @printf "  %-25s %s\n" "code-format" "Format C++ source"
+    @printf "  %-25s %s\n" "code-format-check" "Check C++ formatting without modifying files"
+    @printf "  %-25s %s\n" "code-style" "Run clang-tidy including direct include checks"
+    @printf "  %-25s %s\n" "code-typecheck" "Run cppcheck"
+    @printf "  %-25s %s\n" "code-security" "Run Flawfinder"
+    @printf "  %-25s %s\n" "code-semgrep" "Enforce project source policies"
+    @printf "  %-25s %s\n" "code-secrets" "Detect secrets with Gitleaks"
+    @printf "  %-25s %s\n" "code-shell" "Validate shell scripts with ShellCheck and shfmt"
+    @printf "  %-25s %s\n" "code-spell" "Check spelling"
+    @printf "  %-25s %s\n" "code-architecture" "Check source inventory and compiler-resolved dependencies"
+    @printf "  %-25s %s\n" "code-sanitize" "Run ASan and UBSan tests"
+    @printf "  %-25s %s\n" "code-binary" "Verify ARM64 ELF structure and hardening"
+    @printf "  %-25s %s\n" "code-memcheck" "Run Valgrind memory checks"
+    @echo ""
+    @printf "Tests and CI:\n"
+    @printf "  %-25s %s\n" "test" "Test GCC and Clang debug and optimized builds"
+    @printf "  %-25s %s\n" "test-coverage" "Enforce line, function, and branch coverage"
+    @printf "  %-25s %s\n" "test-artifact" "Test the installed release executable"
+    @printf "  %-25s %s\n" "ci" "Run every required gate, fail-fast"
+    @printf "  %-25s %s\n" "ci-quiet" "Run the same gates with captured output"
+    @printf "\033[32m✓ help completed\033[0m\n"
+    @echo ""
+
+container-build:
+    @echo ""
+    @bash scripts/container.sh build && printf "\033[32m✓ container-build passed\033[0m\n" || { printf "\033[31m✗ container-build failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+container-init: container-build
+    @echo ""
+    @bash scripts/container.sh init && printf "\033[32m✓ container-init passed\033[0m\n" || { printf "\033[31m✗ container-init failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+container-ci: container-build
+    @echo ""
+    @bash scripts/container.sh ci && printf "\033[32m✓ container-ci passed\033[0m\n" || { printf "\033[31m✗ container-ci failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+container-run: container-build
+    @echo ""
+    @bash scripts/container.sh run && printf "\033[32m✓ container-run passed\033[0m\n" || { printf "\033[31m✗ container-run failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+container-shell: container-build
+    @echo ""
+    @bash scripts/container.sh shell && printf "\033[32m✓ container-shell passed\033[0m\n" || { printf "\033[31m✗ container-shell failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+container-artifact:
+    @echo ""
+    @bash scripts/container.sh artifact && printf "\033[32m✓ container-artifact passed\033[0m\n" || { printf "\033[31m✗ container-artifact failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+check:
+    @echo ""
+    @bash scripts/quality.sh check && printf "\033[32m✓ check passed\033[0m\n" || { printf "\033[31m✗ check failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+init: check
+    @echo ""
+    @bash scripts/quality.sh init && printf "\033[32m✓ init passed\033[0m\n" || { printf "\033[31m✗ init failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+code-format:
+    @echo ""
+    @bash scripts/quality.sh format && printf "\033[32m✓ code-format passed\033[0m\n" || { printf "\033[31m✗ code-format failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+code-format-check:
+    @echo ""
+    @bash scripts/quality.sh format-check && printf "\033[32m✓ code-format-check passed\033[0m\n" || { printf "\033[31m✗ code-format-check failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+code-style:
+    @echo ""
+    @bash scripts/quality.sh style && printf "\033[32m✓ code-style passed\033[0m\n" || { printf "\033[31m✗ code-style failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+code-typecheck:
+    @echo ""
+    @bash scripts/quality.sh static && printf "\033[32m✓ code-typecheck passed\033[0m\n" || { printf "\033[31m✗ code-typecheck failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+code-security:
+    @echo ""
+    @bash scripts/quality.sh security && printf "\033[32m✓ code-security passed\033[0m\n" || { printf "\033[31m✗ code-security failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+code-semgrep:
+    @echo ""
+    @bash scripts/quality.sh semgrep && printf "\033[32m✓ code-semgrep passed\033[0m\n" || { printf "\033[31m✗ code-semgrep failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+code-secrets:
+    @echo ""
+    @bash scripts/quality.sh secrets && printf "\033[32m✓ code-secrets passed\033[0m\n" || { printf "\033[31m✗ code-secrets failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+code-shell:
+    @echo ""
+    @bash scripts/quality.sh shell && printf "\033[32m✓ code-shell passed\033[0m\n" || { printf "\033[31m✗ code-shell failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+code-spell:
+    @echo ""
+    @bash scripts/quality.sh spell && printf "\033[32m✓ code-spell passed\033[0m\n" || { printf "\033[31m✗ code-spell failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+code-architecture:
+    @echo ""
+    @bash scripts/quality.sh architecture && printf "\033[32m✓ code-architecture passed\033[0m\n" || { printf "\033[31m✗ code-architecture failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+code-sanitize:
+    @echo ""
+    @bash scripts/quality.sh sanitize && printf "\033[32m✓ code-sanitize passed\033[0m\n" || { printf "\033[31m✗ code-sanitize failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+code-binary:
+    @echo ""
+    @bash scripts/quality.sh binary && printf "\033[32m✓ code-binary passed\033[0m\n" || { printf "\033[31m✗ code-binary failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+code-memcheck:
+    @echo ""
+    @bash scripts/quality.sh memcheck && printf "\033[32m✓ code-memcheck passed\033[0m\n" || { printf "\033[31m✗ code-memcheck failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+test:
+    @echo ""
+    @bash scripts/quality.sh test && printf "\033[32m✓ test passed\033[0m\n" || { printf "\033[31m✗ test failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+test-coverage:
+    @echo ""
+    @bash scripts/quality.sh coverage && printf "\033[32m✓ test-coverage passed\033[0m\n" || { printf "\033[31m✗ test-coverage failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+test-artifact:
+    @echo ""
+    @bash scripts/quality.sh artifact && printf "\033[32m✓ test-artifact passed\033[0m\n" || { printf "\033[31m✗ test-artifact failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+build: check
+    @echo ""
+    @cmake --preset gcc-release && cmake --build --preset gcc-release && printf "\033[32m✓ build passed\033[0m\n" || { printf "\033[31m✗ build failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+run: build
+    @echo ""
+    @./build/gcc-release/{{project_name}} && printf "\033[32m✓ run passed\033[0m\n" || { printf "\033[31m✗ run failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+debug: test
+    @echo ""
+    @gdb -- ./build/gcc-debug/{{project_name}} && printf "\033[32m✓ debug passed\033[0m\n" || { printf "\033[31m✗ debug failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+destroy:
+    @echo ""
+    @rm -rf build reports && printf "\033[32m✓ destroy passed\033[0m\n" || { printf "\033[31m✗ destroy failed\033[0m\n" >&2; exit 1; }
+    @echo ""
+
+ci:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo ""
+    just check
+    just init
+    just code-format-check
+    just code-style
+    just code-typecheck
+    just code-security
+    just code-semgrep
+    just code-secrets
+    just code-shell
+    just code-spell
+    just code-architecture
+    just test
+    just code-sanitize
+    just test-coverage
+    just code-binary
+    just test-artifact
+    printf "\033[32m✓ ci passed\033[0m\n"
+    echo ""
+
+ci-quiet:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo ""
+    report=$(mktemp)
+    trap 'rm -f "$report"' EXIT
+    for step in check init code-format-check code-style code-typecheck code-security code-semgrep code-secrets code-shell code-spell code-architecture test code-sanitize test-coverage code-binary test-artifact; do
+        if just "$step" >"$report" 2>&1; then
+            printf "\033[32m✓ %s passed\033[0m\n" "$step"
+        else
+            cat "$report"
+            printf "\033[31m✗ %s failed\033[0m\n" "$step" >&2
+            exit 1
+        fi
+    done
+    printf "\033[32m✓ ci-quiet passed\033[0m\n"
+    echo ""
