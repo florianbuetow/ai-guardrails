@@ -156,24 +156,6 @@ def validate_violation_contracts(project: Path) -> None:
             raise TestFailure(f"Violation has no overlay files: {violation.name}")
 
 
-def initialize_git(project: Path) -> None:
-    if not (project / ".git").is_dir():
-        run(("git", "init", "-q"), cwd=project)
-    run(("git", "config", "user.email", "template-tests@example.invalid"), cwd=project)
-    run(("git", "config", "user.name", "Template Tests"), cwd=project)
-    rendered_files = sorted(
-        str(path.relative_to(project)) for path in project.rglob("*") if path.is_file() and ".git" not in path.parts
-    )
-    if not rendered_files:
-        raise TestFailure("Rendered project has no files to stage")
-    run(("git", "add", "--", *rendered_files), cwd=project)
-    staged = run(("git", "diff", "--cached", "--quiet"), cwd=project, expected_success=False)
-    if staged.returncode == 1:
-        run(("git", "commit", "-q", "-m", "init"), cwd=project)
-    elif staged.returncode != 0:
-        raise TestFailure("Unable to inspect the rendered project's staged files")
-
-
 def require_docker() -> None:
     require_command("docker")
     result = run(("docker", "info"), capture=True, expected_success=False)
@@ -272,6 +254,20 @@ def overlay_violation(project: Path, violation: Path) -> list[str]:
     return overlaid
 
 
+def prepare_violation_project(project: Path, violation: Path, isolated: Path) -> None:
+    # A distinct directory avoids host/VM inode-cache races after restoring files.
+    # Build outputs must never carry clean behavior into a negative test.
+    shutil.copytree(
+        project,
+        isolated,
+        ignore=shutil.ignore_patterns(".git", "build", "reports", "__pycache__"),
+    )
+    # Semgrep anchors project paths at the Git root, even with explicit inputs.
+    run(("git", "init", "-q"), cwd=isolated)
+    if not overlay_violation(isolated, violation):
+        raise TestFailure(f"Violation has no overlay files: {violation.name}")
+
+
 def test_violations(project: Path) -> None:
     if not VIOLATIONS.is_dir():
         raise TestFailure(f"Violation directory is missing: {VIOLATIONS}")
@@ -294,23 +290,20 @@ def test_violations(project: Path) -> None:
         if recipe not in recipe_names(project / "justfile"):
             raise TestFailure(f"Violation {violation.name!r} selects missing recipe: {recipe}")
 
-        overlaid = overlay_violation(project, violation)
-        if not overlaid:
-            raise TestFailure(f"Violation has no overlay files: {violation.name}")
-        run(("git", "add", "--", *overlaid), cwd=project)
-        result = in_development_container(project, "just", recipe, expected_success=False)
-        if result.returncode == 0:
-            raise TestFailure(
-                f"Violation {violation.name!r} was not detected by 'just {recipe}'\n{result.stdout or ''}"
-            )
-        if expected not in (result.stdout or ""):
-            raise TestFailure(
-                f"Violation {violation.name!r} failed without its expected marker {expected!r}\n"
-                f"{result.stdout or ''}"
-            )
-        print(f"PASS violation {violation.name}: just {recipe}", flush=True)
-        run(("git", "reset", "-q", "--hard", "HEAD"), cwd=project)
-        run(("git", "clean", "-qfd"), cwd=project)
+        with tempfile.TemporaryDirectory(prefix="pi-violation-", dir=project.parent) as temporary:
+            isolated = Path(temporary) / project.name
+            prepare_violation_project(project, violation, isolated)
+            result = in_development_container(isolated, "just", recipe, expected_success=False)
+            if result.returncode == 0:
+                raise TestFailure(
+                    f"Violation {violation.name!r} was not detected by 'just {recipe}'\n{result.stdout or ''}"
+                )
+            if expected not in (result.stdout or ""):
+                raise TestFailure(
+                    f"Violation {violation.name!r} failed without its expected marker {expected!r}\n"
+                    f"{result.stdout or ''}"
+                )
+            print(f"PASS violation {violation.name}: just {recipe}", flush=True)
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -341,8 +334,6 @@ def main() -> int:
         if arguments.contracts:
             return 0
 
-        if not arguments.baseline:
-            initialize_git(project)
         test_baseline(project)
         print("PASS Raspberry Pi C++ container baseline")
         if not arguments.baseline:

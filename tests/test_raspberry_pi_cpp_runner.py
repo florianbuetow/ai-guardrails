@@ -45,6 +45,33 @@ class RunnerRegressionTests(unittest.TestCase):
             self.assertFalse((project / "check").exists())
             self.assertFalse((project / "expected").exists())
 
+    def test_violation_projects_are_fresh_and_do_not_mutate_the_baseline(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            project = root / "baseline"
+            (project / "src").mkdir(parents=True)
+            (project / "build").mkdir()
+            (project / ".git").mkdir()
+            (project / ".git/old-marker").write_text("baseline metadata")
+            (project / "src/main.cpp").write_text("int main() { return 0; }\n")
+            (project / "build/clean.o").write_bytes(b"clean object")
+            violation = root / "violation"
+            (violation / "src").mkdir(parents=True)
+            (violation / "src/main.cpp").write_text("int main() { return 1; }\n")
+            isolated = root / "isolated"
+            runner.prepare_violation_project(project, violation, isolated)
+            self.assertIn("return 1", (isolated / "src/main.cpp").read_text())
+            self.assertIn("return 0", (project / "src/main.cpp").read_text())
+            self.assertFalse((isolated / "build").exists())
+            self.assertTrue((isolated / ".git").is_dir())
+            self.assertFalse((isolated / ".git/old-marker").exists())
+            second = root / "second"
+            runner.prepare_violation_project(project, violation, second)
+            self.assertNotEqual(
+                (isolated / "src/main.cpp").stat().st_ino,
+                (second / "src/main.cpp").stat().st_ino,
+            )
+
     def test_existing_project_cannot_receive_destructive_violation_overlays(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             sentinel = Path(directory) / "keep.txt"
