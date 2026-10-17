@@ -55,4 +55,6 @@ Replace the example statistics domain with your behavior while preserving the la
 
 `just ci` runs initialization, formatting, linting, spelling, shell script checks, Semgrep guardrails, strict TypeScript checks, security linting, secret scanning, dependency and dead-code hygiene, import-boundary and deep architecture checks, package correctness (publint, arethetypeswrong, `npm pack --dry-run`), the full test suite, coverage thresholds, local CodeQL data-flow analysis, and mutation testing. `just ci-quiet` runs the same checks with compact fail-fast output and is installed as the repository pre-commit hook.
 
+`just init` installs the pinned CodeQL query pack when it is missing. After initialization, `just code-codeql` analyzes `src/` with all available logical processors and uses the local query pack without downloading it during the scan.
+
 Run `just help` for every available command.

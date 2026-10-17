@@ -115,6 +115,11 @@ init: check
     @printf "\033[34m=== Initializing Development Environment ===\033[0m\n"
     @if ! git rev-parse --git-dir >/dev/null 2>&1; then git init -q; fi
     @npm install
+    @if codeql resolve queries --format=text 'codeql/javascript-queries@2.4.7:codeql-suites/javascript-security-extended.qls' >/dev/null 2>&1; then \
+        printf "  CodeQL query pack is already installed\n"; \
+    else \
+        codeql pack download 'codeql/javascript-queries@2.4.7:codeql-suites/javascript-security-extended.qls'; \
+    fi
     @if [ ! -f ".git/hooks/pre-commit" ]; then \
         printf "\033[31m✗ Error: .git/hooks/pre-commit is missing\033[0m\n"; \
         printf "  Re-apply the template or restore the generated hook.\n"; \
@@ -253,8 +258,8 @@ code-codeql:
     @printf "\033[34m=== Running CodeQL Data-Flow Analysis ===\033[0m\n"
     @rm -rf .codeql-db
     @mkdir -p reports
-    @codeql database create .codeql-db --language=javascript-typescript --source-root=. --codescanning-config=config/codeql/config.yml --overwrite --verbosity=warnings
-    @codeql database analyze .codeql-db codeql/javascript-queries:codeql-suites/javascript-security-extended.qls --format=sarif-latest --output=reports/codeql.sarif --download --verbosity=warnings
+    @codeql database create .codeql-db --language=javascript-typescript --build-mode=none --source-root=src --threads=0 --overwrite --verbosity=warnings
+    @codeql database analyze .codeql-db 'codeql/javascript-queries@2.4.7:codeql-suites/javascript-security-extended.qls' --threads=0 --format=sarif-latest --output=reports/codeql.sarif --verbosity=warnings
     @node -e 'const sarif = JSON.parse(require("node:fs").readFileSync("reports/codeql.sarif", "utf8")); const results = sarif.runs.flatMap((run) => run.results); for (const result of results) { const location = result.locations?.[0]?.physicalLocation; console.error(`${result.ruleId}: ${result.message.text} (${location?.artifactLocation?.uri}:${location?.region?.startLine})`); } if (results.length > 0) { console.error(`\x1b[31m✗ CodeQL reported ${results.length} finding(s)\x1b[0m`); process.exit(1); }'
     @printf "\033[32m✓ code-codeql completed successfully\033[0m\n"
     @echo ""

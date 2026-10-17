@@ -49,4 +49,67 @@ post_baseline_tests() {
         return 1
     fi
     log_pass "Generated project ships a working executable CLI"
+
+    test_codeql_init_cache "$project_dir"
+}
+
+test_codeql_init_cache() {
+    local project_dir="$1"
+    local fake_bin
+    fake_bin="$(mktemp -d)" || return 1
+    if ! cat >"$fake_bin/codeql" <<'EOF'
+#!/bin/sh
+set -eu
+if [ "$1" = "resolve" ] && [ "$2" = "queries" ]; then
+    case " $* " in
+        *" --format=installedpacks "*) exit 0 ;;
+    esac
+    test -f "$CODEQL_TEST_MARKER"
+elif [ "$1" = "pack" ] && [ "$2" = "download" ]; then
+    if [ "$#" -ne 3 ] || [ "$3" != 'codeql/javascript-queries@2.4.7:codeql-suites/javascript-security-extended.qls' ]; then
+        printf 'Unexpected CodeQL query pack: %s\n' "$*" >&2
+        exit 1
+    fi
+    : > "$CODEQL_TEST_MARKER"
+    printf 'download\n' >> "$CODEQL_TEST_DOWNLOADS"
+else
+    printf 'Unexpected CodeQL command: %s\n' "$*" >&2
+    exit 1
+fi
+EOF
+    then
+        rm -rf "$fake_bin"
+        return 1
+    fi
+    if ! cat >"$fake_bin/npm" <<'EOF'
+#!/bin/sh
+set -eu
+test "$1" = "install"
+EOF
+    then
+        rm -rf "$fake_bin"
+        return 1
+    fi
+    if ! chmod +x "$fake_bin/codeql" "$fake_bin/npm"; then
+        rm -rf "$fake_bin"
+        return 1
+    fi
+
+    local attempt
+    for attempt in 1 2; do
+        if ! (cd "$project_dir" && PATH="$fake_bin:$PATH" \
+            CODEQL_TEST_MARKER="$fake_bin/installed" \
+            CODEQL_TEST_DOWNLOADS="$fake_bin/downloads" just init); then
+            rm -rf "$fake_bin"
+            log_fail "CodeQL setup failed on init attempt $attempt"
+            return 1
+        fi
+        if [ ! -f "$fake_bin/downloads" ] || [ "$(wc -l <"$fake_bin/downloads")" -ne 1 ]; then
+            rm -rf "$fake_bin"
+            log_fail "CodeQL pack must download on the first init and be reused on the second"
+            return 1
+        fi
+    done
+    rm -rf "$fake_bin"
+    log_pass "CodeQL init downloads a missing pack once and reuses it"
 }
