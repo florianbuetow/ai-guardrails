@@ -57,6 +57,12 @@ if [ ! -d "$TEMPLATE_PATH" ]; then
   exit 1
 fi
 
+# ai-review augments an existing project rather than creating a project directory.
+if [ "$TEMPLATE_NAME" = "ai-review" ]; then
+  printf "%bError: ai-review is additive; run setup-project-ai-review-claude.sh (alias: newaireview) inside the target directory%b\n" "$RED" "$NC"
+  exit 1
+fi
+
 # ai-docs adds docs/ to an existing directory instead of creating a project
 if [ "$TEMPLATE_NAME" = "ai-docs" ]; then
   printf "%bError: ai-docs is not a project template; run setup-project-ai-docs-claude.sh (alias: newaidocs) inside the target directory%b\n" "$RED" "$NC"

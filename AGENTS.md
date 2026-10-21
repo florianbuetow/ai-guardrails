@@ -209,6 +209,21 @@ Before running a violation, confirm that its resolved recipe (`check` or the `co
 - Generated-project prerequisites are Git, `just`, and a C compiler (GCC/Clang on Unix, MSVC on Windows); Copier is needed only to render the blueprint
 - One C `mmix-guard` driver owns validation, declarative tests, exact capability allowlists, vendor hashing, and coverage (80% minimum); generated validation never downloads dependencies
 
+### The AI Review Template (`blueprints/ai-review`)
+
+- Language-independent additive installer (`newaireview`), not a standalone project
+- Imports `just/ai-review.just` into an existing justfile, or creates a root justfile;
+  refuses collisions and unsafe paths, and rolls back failed installation
+- `ci-ai` takes an explicit provider, base commit, head commit and new report path;
+  `ci-ai-claude`, `ci-ai-codex`, `ci-ai-grok`, `ci-ai-agy` select the provider
+- Runs five fresh specialist sessions: correctness, security, performance,
+  architecture, tests/guardrails; each receives the same committed text snapshot
+- Models are explicit; malformed/incomplete results and execution failures fail;
+  error findings block, warning findings do not
+- Agy requires a configured isolation launcher; ordinary `ci` is unchanged
+- `just test-ai-review` uses real installer/just integration and simulated CLIs;
+  live authentication and model availability are deployment prerequisites
+
 ### The AI Docs Template (`blueprints/ai-docs`)
 
 - Language-independent knowledge base following the layout in OpenAI's harness engineering article; adds files to the current directory instead of creating a project

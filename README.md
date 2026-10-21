@@ -253,6 +253,22 @@ The MMIXAL template supports GCC/Clang on macOS/Linux and MSVC on Windows. It is
 
 The shell scripts template targets both macOS and Linux. Its CI parses the POSIX source with Bash, dash, BusyBox ash, ksh, and zsh, while `checkbashisms` rejects shell-specific constructs that would break `/bin/sh` portability.
 
+## Add agentic reviews to any project
+
+The language-independent [`ai-review`](blueprints/ai-review/) blueprint adds
+`just ci-ai <provider> <base> <head> <report>` and provider-specific
+`ci-ai-claude`, `ci-ai-codex`, `ci-ai-grok`, and `ci-ai-agy` targets. Each runs five
+independent reviewers focused on correctness, security, performance, architecture,
+and tests/guardrails, against one fixed committed snapshot.
+
+Run `newaireview` in the existing project (or
+`project-setup/setup-project-ai-review-claude.sh` using its absolute path).
+The installer adds a justfile import, preserving existing commands, or creates a
+justfile when absent. Configure the selected model explicitly before running.
+Agy requires an external isolation launcher. Ordinary CI remains independent;
+installation and contract tests never call a model. Run `just test-ai-review` to
+verify installation, rollback and provider result handling.
+
 ## Highly Recommended Companion Tools
 
 These two tools complement AI Guardrails and are strongly recommended for any AI-assisted development workflow.

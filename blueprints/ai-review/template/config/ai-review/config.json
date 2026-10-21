@@ -1,0 +1,16 @@
+{
+  "models": {
+    "claude": "",
+    "codex": "",
+    "grok": "",
+    "agy": ""
+  },
+  "timeout_seconds": 600,
+  "max_snapshot_bytes": 8000000,
+  "isolation_commands": {
+    "claude": [],
+    "codex": [],
+    "grok": [],
+    "agy": []
+  }
+}

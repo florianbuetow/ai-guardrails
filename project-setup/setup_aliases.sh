@@ -32,6 +32,7 @@ ALIASES=(
   "newswift:setup-project-switftmac-claude.sh"
   "newmmix:setup-project-mmix-cli-base-claude.sh"
   "newaidocs:setup-project-ai-docs-claude.sh"
+  "newaireview:setup-project-ai-review-claude.sh"
 )
 UPDATE_ALIAS="alias update-templates='cd ~/scripts/ai-guardrails && git pull && cd - > /dev/null'"
 

@@ -129,6 +129,7 @@ help:
 	@printf "  %-40s %s\n" "test-switftmac" "Run Swift macOS baseline + violation tests"
 	@printf "  %-40s %s\n" "test-mmix-cli-base" "Run MMIX assembly baseline + violation tests"
 	@printf "  %-40s %s\n" "test-ai-docs" "Run AI docs installer tests"
+	@printf "  %-40s %s\n" "test-ai-review" "Run AI review installer and adapter tests"
 	@printf "  %-40s %s\n" "test-create" "Run just create for all project templates"
 	@printf "  %-40s %s\n" "ci" "Run all checks + all template tests (quiet)"
 	@printf "  %-40s %s\n" "ci-verbose" "Run all checks + all template tests (verbose)"
@@ -686,6 +687,12 @@ test-ai-docs:
 	@./tests/run-tests.sh ai-docs && printf "\033[32m✓ ai-docs tests passed\033[0m\n" || { printf "\033[31m✗ ai-docs tests failed\033[0m\n"; exit 1; }
 	@echo ""
 
+# Test additive specialist review installation and provider contracts
+test-ai-review:
+	@echo ""
+	@./tests/run-tests.sh ai-review && printf "\033[32m✓ ai-review tests passed\033[0m\n" || { printf "\033[31m✗ ai-review tests failed\033[0m\n"; exit 1; }
+	@echo ""
+
 # Test just create for all project templates
 test-create:
     #!/usr/bin/env bash
@@ -712,9 +719,8 @@ test-create:
     trap 'rm -rf "$tmp_dir"' EXIT
     for template_path in blueprints/*/; do
         template="$(basename "$template_path")"
-        # ai-docs adds docs/ to an existing directory and has no project CI;
-        # test-ai-docs covers it.
-        if [ "$template" = "ai-docs" ]; then
+        # Additive templates have their own installer suites, not generated CI.
+        if [ "$template" = "ai-docs" ] || [ "$template" = "ai-review" ]; then
             continue
         fi
         shortname="${template%-base}"
