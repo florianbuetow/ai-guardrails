@@ -130,6 +130,7 @@ help:
 	@printf "  %-40s %s\n" "test-mmix-cli-base" "Run MMIX assembly baseline + violation tests"
 	@printf "  %-40s %s\n" "test-ai-docs" "Run AI docs installer tests"
 	@printf "  %-40s %s\n" "test-ai-review" "Run AI review installer and adapter tests"
+	@printf "  %-40s %s\n" "test-ai-review-live <provider> <model>" "Opt-in live review of a synthetic fixture"
 	@printf "  %-40s %s\n" "test-create" "Run just create for all project templates"
 	@printf "  %-40s %s\n" "ci" "Run all checks + all template tests (quiet)"
 	@printf "  %-40s %s\n" "ci-verbose" "Run all checks + all template tests (verbose)"
@@ -691,6 +692,12 @@ test-ai-docs:
 test-ai-review:
 	@echo ""
 	@./tests/run-tests.sh ai-review && printf "\033[32m✓ ai-review tests passed\033[0m\n" || { printf "\033[31m✗ ai-review tests failed\033[0m\n"; exit 1; }
+	@echo ""
+
+# Run a live provider contract test only when explicitly requested
+test-ai-review-live provider model:
+	@echo ""
+	@bash tests/test_ai_review_live.sh {{quote(provider)}} {{quote(model)}} && printf "\033[32m✓ Live AI review contract passed\033[0m\n" || { printf "\033[31m✗ Live AI review contract failed\033[0m\n"; exit 1; }
 	@echo ""
 
 # Test just create for all project templates

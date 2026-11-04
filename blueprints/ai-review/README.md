@@ -1,38 +1,42 @@
 # AI Review Template
 
-Add specialist agent reviews to an existing project, independently of its language
-or whether it was created from an AI Guardrails blueprint.
+Add specialist CLI reviewers to an existing project with `newaireview`, or run
+`project-setup/setup-project-ai-review-claude.sh` by absolute path from that project.
+The installer and runtime use Bash, jq, Git and just, with no Python or uv dependency.
+Installation preserves the existing README and justfile, creates missing ones,
+refuses collisions and rolls back failures. Ordinary CI remains independent.
 
 ```sh
-cd my-project
-newaireview
+just ci-ai                               # List providers, agents and usage
+just ci-ai-codex diff                     # All reviewers, uncommitted changes
+just ci-ai-claude global specs-review     # Documentation and implementation review
+just ci-ai-grok commit                    # Latest commit
+just ci-ai-codex commit security abc123    # Security review of a specific commit
+just ci-ai-codex commit "" abc123          # All reviewers at a specific commit
 ```
 
-Without the alias, run
-`/path/to/ai-guardrails/project-setup/setup-project-ai-review-claude.sh` from the
-project root. Installation requires uv (Python 3.11+), Copier and just; it takes no
-arguments. It installs review scripts, explicit model configuration, prompts,
-documentation and imported just recipes. Existing justfiles are preserved; if none
-exists, it creates one with a dedicated help recipe. Conflicts fail without
-replacement. Failed installation rolls back its changes. Reinstallation is refused.
+Configure explicit models in `config/ai-review/config.json`. Reviewers run in
+parallel with read tools and permission to write their assigned Markdown report
+under `~/reports/ai-review/`. Independent verifier sessions assess candidate
+findings. Only verified high findings or execution errors fail the command.
 
-Configure the provider model in `config/ai-review/config.json`, authenticate the
-selected CLI, then run:
+Prompts include shared Markdown fragments using `{{BASENAME}}`; all includes are
+expanded before any CLI runs. The shared severity document defines high as a
+contradiction of project intent, goals, requirements or documentation, medium as
+an engineering-principle violation, and low as a minor issue.
 
-```sh
-just ci-ai codex main HEAD /tmp/review.json
-```
+The [README section installed into projects](README-section.md) contains complete
+usage, source provenance and license notices. No license directory is buried in
+the generated configuration. The supplied Codex adversarial prompt is adapted to
+the package's scope, severity, permissions and report contract; extraction notes
+are not included. Specs review establishes intent before correlating docs and code.
 
-Provider targets: `ci-ai-claude`, `ci-ai-codex`, `ci-ai-grok`, `ci-ai-agy`.
-Every target runs separate correctness, security, performance, architecture and
-tests/guardrails reviewers, using the same committed snapshot. An explicit base,
-head and new report path are required. Ordinary CI remains independent.
+Run `just test-ai-review` for Bash installer, launcher and simulated CLI contract
+tests. `just test-ai-review-live PROVIDER MODEL` is an opt-in real CLI check using
+synthetic code and preserved login. It verifies reviewer/verifier reports, the
+high-severity gate and unchanged fixture source files.
 
-See [installed usage and isolation requirements](template/docs/ai-review.md).
-Agy requires an explicitly configured external isolation launcher; plan mode is not
-an enforcement boundary. Model calls require network access and can incur charges.
-No model is called during installation or offline contract tests.
+Claude, Codex and Grok passed this live check on 2026-11-02. See the
+[installed README's validation status](README-section.md#provider-validation-and-boundaries).
 
-Run `just test-ai-review` for installer and simulated-provider behavior tests.
-`just create ai-review` is rejected because this is an additive installer, not a
-standalone project template.
+`just create ai-review` is rejected: this template adds to an existing project.

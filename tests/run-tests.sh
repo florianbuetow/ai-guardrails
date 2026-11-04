@@ -69,7 +69,7 @@ for lang in "${languages[@]}"; do
         continue
     fi
     if [ "$lang" = "ai-review" ]; then
-        if ! uv run --no-project python -B -m unittest discover -s "$SCRIPT_DIR" -p 'test_ai_review_*.py'; then
+        if ! bash "$SCRIPT_DIR/test_ai_review_install.sh" || ! bash "$SCRIPT_DIR/test_ai_review_runner.sh"; then
             log_fail "$lang tests failed — aborting"
             exit 1
         fi

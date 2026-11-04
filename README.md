@@ -256,18 +256,55 @@ The shell scripts template targets both macOS and Linux. Its CI parses the POSIX
 ## Add agentic reviews to any project
 
 The language-independent [`ai-review`](blueprints/ai-review/) blueprint adds
-`just ci-ai <provider> <base> <head> <report>` and provider-specific
-`ci-ai-claude`, `ci-ai-codex`, `ci-ai-grok`, and `ci-ai-agy` targets. Each runs five
-independent reviewers focused on correctness, security, performance, architecture,
-and tests/guardrails, against one fixed committed snapshot.
+agentic review to an existing project of any language. It supports **Claude, Codex,
+and Grok** through their locally installed, authenticated CLIs. Installation and
+execution use Bash and jq, with Git and just; no Python or uv is required.
 
-Run `newaireview` in the existing project (or
-`project-setup/setup-project-ai-review-claude.sh` using its absolute path).
-The installer adds a justfile import, preserving existing commands, or creates a
-justfile when absent. Configure the selected model explicitly before running.
-Agy requires an external isolation launcher. Ordinary CI remains independent;
-installation and contract tests never call a model. Run `just test-ai-review` to
-verify installation, rollback and provider result handling.
+Run `newaireview` from the target project, or invoke
+`project-setup/setup-project-ai-review-claude.sh` by absolute path. The installer
+preserves existing justfile and README content, adds the review commands and README
+license notices, and rolls back failed installation. Set an explicit model for each
+provider you intend to use in `config/ai-review/config.json`.
+
+```sh
+just ci-ai                               # Show providers, agents and usage
+just ci-ai-codex diff                     # All reviewers: uncommitted changes
+just ci-ai-claude global specs-review     # One reviewer: the current project
+just ci-ai-grok commit                    # All reviewers: latest commit
+just ci-ai-codex commit security abc123    # One reviewer: a specific commit
+just ci-ai-codex commit "" abc123          # All reviewers: a specific commit
+```
+
+`diff` includes staged and unstaged tracked changes against HEAD and nonignored
+untracked files. `commit` reviews the changes introduced by HEAD or the supplied
+hash against its first parent; initial commits are compared with an empty tree.
+`global` reviews the current project. Historical commit review currently rejects
+trees containing symlinks or submodules.
+
+The eight reviewers cover **correctness, security, performance, architecture,
+test coverage, error handling, adversarial review, and specifications/documentation**.
+Specs review first establishes project intent, then checks documentation for
+contradictions and gaps and correlates its claims with code. Prompt files include
+shared Markdown fragments through `{{BASENAME}}`; every session receives a complete
+rendered prompt.
+
+Reviewers run in parallel, followed by fresh, independent finding verifiers. Agents
+must not modify project files or execute tests. Their sole permitted write is their
+assigned timestamped Markdown report under `~/reports/ai-review/`. The launcher also
+records structured results and session logs in a unique configured run directory.
+
+- **High:** contradicts documented project intent, architecture, requirements or goals.
+- **Medium:** violates an engineering principle without an established project-goal contradiction.
+- **Low:** minor, readily corrected issues.
+
+Verified high findings fail the command. Medium and low findings are reported;
+execution errors and incomplete reviews also fail. Ordinary `just ci` remains separate.
+
+Validation: `just test-ai-review` runs 26 offline installer and runner scenarios.
+`just test-ai-review-live <provider> <model>` is an explicit, opt-in test against
+synthetic code. Claude, Codex and Grok passed the real reviewer/verifier/report flow
+on macOS on 2026-11-02. This verifies integration, not general review accuracy;
+Linux and broader reviewer-quality evaluation remain unverified.
 
 ## Highly Recommended Companion Tools
 

@@ -2,66 +2,61 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "domain",
     "complete",
-    "findings"
+    "verdicts",
+    "warnings"
   ],
   "properties": {
-    "domain": {
-      "type": "string",
-      "enum": [
-        "correctness",
-        "security",
-        "performance",
-        "architecture",
-        "tests"
-      ]
-    },
     "complete": {
       "type": "boolean"
     },
-    "findings": {
+    "verdicts": {
       "type": "array",
       "items": {
         "type": "object",
         "additionalProperties": false,
         "required": [
+          "id",
+          "status",
           "severity",
-          "file",
-          "line",
-          "title",
-          "scenario",
-          "evidence"
+          "reason",
+          "basis"
         ],
         "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "rejected"
+            ]
+          },
           "severity": {
             "type": "string",
             "enum": [
-              "error",
-              "warning"
+              "low",
+              "medium",
+              "high"
             ]
           },
-          "line": {
-            "type": "integer",
-            "minimum": 1
-          },
-          "file": {
+          "id": {
             "type": "string",
             "minLength": 1
           },
-          "title": {
+          "reason": {
             "type": "string",
             "minLength": 1
           },
-          "scenario": {
-            "type": "string",
-            "minLength": 1
-          },
-          "evidence": {
+          "basis": {
             "type": "string",
             "minLength": 1
           }
         }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
       }
     }
   }

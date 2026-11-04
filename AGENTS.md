@@ -211,18 +211,23 @@ Before running a violation, confirm that its resolved recipe (`check` or the `co
 
 ### The AI Review Template (`blueprints/ai-review`)
 
-- Language-independent additive installer (`newaireview`), not a standalone project
-- Imports `just/ai-review.just` into an existing justfile, or creates a root justfile;
-  refuses collisions and unsafe paths, and rolls back failed installation
-- `ci-ai` takes an explicit provider, base commit, head commit and new report path;
-  `ci-ai-claude`, `ci-ai-codex`, `ci-ai-grok`, `ci-ai-agy` select the provider
-- Runs five fresh specialist sessions: correctness, security, performance,
-  architecture, tests/guardrails; each receives the same committed text snapshot
-- Models are explicit; malformed/incomplete results and execution failures fail;
-  error findings block, warning findings do not
-- Agy requires a configured isolation launcher; ordinary `ci` is unchanged
-- `just test-ai-review` uses real installer/just integration and simulated CLIs;
-  live authentication and model availability are deployment prerequisites
+- Language-independent additive Bash installer (`newaireview`); no Python/uv runtime
+- Preserves existing justfile/README, installs recipes and README license notices;
+  refuses conflicts and unsafe paths, rolls back failure
+- `just ci-ai` prints help; `ci-ai-{claude,codex,grok}` takes scope
+  `diff|commit|global`, optional agent and optional commit hash (commit defaults HEAD)
+- JSON configuration registers parallel reviewers and models; independent verifier
+  sessions assess findings before final severity gating
+- Reviewer prompts expand `{{BASENAME}}` Markdown includes; shared fragments define
+  read-only investigation, report writing and low/medium/high severity
+- Agents must not change project files; they write only their assigned timestamped
+  Markdown report under `~/reports/ai-review/`
+- High requires a documented project-intent/goal contradiction and fails CI after
+  verification; medium/low are reported; incomplete sessions always fail
+- Specs review establishes project intent, finds documentation contradictions/gaps,
+  and correlates documentation with implementation; coverage review reads reports
+- `just test-ai-review` runs Bash installer and simulated CLI tests; live CLI/model
+  authentication and permissions require deployment verification
 
 ### The AI Docs Template (`blueprints/ai-docs`)
 
