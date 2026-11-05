@@ -115,13 +115,13 @@ home_for_project() {
 new_project() {
 	local name="$1"
 	local project="$TEST_ROOT/$name"
-	mkdir -p "$project/scripts/ai-review" "$project/config/ai-review/schemas" "$project/just" "$project/reports"
+	mkdir -p "$project/scripts/ai-review" "$project/config/ai-review/schemas" "$project/reports"
 	mkdir "$(home_for_project "$project")"
 	cp "$TEMPLATE/scripts/ai-review/review.sh" "$project/scripts/ai-review/review.sh"
 	cp "$TEMPLATE/scripts/ai-review/providers.sh" "$project/scripts/ai-review/providers.sh"
 	cp "$TEMPLATE/scripts/ai-review/read-tools.sh" "$project/scripts/ai-review/read-tools.sh"
-	cp "$TEMPLATE/just/ai-review.just" "$project/just/ai-review.just"
-	printf "import 'just/ai-review.just'\n" >"$project/Justfile"
+	cp "$TEMPLATE/config/ai-review/ai-review.just" "$project/config/ai-review/ai-review.just"
+	printf "import 'config/ai-review/ai-review.just'\n" >"$project/Justfile"
 	write_config "$project" "$project/reports"
 	write_prompts "$project"
 	printf '{}\n' >"$project/config/ai-review/schemas/findings.json"
@@ -380,7 +380,7 @@ test_shell_only_and_help_needs_no_provider_auth() {
 	if [ -e "$TEMPLATE/scripts/ai-review/review.py" ]; then
 		fail 'obsolete Python runner still exists'
 	fi
-	if grep -RqiF python "$TEMPLATE/scripts/ai-review" "$TEMPLATE/just/ai-review.just"; then
+	if grep -RqiF python "$TEMPLATE/scripts/ai-review" "$TEMPLATE/config/ai-review/ai-review.just"; then
 		fail 'AI review runner or Just recipes still invoke Python'
 	fi
 	local project

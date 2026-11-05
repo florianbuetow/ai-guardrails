@@ -9,8 +9,8 @@ BLUEPRINT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)/blueprints/ai-review"
 TEMPLATE_DIR="$BLUEPRINT_DIR/template"
 README_SECTION="$BLUEPRINT_DIR/README-section.md"
 README_MARKER='<!-- AI-REVIEW:START -->'
-IMPORT_LINE="import 'just/ai-review.just'"
-OWNED_PATHS=(scripts/ai-review config/ai-review just/ai-review.just)
+IMPORT_LINE="import 'config/ai-review/ai-review.just'"
+OWNED_PATHS=(scripts/ai-review config/ai-review)
 
 fail() {
   printf '\033[31m✗ Error: %s\033[0m\n' "$1" >&2

@@ -69,7 +69,7 @@ assert_absent() {
 
 assert_installed_layout() {
   local project="$1"
-  for path in scripts/ai-review config/ai-review just/ai-review.just README.md; do
+  for path in scripts/ai-review config/ai-review config/ai-review/ai-review.just README.md; do
     if [ ! -e "$project/$path" ]; then
       fail "missing installed path: $path"
     fi
@@ -162,7 +162,7 @@ test_path_with_spaces_and_case_insensitive_justfile() {
   printf '# Existing\n' >"$project/README.md"
   run_installer "$project" 0 env
   assert_absent "$project/Justfile"
-  assert_contains "$project/.JUSTFILE" "import 'just/ai-review.just'"
+  assert_contains "$project/.JUSTFILE" "import 'config/ai-review/ai-review.just'"
   just --justfile "$project/.JUSTFILE" --working-directory "$project" --summary >/dev/null
 }
 
@@ -293,7 +293,7 @@ test_second_file_commit_failure_restores_both_files() {
   cmp "$project/README.md" "$project/README.before"
   assert_absent "$project/scripts/ai-review"
   assert_absent "$project/config/ai-review"
-  assert_absent "$project/just/ai-review.just"
+  assert_absent "$project/config/ai-review/ai-review.just"
 }
 
 test_rejects_arguments() {
