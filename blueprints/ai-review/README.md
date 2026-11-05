@@ -8,11 +8,11 @@ refuses collisions and rolls back failures. Ordinary CI remains independent.
 
 ```sh
 just ci-ai                               # List providers, agents and usage
-just ci-ai-codex diff                     # All reviewers, uncommitted changes
-just ci-ai-claude global specs-review     # Documentation and implementation review
-just ci-ai-grok commit                    # Latest commit
-just ci-ai-codex commit security abc123    # Security review of a specific commit
-just ci-ai-codex commit "" abc123          # All reviewers at a specific commit
+just ci-ai-codex diff all                # All reviewers, uncommitted changes
+just ci-ai-claude global specs-review    # Documentation and implementation review
+just ci-ai-grok commit security          # One reviewer at the latest commit
+just ci-ai-codex commit security abc123  # Security review of a specific commit
+just ci-ai-codex commit all abc123       # All reviewers at a specific commit
 ```
 
 Configure explicit models in `config/ai-review/config.json`. Reviewers run in

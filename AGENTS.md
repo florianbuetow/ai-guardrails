@@ -215,7 +215,8 @@ Before running a violation, confirm that its resolved recipe (`check` or the `co
 - Preserves existing justfile/README, installs recipes and README license notices;
   refuses conflicts and unsafe paths, rolls back failure
 - `just ci-ai` prints help; `ci-ai-{claude,codex,grok}` takes scope
-  `diff|commit|global`, optional agent and optional commit hash (commit defaults HEAD)
+  `diff|commit|global`, a required agent (`all` runs every enabled reviewer) and optional
+  commit hash (commit defaults HEAD); missing or invalid arguments print short help and a next step
 - JSON configuration registers parallel reviewers and models; independent verifier
   sessions assess findings before final severity gating
 - Reviewer prompts expand `{{BASENAME}}` Markdown includes; shared fragments define

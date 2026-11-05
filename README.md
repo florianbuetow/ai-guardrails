@@ -268,11 +268,11 @@ provider you intend to use in `config/ai-review/config.json`.
 
 ```sh
 just ci-ai                               # Show providers, agents and usage
-just ci-ai-codex diff                     # All reviewers: uncommitted changes
-just ci-ai-claude global specs-review     # One reviewer: the current project
-just ci-ai-grok commit                    # All reviewers: latest commit
-just ci-ai-codex commit security abc123    # One reviewer: a specific commit
-just ci-ai-codex commit "" abc123          # All reviewers: a specific commit
+just ci-ai-codex diff all                # All reviewers: uncommitted changes
+just ci-ai-claude global specs-review    # One reviewer: the current project
+just ci-ai-grok commit all               # All reviewers: latest commit
+just ci-ai-codex commit security abc123  # One reviewer: a specific commit
+just ci-ai-codex commit all abc123       # All reviewers: a specific commit
 ```
 
 `diff` includes staged and unstaged tracked changes against HEAD and nonignored

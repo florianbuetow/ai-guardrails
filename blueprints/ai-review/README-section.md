@@ -6,14 +6,14 @@ provider models in `config/ai-review/config.json`. No Python or uv is required.
 
 ```sh
 just ci-ai                            # Show configured providers and agents
-just ci-ai-codex diff                  # All enabled reviewers
-just ci-ai-claude global specs-review  # One reviewer
-just ci-ai-grok commit                 # Latest commit
-just ci-ai-claude commit security abc123   # One reviewer at a commit
-just ci-ai-codex commit "" abc123       # All reviewers at a commit
+just ci-ai-codex diff all             # All enabled reviewers
+just ci-ai-claude global specs-review # One reviewer
+just ci-ai-grok commit security       # One reviewer at the latest commit
+just ci-ai-claude commit security abc123 # One reviewer at a commit
+just ci-ai-codex commit all abc123    # All reviewers at a commit
 ```
 
-Scope is required. `diff` covers tracked changes against HEAD plus nonignored
+Scope and agent are required; nothing runs until both are given. Pass `all` to run every enabled reviewer. `diff` covers tracked changes against HEAD plus nonignored
 untracked files. `commit` covers the latest commit (HEAD) or the supplied hash,
 compared with its first parent; an initial commit is compared with an empty tree.
 For a historical commit, reviewers receive a temporary filesystem of that revision.

@@ -68,19 +68,28 @@ jq -e '
 ' "$CONFIG" >/dev/null || fail "Invalid configuration"
 
 show_help() {
-  printf 'AI review\n\nProviders:\n'
-  jq -r '.providers | to_entries[] | "  " + .key + (if .value | has("description") then " — " + .value.description else "" end)' "$CONFIG"
-  printf '\nAgents:\n'
+  local provider=${1:-}
+  if [ -n "$provider" ]; then
+    printf 'Usage:\n  just ci-ai-%s <diff|commit|global> [agent] [commit-hash]\n\n' "$provider"
+  else
+    printf 'AI review\n\nUsage:\n  just ci-ai\n  just ci-ai-<provider> <diff|commit|global> [agent] [commit-hash]\n\n'
+  fi
+  printf 'Scopes:\n  diff    uncommitted changes\n  commit  one commit (HEAD unless a hash is given)\n  global  the whole project\n\n'
+  if [ -z "$provider" ]; then
+    printf 'Providers:\n'
+    jq -r '.providers | to_entries[] | "  " + .key + (if .value | has("description") then " — " + .value.description else "" end)' "$CONFIG"
+    printf '\n'
+  fi
+  printf 'Agents (default: all enabled):\n'
   jq -r '.agents[] | "  " + .name + " — " + .description + (if .enabled then "" else " (disabled)" end)' "$CONFIG"
-  printf '\nUsage:\n  just ci-ai\n  just ci-ai-<provider> <diff|commit|global> [agent] [commit-hash]\n\n'
-  printf 'Examples:\n  just ci-ai-codex diff\n  just ci-ai-claude global specs-review\n  just ci-ai-grok commit security abc123\n  just ci-ai-codex commit "" abc123\n\n'
-  printf 'commit without a hash reviews HEAD. Only commit scope accepts a hash.\n'
-  printf '\033[32mAI review help displayed\033[0m\n'
+  local p=${provider:-codex}
+  printf '\nExamples:\n  just ci-ai-%s diff\n  just ci-ai-%s global specs-review\n  just ci-ai-%s commit security abc123\n  just ci-ai-%s commit "" abc123\n\n' "$p" "$p" "$p" "$p"
+  printf 'Only commit scope accepts a hash.\n'
 }
 [ "$#" -gt 0 ] || fail "Expected help or run"
 if [ "$1" = help ]; then
-  [ "$#" -eq 1 ] || fail "help takes no arguments"
-  show_help
+  [ "$#" -le 2 ] || fail "help takes at most one provider"
+  show_help "${2:-}"
   exit 0
 fi
 [ "$1" = run ] || fail "Expected help or run"
